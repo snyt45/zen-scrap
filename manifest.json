@@ -1,0 +1,10 @@
+{
+  "id": "zen-scrap",
+  "name": "Zen Scrap",
+  "version": "0.1.0",
+  "minAppVersion": "1.0.0",
+  "description": "Zennスクラップ風のスレッド形式メモ機能",
+  "author": "snyt45",
+  "authorUrl": "https://github.com/snyt45",
+  "isDesktopOnly": false
+}
