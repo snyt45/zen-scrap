@@ -4,6 +4,7 @@ import { Scrap } from "../data/types";
 import { ScrapRepository } from "../data/scrap-repository";
 import { EventBus } from "../events/event-bus";
 import { EVENTS } from "../events/constants";
+import { EmbedModal, EmbedType } from "../ui/embed-modal";
 
 export const VIEW_TYPE_SCRAP_DETAIL = "zen-scrap-detail";
 
@@ -208,7 +209,43 @@ export class ScrapDetailView extends ItemView {
   }
 
   private renderEmbedButton(parent: HTMLElement, textarea: HTMLTextAreaElement): void {
-    // Will be implemented in Task 4
+    const wrapper = parent.createDiv({ cls: "zen-scrap-embed-wrapper" });
+    const embedBtn = wrapper.createEl("button", { text: "+ 埋め込み", cls: "zen-scrap-embed-btn" });
+
+    const menu = wrapper.createDiv({ cls: "zen-scrap-embed-menu" });
+    menu.style.display = "none";
+
+    const items: { label: string; type: EmbedType }[] = [
+      { label: "X (Twitter)", type: "tweet" },
+      { label: "YouTube", type: "youtube" },
+      { label: "Web記事", type: "card" },
+      { label: "GitHub", type: "github" },
+    ];
+
+    for (const item of items) {
+      const menuItem = menu.createDiv({ cls: "zen-scrap-dropdown-item", text: item.label });
+      menuItem.addEventListener("click", (e) => {
+        e.stopPropagation();
+        menu.style.display = "none";
+        new EmbedModal(this.app, item.type, (syntax) => {
+          const pos = textarea.selectionStart;
+          const before = textarea.value.substring(0, pos);
+          const after = textarea.value.substring(pos);
+          textarea.value = before + syntax + "\n" + after;
+          textarea.focus();
+          textarea.selectionStart = textarea.selectionEnd = pos + syntax.length + 1;
+        }).open();
+      });
+    }
+
+    embedBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      menu.style.display = menu.style.display === "none" ? "" : "none";
+    });
+
+    document.addEventListener("click", () => {
+      menu.style.display = "none";
+    });
   }
 }
 

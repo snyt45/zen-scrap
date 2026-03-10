@@ -461,6 +461,81 @@
   background: #1d4ed8;
 }
 
+/* 埋め込みボタン */
+.zen-scrap-embed-wrapper {
+  position: relative;
+}
+
+.zen-scrap-embed-btn {
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--background-modifier-border);
+  background: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 0.85em;
+}
+
+.zen-scrap-embed-btn:hover {
+  color: var(--text-normal);
+  background: var(--background-secondary);
+}
+
+.zen-scrap-embed-menu {
+  position: absolute;
+  bottom: 100%;
+  left: 0;
+  z-index: 100;
+  min-width: 160px;
+  padding: 4px 0;
+  margin-bottom: 4px;
+  background: var(--background-primary);
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* 埋め込みモーダル */
+.zen-scrap-embed-input {
+  padding: 8px 12px;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 6px;
+  background: var(--background-primary);
+  color: var(--text-normal);
+  font-size: 0.9em;
+  margin-bottom: 12px;
+}
+
+.zen-scrap-embed-input:focus {
+  outline: none;
+  border-color: var(--interactive-accent);
+}
+
+.zen-scrap-embed-btn-row {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.zen-scrap-embed-insert-btn {
+  padding: 6px 16px;
+  border-radius: 6px;
+  background: var(--interactive-accent);
+  color: var(--text-on-accent);
+  border: none;
+  cursor: pointer;
+}
+
+.zen-scrap-embed-cancel-btn {
+  padding: 6px 16px;
+  border-radius: 6px;
+  background: none;
+  color: var(--text-muted);
+  border: 1px solid var(--background-modifier-border);
+  cursor: pointer;
+}
+
 /* プレビューエリア */
 .zen-scrap-preview {
   min-height: 100px;
