@@ -43,7 +43,11 @@ export class ScrapListView extends ItemView {
     container.empty();
     container.addClass("zen-scrap-list-container");
 
-    // ヘッダー
+    this.renderHeader(container);
+    await this.renderList(container);
+  }
+
+  private renderHeader(container: HTMLElement): void {
     const header = container.createDiv({ cls: "zen-scrap-list-header" });
     header.createEl("h2", { text: "Zen Scrap" });
 
@@ -63,8 +67,9 @@ export class ScrapListView extends ItemView {
     // 新規ボタン
     const newBtn = controls.createEl("button", { text: "+ 新規", cls: "zen-scrap-new-btn" });
     newBtn.addEventListener("click", () => this.onCreateNew());
+  }
 
-    // スクラップ一覧
+  private async renderList(container: HTMLElement): Promise<void> {
     const scraps = await this.repo.listAll();
     const filtered = scraps.filter((s) => {
       if (s.archived) return false;
