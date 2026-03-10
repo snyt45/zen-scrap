@@ -67,6 +67,7 @@ export default class ZenScrapPlugin extends Plugin {
       });
       input.style.width = "100%";
       input.addEventListener("keydown", (e: KeyboardEvent) => {
+        if (e.isComposing) return;
         if (e.key === "Enter") {
           modal.close();
           resolve(input.value.trim() || null);
