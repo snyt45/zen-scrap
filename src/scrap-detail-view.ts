@@ -31,8 +31,7 @@ export class ScrapDetailView extends ItemView {
 
   async setState(state: { filePath?: string }, result: any): Promise<void> {
     if (state.filePath) {
-      const scraps = await this.repo.listAll();
-      const found = scraps.find((s) => s.filePath === state.filePath);
+      const found = await this.repo.getByPath(state.filePath);
       if (found) {
         this.scrap = found;
         await this.render();
@@ -64,28 +63,34 @@ export class ScrapDetailView extends ItemView {
     if (!this.scrap) return;
     container.addClass("zen-scrap-detail-container");
 
-    // ヘッダー
+    this.renderHeader(container);
+    await this.renderTimeline(container);
+    this.renderInputArea(container);
+  }
+
+  private renderHeader(container: HTMLElement): void {
     const header = container.createDiv({ cls: "zen-scrap-detail-header" });
     const backBtn = header.createEl("button", { text: "← 一覧", cls: "zen-scrap-back-btn" });
     backBtn.addEventListener("click", () => this.onBack());
 
-    header.createEl("h2", { text: this.scrap.title, cls: "zen-scrap-detail-title" });
+    header.createEl("h2", { text: this.scrap!.title, cls: "zen-scrap-detail-title" });
 
     const headerControls = header.createDiv({ cls: "zen-scrap-detail-controls" });
-    const statusBadge = headerControls.createSpan({
-      text: this.scrap.status,
-      cls: `zen-scrap-status zen-scrap-status-${this.scrap.status}`,
+    headerControls.createSpan({
+      text: this.scrap!.status,
+      cls: `zen-scrap-status zen-scrap-status-${this.scrap!.status}`,
     });
 
-    if (this.scrap.tags.length > 0) {
+    if (this.scrap!.tags.length > 0) {
       const tagsEl = header.createDiv({ cls: "zen-scrap-detail-tags" });
-      tagsEl.setText(this.scrap.tags.map((t) => `#${t}`).join(" "));
+      tagsEl.setText(this.scrap!.tags.map((t) => `#${t}`).join(" "));
     }
+  }
 
-    // タイムライン
+  private async renderTimeline(container: HTMLElement): Promise<void> {
     const timeline = container.createDiv({ cls: "zen-scrap-timeline" });
 
-    for (const entry of this.scrap.entries) {
+    for (const entry of this.scrap!.entries) {
       const entryEl = timeline.createDiv({ cls: "zen-scrap-entry" });
 
       const entryHeader = entryEl.createDiv({ cls: "zen-scrap-entry-header" });
@@ -96,12 +101,15 @@ export class ScrapDetailView extends ItemView {
         this.app,
         entry.body,
         entryBody,
-        this.scrap.filePath,
+        this.scrap!.filePath,
         this.renderComponent
       );
     }
 
-    // 入力欄
+    timeline.scrollTop = timeline.scrollHeight;
+  }
+
+  private renderInputArea(container: HTMLElement): void {
     const inputArea = container.createDiv({ cls: "zen-scrap-input-area" });
     const textarea = inputArea.createEl("textarea", {
       placeholder: "ここに書き散らす...",
@@ -116,15 +124,11 @@ export class ScrapDetailView extends ItemView {
       await this.render();
     });
 
-    // Cmd+Enterで投稿
     textarea.addEventListener("keydown", (e: KeyboardEvent) => {
       if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
         e.preventDefault();
         submitBtn.click();
       }
     });
-
-    // 最下部にスクロール
-    timeline.scrollTop = timeline.scrollHeight;
   }
 }
