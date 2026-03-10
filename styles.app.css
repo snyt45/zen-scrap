@@ -271,18 +271,18 @@
 
 .zen-scrap-status-toggle-btn {
   margin-left: auto;
-  padding: 4px 12px;
-  border-radius: 6px;
-  border: 1px solid var(--background-modifier-border);
-  background: none;
-  color: var(--text-muted);
+  padding: 4px 14px;
+  border-radius: 20px;
+  border: none;
+  background: #7c3aed;
+  color: #fff;
   cursor: pointer;
   font-size: 0.85em;
+  font-weight: 600;
 }
 
 .zen-scrap-status-toggle-btn:hover {
-  color: var(--text-normal);
-  background: var(--background-secondary);
+  background: #6d28d9;
 }
 
 .zen-scrap-detail-title-row {
@@ -323,21 +323,31 @@
 }
 
 .zen-scrap-title-save-btn {
-  padding: 4px 12px;
-  border-radius: 6px;
-  background: var(--interactive-accent);
-  color: var(--text-on-accent);
+  padding: 6px 16px;
+  border-radius: 20px;
+  background: #2563eb;
+  color: #fff;
   border: none;
   cursor: pointer;
+  font-weight: 600;
+}
+
+.zen-scrap-title-save-btn:hover {
+  background: #1d4ed8;
 }
 
 .zen-scrap-title-cancel-btn {
-  padding: 4px 12px;
-  border-radius: 6px;
+  padding: 6px 16px;
+  border-radius: 20px;
   background: none;
   color: var(--text-muted);
   border: 1px solid var(--background-modifier-border);
   cursor: pointer;
+}
+
+.zen-scrap-title-cancel-btn:hover {
+  color: var(--text-normal);
+  background: var(--background-secondary);
 }
 
 .zen-scrap-timeline {
@@ -428,6 +438,25 @@
   padding: 12px;
 }
 
+.zen-scrap-edit-cancel-btn {
+  margin-left: auto;
+  padding: 6px 16px;
+  border-radius: 20px;
+  background: none;
+  color: var(--text-muted);
+  border: 1px solid var(--background-modifier-border);
+  cursor: pointer;
+}
+
+.zen-scrap-edit-cancel-btn:hover {
+  color: var(--text-normal);
+  background: var(--background-secondary);
+}
+
+.zen-scrap-ml-auto {
+  margin-left: auto;
+}
+
 .zen-scrap-entry-time {
   font-size: 0.85em;
   color: var(--text-muted);
@@ -512,7 +541,6 @@
 
 /* 新しい投稿ボタン */
 .zen-scrap-submit-btn-new {
-  margin-left: auto;
   padding: 8px 20px;
   border-radius: 20px;
   background: #2563eb;
@@ -608,6 +636,31 @@
   border: 1px solid var(--background-modifier-border);
   border-radius: 6px;
   background: var(--background-primary);
+}
+
+/* コードブロック コピーボタン */
+.zen-scrap-code-copy-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  padding: 3px 10px;
+  border-radius: 4px;
+  border: 1px solid var(--background-modifier-border);
+  background: var(--background-primary);
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 0.75em;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+pre:hover .zen-scrap-code-copy-btn {
+  opacity: 1;
+}
+
+.zen-scrap-code-copy-btn:hover {
+  color: var(--text-normal);
+  background: var(--background-secondary);
 }
 
 /* ダークモード: インラインコードの背景を落ち着かせる */

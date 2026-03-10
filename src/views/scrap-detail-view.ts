@@ -195,7 +195,7 @@ export class ScrapDetailView extends ItemView {
     // 1. 埋め込み記法を抽出してプレースホルダーに置換（youtubeはzenn-markdown-htmlが処理するので除外）
     const embeds: { id: string; type: string; url: string }[] = [];
     const processed = body.replace(/@\[(tweet|card|github)\]\(([^)]+)\)/g, (_, type, url) => {
-      const id = `__EMBED_${embeds.length}__`;
+      const id = `ZENSCRAPEMBED${embeds.length}ZENSCRAPEMBED`;
       embeds.push({ id, type, url });
       return id;
     });
@@ -203,14 +203,24 @@ export class ScrapDetailView extends ItemView {
     // 2. markdownToHtml
     let html = await markdownToHtml(processed);
 
-    // 3. 埋め込みプレースホルダーをリッチHTMLに置換
+    // 3. 埋め込みプレースホルダーをリッチHTMLに置換（<p>で囲まれている場合も対応）
     for (const embed of embeds) {
       const embedHtml = await renderEmbed(embed.type, embed.url);
-      html = html.replace(embed.id, embedHtml);
+      const wrappedPattern = new RegExp(`<p[^>]*>${embed.id}</p>`);
+      if (wrappedPattern.test(html)) {
+        html = html.replace(wrappedPattern, embedHtml);
+      } else {
+        html = html.replace(embed.id, embedHtml);
+      }
     }
 
     // 4. vault内画像パスをリソースURLに変換
     html = this.fixImagePaths(html);
+
+    // 5. コードブロックにコピーボタンを追加
+    html = html.replace(/<pre([^>]*)><code([^>]*)>/g, (match, preAttr, codeAttr) => {
+      return `<pre${preAttr} style="position:relative;"><button class="zen-scrap-code-copy-btn" onclick="navigator.clipboard.writeText(this.parentElement.querySelector('code').textContent)">Copy</button><code${codeAttr}>`;
+    });
 
     return html;
   }
@@ -272,7 +282,7 @@ export class ScrapDetailView extends ItemView {
 
     this.renderEmbedButton(actionBar, textarea);
 
-    const submitBtn = actionBar.createEl("button", { text: "投稿する", cls: "zen-scrap-submit-btn-new" });
+    const submitBtn = actionBar.createEl("button", { text: "投稿する", cls: "zen-scrap-submit-btn-new zen-scrap-ml-auto" });
     submitBtn.addEventListener("click", async () => {
       const body = textarea.value.trim();
       if (!body || !this.scrap) return;
@@ -402,8 +412,7 @@ export class ScrapDetailView extends ItemView {
 
     this.renderEmbedButton(actionBar, textarea);
 
-    const cancelBtn = actionBar.createEl("button", { text: "キャンセル", cls: "zen-scrap-title-cancel-btn" });
-    cancelBtn.style.marginLeft = "auto";
+    const cancelBtn = actionBar.createEl("button", { text: "キャンセル", cls: "zen-scrap-edit-cancel-btn" });
 
     const updateBtn = actionBar.createEl("button", { text: "更新する", cls: "zen-scrap-submit-btn-new" });
 
