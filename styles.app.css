@@ -464,6 +464,8 @@
 
 .zen-scrap-entry-body {
   padding: 12px;
+  user-select: text;
+  cursor: text;
 }
 
 .zen-scrap-input-area {
@@ -834,6 +836,7 @@ pre:hover .zen-scrap-code-copy-btn {
   border-radius: 10px;
   overflow: hidden;
   margin: 8px 0;
+  max-width: 100%;
 }
 
 .zen-scrap-github-header {
@@ -875,7 +878,8 @@ pre:hover .zen-scrap-code-copy-btn {
 }
 
 .zen-scrap-github-code-wrapper {
-  overflow-x: auto;
+  overflow: auto;
+  max-height: 300px;
   background: var(--background-primary);
 }
 
@@ -884,13 +888,13 @@ pre:hover .zen-scrap-code-copy-btn {
   border-collapse: collapse;
   font-size: 0.85em;
   font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
-  line-height: 1.45;
+  line-height: 1.2;
 }
 
 .zen-scrap-gh-num {
   width: 1%;
   min-width: 40px;
-  padding: 2px 10px;
+  padding: 1px 10px;
   text-align: right;
   color: var(--text-faint);
   user-select: none;
@@ -899,7 +903,7 @@ pre:hover .zen-scrap-code-copy-btn {
 }
 
 .zen-scrap-gh-code {
-  padding: 2px 12px;
+  padding: 1px 12px;
   white-space: pre;
   vertical-align: top;
 }
@@ -914,7 +918,7 @@ pre:hover .zen-scrap-code-copy-btn {
 .zen-scrap-preview .zen-scrap-gh-table td {
   background: transparent;
   border: none;
-  padding: 2px 10px;
+  padding: 1px 10px;
 }
 
 .zen-scrap-entry-body .zen-scrap-github-code-wrapper,
