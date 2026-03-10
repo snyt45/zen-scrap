@@ -68,9 +68,15 @@ export class ScrapListView extends ItemView {
       placeholder: "タイトルやトピックで検索...",
     });
     input.value = this.searchQuery;
-    input.addEventListener("input", () => {
+    input.addEventListener("input", async () => {
       this.searchQuery = input.value;
-      this.render();
+      const pos = input.selectionStart;
+      await this.render();
+      const el = this.containerEl.querySelector<HTMLInputElement>(".zen-scrap-search");
+      if (el) {
+        el.focus();
+        el.setSelectionRange(pos, pos);
+      }
     });
   }
 
