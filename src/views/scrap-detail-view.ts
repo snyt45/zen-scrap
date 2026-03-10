@@ -124,25 +124,60 @@ export class ScrapDetailView extends ItemView {
       return;
     }
 
-    for (const entry of this.scrap!.entries) {
+    for (let i = 0; i < this.scrap!.entries.length; i++) {
+      const entry = this.scrap!.entries[i];
       const entryEl = timeline.createDiv({ cls: "zen-scrap-entry" });
 
       const entryHeader = entryEl.createDiv({ cls: "zen-scrap-entry-header" });
       entryHeader.createSpan({ text: entry.timestamp, cls: "zen-scrap-entry-time" });
 
-      const toggleBtn = entryHeader.createEl("button", { cls: "zen-scrap-entry-toggle" });
-      toggleBtn.innerHTML = "&#x25BC;"; // ▼
+      // メニューボタン
+      const menuWrapper = entryHeader.createDiv({ cls: "zen-scrap-entry-menu" });
+      const menuBtn = menuWrapper.createEl("button", { cls: "zen-scrap-entry-menu-btn" });
+      menuBtn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>';
+
+      const menu = menuWrapper.createDiv({ cls: "zen-scrap-entry-menu-dropdown" });
+      menu.style.display = "none";
+
+      const editItem = menu.createDiv({ cls: "zen-scrap-dropdown-item", text: "編集" });
+      const deleteItem = menu.createDiv({ cls: "zen-scrap-dropdown-item zen-scrap-dropdown-item-danger", text: "削除" });
+
+      menuBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const isOpen = menu.style.display !== "none";
+        timeline.querySelectorAll<HTMLElement>(".zen-scrap-entry-menu-dropdown").forEach((m) => {
+          m.style.display = "none";
+        });
+        menu.style.display = isOpen ? "none" : "";
+      });
 
       const entryBody = entryEl.createDiv({ cls: "zen-scrap-entry-body znc" });
       entryBody.innerHTML = postProcessEmbeds(await markdownToHtml(entry.body));
 
-      toggleBtn.addEventListener("click", () => {
-        const collapsed = entryBody.style.display === "none";
-        entryBody.style.display = collapsed ? "" : "none";
-        toggleBtn.innerHTML = collapsed ? "&#x25BC;" : "&#x25B6;"; // ▼ or ▶
-        entryEl.toggleClass("zen-scrap-entry-collapsed", !collapsed);
+      // 編集
+      editItem.addEventListener("click", (e) => {
+        e.stopPropagation();
+        menu.style.display = "none";
+        this.renderEntryEditor(entryEl, entryBody, i);
+      });
+
+      // 削除
+      deleteItem.addEventListener("click", async (e) => {
+        e.stopPropagation();
+        menu.style.display = "none";
+        this.scrap!.entries.splice(i, 1);
+        this.scrap!.updated = new Date().toISOString();
+        await this.repo.save(this.scrap!);
+        await this.render();
       });
     }
+
+    // 外側クリックでメニュー閉じる
+    document.addEventListener("click", () => {
+      timeline.querySelectorAll<HTMLElement>(".zen-scrap-entry-menu-dropdown").forEach((m) => {
+        m.style.display = "none";
+      });
+    });
 
     timeline.scrollTop = timeline.scrollHeight;
   }
@@ -272,6 +307,85 @@ export class ScrapDetailView extends ItemView {
     document.addEventListener("click", () => {
       menu.style.display = "none";
     });
+  }
+
+  private renderEntryEditor(entryEl: HTMLElement, entryBody: HTMLElement, index: number): void {
+    const entry = this.scrap!.entries[index];
+
+    // 本文を非表示にして編集エリアを追加
+    entryBody.style.display = "none";
+    const editArea = entryEl.createDiv({ cls: "zen-scrap-entry-edit" });
+
+    // pill風タブ
+    const tabHeader = editArea.createDiv({ cls: "zen-scrap-pill-tabs" });
+    const mdTab = tabHeader.createEl("button", { text: "Markdown", cls: "zen-scrap-pill-tab zen-scrap-pill-tab-active" });
+    const pvTab = tabHeader.createEl("button", { text: "Preview", cls: "zen-scrap-pill-tab" });
+
+    // textarea
+    const textarea = editArea.createEl("textarea", {
+      cls: "zen-scrap-textarea",
+    });
+    textarea.value = entry.body;
+
+    // プレビュー
+    const preview = editArea.createDiv({ cls: "zen-scrap-preview znc" });
+    preview.style.display = "none";
+
+    // タブ切り替え
+    mdTab.addEventListener("click", () => {
+      mdTab.addClass("zen-scrap-pill-tab-active");
+      pvTab.removeClass("zen-scrap-pill-tab-active");
+      textarea.style.display = "";
+      preview.style.display = "none";
+    });
+
+    pvTab.addEventListener("click", async () => {
+      pvTab.addClass("zen-scrap-pill-tab-active");
+      mdTab.removeClass("zen-scrap-pill-tab-active");
+      textarea.style.display = "none";
+      preview.style.display = "";
+      if (textarea.value.trim()) {
+        preview.innerHTML = postProcessEmbeds(await markdownToHtml(textarea.value));
+      } else {
+        preview.innerHTML = '<p style="color: var(--text-muted)">プレビューする内容がありません</p>';
+      }
+    });
+
+    // アクションバー
+    const actionBar = editArea.createDiv({ cls: "zen-scrap-action-bar" });
+
+    const imgBtn = actionBar.createEl("button", { text: "画像", cls: "zen-scrap-img-btn" });
+    imgBtn.addEventListener("click", () => this.handleImageUpload(textarea));
+
+    this.renderEmbedButton(actionBar, textarea);
+
+    const cancelBtn = actionBar.createEl("button", { text: "キャンセル", cls: "zen-scrap-title-cancel-btn" });
+    cancelBtn.style.marginLeft = "auto";
+
+    const updateBtn = actionBar.createEl("button", { text: "更新する", cls: "zen-scrap-submit-btn-new" });
+
+    cancelBtn.addEventListener("click", () => {
+      editArea.remove();
+      entryBody.style.display = "";
+    });
+
+    updateBtn.addEventListener("click", async () => {
+      const body = textarea.value.trim();
+      if (!body || !this.scrap) return;
+      this.scrap.entries[index].body = body;
+      this.scrap.updated = new Date().toISOString();
+      await this.repo.save(this.scrap);
+      await this.render();
+    });
+
+    textarea.addEventListener("keydown", (e: KeyboardEvent) => {
+      if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
+        e.preventDefault();
+        updateBtn.click();
+      }
+    });
+
+    textarea.focus();
   }
 }
 
