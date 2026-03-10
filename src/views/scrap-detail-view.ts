@@ -64,21 +64,54 @@ export class ScrapDetailView extends ItemView {
 
   private renderHeader(container: HTMLElement): void {
     const header = container.createDiv({ cls: "zen-scrap-detail-header" });
+
     const backBtn = header.createEl("button", { text: "← 一覧", cls: "zen-scrap-back-btn" });
     backBtn.addEventListener("click", () => this.eventBus.emit(EVENTS.NAV_BACK_TO_LIST));
 
-    header.createEl("h2", { text: this.scrap!.title, cls: "zen-scrap-detail-title" });
+    const metaRow = header.createDiv({ cls: "zen-scrap-detail-meta" });
+    const labelCls = this.scrap!.status === "open" ? "zen-scrap-label-open" : "zen-scrap-label-closed";
+    const labelText = this.scrap!.status === "open" ? "Open" : "Closed";
+    metaRow.createSpan({ text: labelText, cls: labelCls });
+    metaRow.createSpan({ text: formatDate(this.scrap!.created) + "に作成", cls: "zen-scrap-detail-meta-text" });
+    metaRow.createSpan({ text: `${this.scrap!.entries.length}件のコメント`, cls: "zen-scrap-detail-meta-text" });
 
-    const headerControls = header.createDiv({ cls: "zen-scrap-detail-controls" });
-    headerControls.createSpan({
-      text: this.scrap!.status,
-      cls: `zen-scrap-status zen-scrap-status-${this.scrap!.status}`,
+    const titleRow = header.createDiv({ cls: "zen-scrap-detail-title-row" });
+    const titleEl = titleRow.createEl("h2", { text: this.scrap!.title, cls: "zen-scrap-detail-title" });
+
+    const editBtn = titleRow.createEl("button", { cls: "zen-scrap-title-edit-btn" });
+    editBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>';
+
+    editBtn.addEventListener("click", () => {
+      titleRow.empty();
+      const input = titleRow.createEl("input", {
+        type: "text",
+        value: this.scrap!.title,
+        cls: "zen-scrap-title-edit-input",
+      });
+
+      const saveBtn = titleRow.createEl("button", { text: "保存", cls: "zen-scrap-title-save-btn" });
+      const cancelBtn = titleRow.createEl("button", { text: "キャンセル", cls: "zen-scrap-title-cancel-btn" });
+
+      const doSave = async () => {
+        const newTitle = input.value.trim();
+        if (newTitle && newTitle !== this.scrap!.title) {
+          this.scrap!.title = newTitle;
+          await this.repo.save(this.scrap!);
+          this.eventBus.emit(EVENTS.SCRAP_CHANGED);
+        }
+        await this.render();
+      };
+
+      saveBtn.addEventListener("click", doSave);
+      cancelBtn.addEventListener("click", () => this.render());
+      input.addEventListener("keydown", (e: KeyboardEvent) => {
+        if (e.isComposing) return;
+        if (e.key === "Enter") { e.preventDefault(); doSave(); }
+        if (e.key === "Escape") { this.render(); }
+      });
+      input.focus();
+      input.select();
     });
-
-    if (this.scrap!.tags.length > 0) {
-      const tagsEl = header.createDiv({ cls: "zen-scrap-detail-tags" });
-      tagsEl.setText(this.scrap!.tags.map((t) => `#${t}`).join(" "));
-    }
   }
 
   private async renderTimeline(container: HTMLElement): Promise<void> {
@@ -161,4 +194,12 @@ export class ScrapDetailView extends ItemView {
       }
     });
   }
+}
+
+function formatDate(isoString: string): string {
+  const d = new Date(isoString);
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}/${m}/${day}`;
 }

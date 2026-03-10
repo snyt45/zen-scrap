@@ -243,30 +243,72 @@
   margin: 4px 0;
 }
 
-.zen-scrap-detail-controls {
-  margin-top: 4px;
+/* 詳細ヘッダー改善 */
+.zen-scrap-detail-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
 }
 
-.zen-scrap-status {
-  font-size: 0.85em;
-  padding: 2px 8px;
-  border-radius: 12px;
-}
-
-.zen-scrap-status-open {
-  background: var(--background-modifier-success);
-  color: var(--text-on-accent);
-}
-
-.zen-scrap-status-closed {
-  background: var(--background-modifier-border);
+.zen-scrap-detail-meta-text {
+  font-size: 0.9em;
   color: var(--text-muted);
 }
 
-.zen-scrap-detail-tags {
-  margin-top: 4px;
-  font-size: 0.85em;
-  color: var(--text-accent);
+.zen-scrap-detail-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.zen-scrap-detail-title-row h2 {
+  margin: 0;
+  flex: 1;
+}
+
+.zen-scrap-title-edit-btn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.zen-scrap-title-edit-btn:hover {
+  color: var(--text-normal);
+  background: var(--background-secondary);
+}
+
+.zen-scrap-title-edit-input {
+  flex: 1;
+  padding: 6px 10px;
+  font-size: 1.2em;
+  font-weight: 700;
+  border: 1px solid var(--interactive-accent);
+  border-radius: 6px;
+  background: var(--background-primary);
+  color: var(--text-normal);
+}
+
+.zen-scrap-title-save-btn {
+  padding: 4px 12px;
+  border-radius: 6px;
+  background: var(--interactive-accent);
+  color: var(--text-on-accent);
+  border: none;
+  cursor: pointer;
+}
+
+.zen-scrap-title-cancel-btn {
+  padding: 4px 12px;
+  border-radius: 6px;
+  background: none;
+  color: var(--text-muted);
+  border: 1px solid var(--background-modifier-border);
+  cursor: pointer;
 }
 
 .zen-scrap-timeline {
