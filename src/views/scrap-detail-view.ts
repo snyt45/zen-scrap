@@ -167,6 +167,7 @@ export class ScrapDetailView extends ItemView {
 
       const entryBody = entryEl.createDiv({ cls: "zen-scrap-entry-body znc" });
       entryBody.innerHTML = await this.renderBody(entry.body);
+      this.addCopyButtons(entryBody);
 
       editItem.addEventListener("click", (e) => {
         e.stopPropagation();
@@ -217,11 +218,6 @@ export class ScrapDetailView extends ItemView {
     // 4. vault内画像パスをリソースURLに変換
     html = this.fixImagePaths(html);
 
-    // 5. コードブロックにコピーボタンを追加
-    html = html.replace(/<pre([^>]*)><code([^>]*)>/g, (match, preAttr, codeAttr) => {
-      return `<pre${preAttr} style="position:relative;"><button class="zen-scrap-code-copy-btn" onclick="navigator.clipboard.writeText(this.parentElement.querySelector('code').textContent)">Copy</button><code${codeAttr}>`;
-    });
-
     return html;
   }
 
@@ -270,6 +266,7 @@ export class ScrapDetailView extends ItemView {
       preview.style.display = "";
       if (textarea.value.trim()) {
         preview.innerHTML = await this.renderBody(textarea.value);
+        this.addCopyButtons(preview);
       } else {
         preview.innerHTML = '<p style="color: var(--text-muted)">プレビューする内容がありません</p>';
       }
@@ -368,6 +365,20 @@ export class ScrapDetailView extends ItemView {
     });
   }
 
+  private addCopyButtons(container: HTMLElement): void {
+    container.querySelectorAll("pre").forEach((pre) => {
+      pre.style.position = "relative";
+      const btn = document.createElement("button");
+      btn.className = "zen-scrap-code-copy-btn";
+      btn.textContent = "Copy";
+      btn.addEventListener("click", () => {
+        const code = pre.querySelector("code");
+        if (code) navigator.clipboard.writeText(code.textContent || "");
+      });
+      pre.prepend(btn);
+    });
+  }
+
   private renderEntryEditor(entryEl: HTMLElement, entryBody: HTMLElement, index: number): void {
     const entry = this.scrap!.entries[index];
 
@@ -400,6 +411,7 @@ export class ScrapDetailView extends ItemView {
       preview.style.display = "";
       if (textarea.value.trim()) {
         preview.innerHTML = await this.renderBody(textarea.value);
+        this.addCopyButtons(preview);
       } else {
         preview.innerHTML = '<p style="color: var(--text-muted)">プレビューする内容がありません</p>';
       }
