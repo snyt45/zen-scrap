@@ -65,19 +65,28 @@ export class ScrapListView extends ItemView {
     const input = container.createEl("input", {
       cls: "zen-scrap-search",
       type: "text",
-      placeholder: "タイトルで検索...",
+      placeholder: "スクラップを検索...",
     });
     input.value = this.searchQuery;
-    input.addEventListener("input", async () => {
+    let composing = false;
+    input.addEventListener("compositionstart", () => { composing = true; });
+    input.addEventListener("compositionend", () => {
+      composing = false;
       this.searchQuery = input.value;
-      const pos = input.selectionStart;
-      await this.render();
-      const el = this.containerEl.querySelector<HTMLInputElement>(".zen-scrap-search");
-      if (el) {
-        el.focus();
-        el.setSelectionRange(pos, pos);
-      }
+      this.rerenderList();
     });
+    input.addEventListener("input", () => {
+      if (composing) return;
+      this.searchQuery = input.value;
+      this.rerenderList();
+    });
+  }
+
+  private async rerenderList(): Promise<void> {
+    const existing = this.containerEl.querySelector(".zen-scrap-list");
+    if (existing) existing.remove();
+    const container = this.containerEl.children[1] as HTMLElement;
+    await this.renderList(container);
   }
 
   private renderToolbar(container: HTMLElement): void {
@@ -156,10 +165,13 @@ export class ScrapListView extends ItemView {
       return s.status === this.filter && !s.archived;
     });
 
-    // 検索フィルタ
+    // 全文検索
     if (this.searchQuery) {
       const q = this.searchQuery.toLowerCase();
-      filtered = filtered.filter((s) => s.title.toLowerCase().includes(q));
+      filtered = filtered.filter((s) => {
+        if (s.title.toLowerCase().includes(q)) return true;
+        return s.entries.some((e) => e.body.toLowerCase().includes(q));
+      });
     }
 
     // 並び替え
