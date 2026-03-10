@@ -205,7 +205,33 @@ export class ScrapDetailView extends ItemView {
   }
 
   private handleImageUpload(textarea: HTMLTextAreaElement): void {
-    // Will be implemented in Task 5
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = "image/*";
+    input.addEventListener("change", async () => {
+      const file = input.files?.[0];
+      if (!file) return;
+
+      const buffer = await file.arrayBuffer();
+      const fileName = `${Date.now()}-${file.name}`;
+      const folderPath = "Scraps/images";
+
+      if (!this.app.vault.getAbstractFileByPath(folderPath)) {
+        await this.app.vault.createFolder(folderPath);
+      }
+
+      const filePath = `${folderPath}/${fileName}`;
+      await this.app.vault.createBinary(filePath, buffer);
+
+      const syntax = `![](${filePath})`;
+      const pos = textarea.selectionStart;
+      const before = textarea.value.substring(0, pos);
+      const after = textarea.value.substring(pos);
+      textarea.value = before + syntax + "\n" + after;
+      textarea.focus();
+      textarea.selectionStart = textarea.selectionEnd = pos + syntax.length + 1;
+    });
+    input.click();
   }
 
   private renderEmbedButton(parent: HTMLElement, textarea: HTMLTextAreaElement): void {
