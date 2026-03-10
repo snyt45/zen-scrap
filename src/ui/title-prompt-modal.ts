@@ -20,15 +20,20 @@ export class TitlePromptModal extends Modal {
     input.addEventListener("keydown", (e: KeyboardEvent) => {
       if (e.isComposing) return;
       if (e.key === "Enter") {
+        e.preventDefault();
+        e.stopPropagation();
         this.result = input.value.trim() || null;
-        this.close();
+        setTimeout(() => this.close(), 0);
       }
     });
     input.focus();
   }
 
   onClose() {
+    const cb = this.onSubmit;
+    const result = this.result;
     this.contentEl.empty();
-    this.onSubmit(this.result);
+    // モーダルが完全に閉じた後にコールバックを実行
+    setTimeout(() => cb(result), 0);
   }
 }
