@@ -1,10 +1,12 @@
 import { App, Modal } from "obsidian";
 
 export class TitlePromptModal extends Modal {
-  private resolve: (value: string | null) => void = () => {};
+  private result: string | null = null;
+  private onSubmit: (value: string | null) => void;
 
-  constructor(app: App) {
+  constructor(app: App, onSubmit: (value: string | null) => void) {
     super(app);
+    this.onSubmit = onSubmit;
   }
 
   onOpen() {
@@ -18,13 +20,7 @@ export class TitlePromptModal extends Modal {
     input.addEventListener("keydown", (e: KeyboardEvent) => {
       if (e.isComposing) return;
       if (e.key === "Enter") {
-        const value = input.value.trim() || null;
-        const r = this.resolve;
-        this.resolve = () => {};
-        this.close();
-        r(value);
-      }
-      if (e.key === "Escape") {
+        this.result = input.value.trim() || null;
         this.close();
       }
     });
@@ -32,13 +28,7 @@ export class TitlePromptModal extends Modal {
   }
 
   onClose() {
-    this.resolve(null);
-  }
-
-  prompt(): Promise<string | null> {
-    return new Promise((resolve) => {
-      this.resolve = resolve;
-      this.open();
-    });
+    this.contentEl.empty();
+    this.onSubmit(this.result);
   }
 }

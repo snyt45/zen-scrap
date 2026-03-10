@@ -65,7 +65,7 @@ export class ScrapListView extends ItemView {
     const input = container.createEl("input", {
       cls: "zen-scrap-search",
       type: "text",
-      placeholder: "タイトルやトピックで検索...",
+      placeholder: "タイトルで検索...",
     });
     input.value = this.searchQuery;
     input.addEventListener("input", async () => {
@@ -83,36 +83,66 @@ export class ScrapListView extends ItemView {
   private renderToolbar(container: HTMLElement): void {
     const toolbar = container.createDiv({ cls: "zen-scrap-toolbar" });
 
-    // フィルタタブ
-    const tabs = toolbar.createDiv({ cls: "zen-scrap-tabs" });
-    const tabDefs: { key: typeof this.filter; label: string }[] = [
-      { key: "all", label: "All" },
-      { key: "open", label: "Open" },
-      { key: "closed", label: "Closed" },
-      { key: "archived", label: "Archived" },
-    ];
-    for (const def of tabDefs) {
-      const cls = this.filter === def.key ? "zen-scrap-tab zen-scrap-tab-active" : "zen-scrap-tab";
-      const tab = tabs.createEl("button", { text: def.label, cls });
-      tab.addEventListener("click", () => {
-        this.filter = def.key;
-        this.render();
+    this.renderDropdown(toolbar, "公開状態", "all", [
+      { value: "all", label: "All" },
+      { value: "open", label: "Open" },
+      { value: "closed", label: "Closed" },
+      { value: "archived", label: "Archived" },
+    ], this.filter, (v) => { this.filter = v as typeof this.filter; this.render(); });
+
+    this.renderDropdown(toolbar, "並び替え", "created", [
+      { value: "created", label: "作成日が新しい順" },
+      { value: "commented", label: "コメントが新しい順" },
+    ], this.sort, (v) => { this.sort = v as typeof this.sort; this.render(); });
+  }
+
+  private renderDropdown(
+    parent: HTMLElement,
+    label: string,
+    defaultValue: string,
+    options: { value: string; label: string }[],
+    currentValue: string,
+    onChange: (value: string) => void,
+  ): void {
+    const wrapper = parent.createDiv({ cls: "zen-scrap-dropdown" });
+
+    const isDefault = currentValue === defaultValue;
+    const displayText = isDefault ? label : options.find((o) => o.value === currentValue)?.label || label;
+
+    const btn = wrapper.createEl("button", { cls: "zen-scrap-dropdown-btn" });
+    btn.createSpan({ text: displayText });
+    const arrow = btn.createSpan({ cls: "zen-scrap-dropdown-arrow" });
+    arrow.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>';
+
+    const menu = wrapper.createDiv({ cls: "zen-scrap-dropdown-menu" });
+    menu.style.display = "none";
+
+    for (const opt of options) {
+      const item = menu.createDiv({ cls: "zen-scrap-dropdown-item" });
+      item.setText(opt.label);
+      if (opt.value === currentValue) {
+        item.addClass("zen-scrap-dropdown-item-active");
+      }
+      item.addEventListener("click", (e) => {
+        e.stopPropagation();
+        menu.style.display = "none";
+        onChange(opt.value);
       });
     }
 
-    // 並び替え
-    const sortSelect = toolbar.createEl("select", { cls: "zen-scrap-sort" });
-    const sortOptions: { value: typeof this.sort; label: string }[] = [
-      { value: "created", label: "作成日が新しい順" },
-      { value: "commented", label: "コメントが新しい順" },
-    ];
-    for (const opt of sortOptions) {
-      const optEl = sortSelect.createEl("option", { text: opt.label, value: opt.value });
-      if (opt.value === this.sort) optEl.selected = true;
-    }
-    sortSelect.addEventListener("change", () => {
-      this.sort = sortSelect.value as typeof this.sort;
-      this.render();
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const isOpen = menu.style.display !== "none";
+      // 他のドロップダウンを閉じる
+      parent.querySelectorAll<HTMLElement>(".zen-scrap-dropdown-menu").forEach((m) => {
+        m.style.display = "none";
+      });
+      menu.style.display = isOpen ? "none" : "";
+    });
+
+    // 外側クリックで閉じる
+    document.addEventListener("click", () => {
+      menu.style.display = "none";
     });
   }
 
@@ -129,11 +159,7 @@ export class ScrapListView extends ItemView {
     // 検索フィルタ
     if (this.searchQuery) {
       const q = this.searchQuery.toLowerCase();
-      filtered = filtered.filter((s) => {
-        const titleMatch = s.title.toLowerCase().includes(q);
-        const tagsMatch = s.tags.some((t) => t.toLowerCase().includes(q));
-        return titleMatch || tagsMatch;
-      });
+      filtered = filtered.filter((s) => s.title.toLowerCase().includes(q));
     }
 
     // 並び替え
@@ -155,35 +181,27 @@ export class ScrapListView extends ItemView {
       const item = list.createDiv({ cls: "zen-scrap-list-item" });
       item.addEventListener("click", () => this.eventBus.emit(EVENTS.SCRAP_SELECT, scrap));
 
-      const titleRow = item.createDiv({ cls: "zen-scrap-item-title-row" });
-      const titleLeft = titleRow.createSpan();
+      // 1行目: タイトル
+      item.createDiv({ text: scrap.title, cls: "zen-scrap-item-title" });
 
-      // ステータスラベル
+      // 2行目: ステータス + 日付情報
+      const metaRow = item.createDiv({ cls: "zen-scrap-item-meta" });
       const labelCls = scrap.status === "open" ? "zen-scrap-label-open" : "zen-scrap-label-closed";
       const labelText = scrap.status === "open" ? "Open" : "Closed";
-      titleLeft.createSpan({ text: labelText, cls: labelCls });
-
-      titleLeft.createSpan({ text: scrap.title, cls: "zen-scrap-item-title" });
-      titleRow.createSpan({ text: `${scrap.entries.length}件`, cls: "zen-scrap-item-count" });
-
-      const metaRow = item.createDiv({ cls: "zen-scrap-item-meta" });
-      if (scrap.tags.length > 0) {
-        metaRow.createSpan({ text: scrap.tags.map((t) => `#${t}`).join(" "), cls: "zen-scrap-item-tags" });
+      metaRow.createSpan({ text: labelText, cls: labelCls });
+      metaRow.createSpan({ text: formatDate(scrap.created) + "に作成", cls: "zen-scrap-item-time" });
+      if (scrap.status === "closed") {
+        metaRow.createSpan({ text: " / " + formatDate(scrap.updated) + "にクローズ", cls: "zen-scrap-item-time" });
       }
-      const timeAgo = formatTimeAgo(scrap.updated);
-      metaRow.createSpan({ text: timeAgo, cls: "zen-scrap-item-time" });
+      metaRow.createSpan({ text: `${scrap.entries.length}件`, cls: "zen-scrap-item-count" });
     }
   }
 }
 
-function formatTimeAgo(isoString: string): string {
-  const now = Date.now();
-  const then = new Date(isoString).getTime();
-  const diffMin = Math.floor((now - then) / 60000);
-  if (diffMin < 1) return "たった今";
-  if (diffMin < 60) return `${diffMin}分前`;
-  const diffHour = Math.floor(diffMin / 60);
-  if (diffHour < 24) return `${diffHour}時間前`;
-  const diffDay = Math.floor(diffHour / 24);
-  return `${diffDay}日前`;
+function formatDate(isoString: string): string {
+  const d = new Date(isoString);
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}/${m}/${day}`;
 }

@@ -15,11 +15,12 @@ export function registerScrapHandlers(
     openScrap(scrap);
   });
 
-  eventBus.on(EVENTS.SCRAP_CREATE_REQUEST, async () => {
-    const title = await new TitlePromptModal(app).prompt();
-    if (!title) return;
-    const scrap = await repo.create(title, []);
-    openScrap(scrap);
-    eventBus.emit(EVENTS.SCRAP_CHANGED);
+  eventBus.on(EVENTS.SCRAP_CREATE_REQUEST, () => {
+    new TitlePromptModal(app, async (title) => {
+      if (!title) return;
+      const scrap = await repo.create(title, []);
+      openScrap(scrap);
+      eventBus.emit(EVENTS.SCRAP_CHANGED);
+    }).open();
   });
 }
