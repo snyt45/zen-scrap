@@ -179,13 +179,41 @@ export class ScrapListView extends ItemView {
 
     for (const scrap of filtered) {
       const item = list.createDiv({ cls: "zen-scrap-list-item" });
-      item.addEventListener("click", () => this.eventBus.emit(EVENTS.SCRAP_SELECT, scrap));
 
-      // 1行目: タイトル
-      item.createDiv({ text: scrap.title, cls: "zen-scrap-item-title" });
+      // 1行目: タイトル + メニューボタン
+      const titleRow = item.createDiv({ cls: "zen-scrap-item-title-row" });
+      titleRow.createSpan({ text: scrap.title, cls: "zen-scrap-item-title" });
+      titleRow.addEventListener("click", () => this.eventBus.emit(EVENTS.SCRAP_SELECT, scrap));
+
+      const menuWrapper = titleRow.createDiv({ cls: "zen-scrap-item-menu" });
+      const menuBtn = menuWrapper.createEl("button", { cls: "zen-scrap-item-menu-btn" });
+      menuBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>';
+
+      const menu = menuWrapper.createDiv({ cls: "zen-scrap-item-menu-dropdown" });
+      menu.style.display = "none";
+
+      const archiveLabel = scrap.archived ? "アーカイブ解除" : "アーカイブする";
+      const archiveItem = menu.createDiv({ cls: "zen-scrap-dropdown-item", text: archiveLabel });
+      archiveItem.addEventListener("click", async (e) => {
+        e.stopPropagation();
+        scrap.archived = !scrap.archived;
+        await this.repo.save(scrap);
+        this.eventBus.emit(EVENTS.SCRAP_CHANGED);
+      });
+
+      menuBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const isOpen = menu.style.display !== "none";
+        // 他のメニューを閉じる
+        list.querySelectorAll<HTMLElement>(".zen-scrap-item-menu-dropdown").forEach((m) => {
+          m.style.display = "none";
+        });
+        menu.style.display = isOpen ? "none" : "";
+      });
 
       // 2行目: ステータス + 日付情報
       const metaRow = item.createDiv({ cls: "zen-scrap-item-meta" });
+      metaRow.addEventListener("click", () => this.eventBus.emit(EVENTS.SCRAP_SELECT, scrap));
       const labelCls = scrap.status === "open" ? "zen-scrap-label-open" : "zen-scrap-label-closed";
       const labelText = scrap.status === "open" ? "Open" : "Closed";
       metaRow.createSpan({ text: labelText, cls: labelCls });
@@ -195,6 +223,13 @@ export class ScrapListView extends ItemView {
       }
       metaRow.createSpan({ text: `${scrap.entries.length}件`, cls: "zen-scrap-item-count" });
     }
+
+    // 外側クリックでメニュー閉じる
+    document.addEventListener("click", () => {
+      list.querySelectorAll<HTMLElement>(".zen-scrap-item-menu-dropdown").forEach((m) => {
+        m.style.display = "none";
+      });
+    });
   }
 }
 
