@@ -1,7 +1,8 @@
-import { Plugin, Modal } from "obsidian";
+import { Plugin } from "obsidian";
 import { ScrapRepository } from "./scrap-repository";
 import { ScrapListView, VIEW_TYPE_SCRAP_LIST } from "./scrap-list-view";
 import { ScrapDetailView, VIEW_TYPE_SCRAP_DETAIL } from "./scrap-detail-view";
+import { TitlePromptModal } from "./title-prompt-modal";
 import { Scrap } from "./types";
 
 export default class ZenScrapPlugin extends Plugin {
@@ -50,37 +51,10 @@ export default class ZenScrapPlugin extends Plugin {
   }
 
   async createNewScrap() {
-    const title = await this.promptForTitle();
+    const title = await new TitlePromptModal(this.app).prompt();
     if (!title) return;
     const scrap = await this.repo.create(title, []);
     this.openScrap(scrap);
-  }
-
-  async promptForTitle(): Promise<string | null> {
-    return new Promise((resolve) => {
-      const modal = new Modal(this.app);
-      modal.titleEl.setText("新しいスクラップ");
-      const input = modal.contentEl.createEl("input", {
-        type: "text",
-        placeholder: "タイトルを入力...",
-        cls: "zen-scrap-title-input",
-      });
-      input.style.width = "100%";
-      input.addEventListener("keydown", (e: KeyboardEvent) => {
-        if (e.isComposing) return;
-        if (e.key === "Enter") {
-          modal.close();
-          resolve(input.value.trim() || null);
-        }
-        if (e.key === "Escape") {
-          modal.close();
-          resolve(null);
-        }
-      });
-      modal.onClose = () => resolve(null);
-      modal.open();
-      input.focus();
-    });
   }
 
   async openScrap(scrap: Scrap) {
