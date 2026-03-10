@@ -10,7 +10,7 @@ export class ScrapListView extends ItemView {
   private repo: ScrapRepository;
   private eventBus: EventBus;
   private filter: "all" | "open" | "closed" | "archived" = "open";
-  private sort: "created" | "commented" = "created";
+  private sort: "created" | "updated" = "created";
   private searchQuery = "";
   private onScrapChangedHandler: () => void;
 
@@ -92,7 +92,7 @@ export class ScrapListView extends ItemView {
 
     this.renderDropdown(toolbar, "並び替え", "created", [
       { value: "created", label: "作成日が新しい順" },
-      { value: "commented", label: "コメントが新しい順" },
+      { value: "updated", label: "更新日が新しい順" },
     ], this.sort, (v) => { this.sort = v as typeof this.sort; this.render(); });
   }
 
