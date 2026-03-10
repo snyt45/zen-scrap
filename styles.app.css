@@ -829,28 +829,35 @@ pre:hover .zen-scrap-code-copy-btn {
 /* GitHub埋め込み */
 .zen-scrap-github-embed {
   border: 1px solid var(--background-modifier-border);
-  border-radius: 6px;
+  border-radius: 10px;
   overflow: hidden;
   margin: 8px 0;
 }
 
 .zen-scrap-github-header {
   display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 8px 12px;
-  background: var(--background-secondary);
-  border-bottom: 1px solid var(--background-modifier-border);
+  align-items: flex-start;
+  gap: 8px;
+  padding: 12px 16px;
+  background: #24292e;
+  color: #e1e4e8;
   font-size: 0.85em;
+  line-height: 1.4;
+}
+
+.theme-light .zen-scrap-github-header {
+  background: #24292e;
+  color: #e1e4e8;
 }
 
 .zen-scrap-gh-icon {
   flex-shrink: 0;
-  color: var(--text-muted);
+  color: #e1e4e8;
+  margin-top: 2px;
 }
 
 .zen-scrap-github-header a {
-  color: var(--text-accent);
+  color: #58a6ff;
   text-decoration: none;
 }
 
@@ -858,8 +865,16 @@ pre:hover .zen-scrap-code-copy-btn {
   text-decoration: underline;
 }
 
+.zen-scrap-gh-sub {
+  display: block;
+  font-size: 0.9em;
+  color: #8b949e;
+  margin-top: 2px;
+}
+
 .zen-scrap-github-code-wrapper {
   overflow-x: auto;
+  background: var(--background-primary);
 }
 
 .zen-scrap-gh-table {
@@ -867,37 +882,22 @@ pre:hover .zen-scrap-code-copy-btn {
   border-collapse: collapse;
   font-size: 0.85em;
   font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
-  line-height: 1.4;
-}
-
-.zen-scrap-gh-row:hover {
-  background: var(--background-modifier-hover);
+  line-height: 1.45;
 }
 
 .zen-scrap-gh-num {
   width: 1%;
   min-width: 40px;
-  padding: 0 10px;
+  padding: 2px 10px;
   text-align: right;
   color: var(--text-faint);
   user-select: none;
   white-space: nowrap;
   vertical-align: top;
-  border-right: 1px solid var(--background-modifier-border);
 }
 
 .zen-scrap-gh-code {
-  padding: 0 12px;
+  padding: 2px 12px;
   white-space: pre;
   vertical-align: top;
-}
-
-/* ダークモード: GitHub埋め込みの背景を暗く */
-.theme-dark .zen-scrap-gh-table {
-  background: var(--background-primary);
-  color: var(--text-normal);
-}
-
-.theme-dark .zen-scrap-gh-row:hover {
-  background: var(--background-secondary);
 }
