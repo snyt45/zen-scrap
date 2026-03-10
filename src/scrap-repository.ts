@@ -32,6 +32,13 @@ export class ScrapRepository {
     return scraps;
   }
 
+  async getByPath(filePath: string): Promise<Scrap | null> {
+    const file = this.app.vault.getAbstractFileByPath(filePath);
+    if (!(file instanceof TFile)) return null;
+    const content = await this.app.vault.read(file);
+    return parseScrapMarkdown(content, file.path);
+  }
+
   async create(title: string, tags: string[]): Promise<Scrap> {
     await this.ensureFolder();
     const now = new Date().toISOString();
