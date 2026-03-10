@@ -1,1 +1,92 @@
-/* Zen Scrap styles */
+/* Zen Scrap - List View */
+.zen-scrap-list-container {
+  padding: 16px;
+}
+
+.zen-scrap-list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.zen-scrap-list-header h2 {
+  margin: 0;
+}
+
+.zen-scrap-list-controls {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.zen-scrap-filter {
+  padding: 4px 8px;
+  border-radius: 4px;
+  border: 1px solid var(--background-modifier-border);
+  background: var(--background-primary);
+  color: var(--text-normal);
+}
+
+.zen-scrap-new-btn {
+  padding: 4px 12px;
+  border-radius: 4px;
+  background: var(--interactive-accent);
+  color: var(--text-on-accent);
+  border: none;
+  cursor: pointer;
+}
+
+.zen-scrap-new-btn:hover {
+  opacity: 0.9;
+}
+
+.zen-scrap-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.zen-scrap-list-item {
+  padding: 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  border: 1px solid var(--background-modifier-border);
+}
+
+.zen-scrap-list-item:hover {
+  background: var(--background-secondary);
+}
+
+.zen-scrap-item-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.zen-scrap-item-title {
+  font-weight: 600;
+}
+
+.zen-scrap-item-count {
+  font-size: 0.85em;
+  color: var(--text-muted);
+}
+
+.zen-scrap-item-meta {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 4px;
+  font-size: 0.85em;
+  color: var(--text-muted);
+}
+
+.zen-scrap-item-tags {
+  color: var(--text-accent);
+}
+
+.zen-scrap-empty {
+  text-align: center;
+  padding: 40px;
+  color: var(--text-muted);
+}
