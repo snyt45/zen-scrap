@@ -1,10 +1,12 @@
 import { Plugin, Modal } from "obsidian";
 import { ScrapRepository } from "./scrap-repository";
 import { ScrapListView, VIEW_TYPE_SCRAP_LIST } from "./scrap-list-view";
+import { ScrapDetailView, VIEW_TYPE_SCRAP_DETAIL } from "./scrap-detail-view";
 import { Scrap } from "./types";
 
 export default class ZenScrapPlugin extends Plugin {
   private repo!: ScrapRepository;
+  private currentScrap: Scrap | null = null;
 
   async onload() {
     this.repo = new ScrapRepository(this.app);
@@ -15,6 +17,15 @@ export default class ZenScrapPlugin extends Plugin {
         this.repo,
         (scrap) => this.openScrap(scrap),
         () => this.createNewScrap()
+      )
+    );
+
+    this.registerView(VIEW_TYPE_SCRAP_DETAIL, (leaf) =>
+      new ScrapDetailView(
+        leaf,
+        this.repo,
+        this.currentScrap!,
+        () => this.activateListView()
       )
     );
 
@@ -77,9 +88,14 @@ export default class ZenScrapPlugin extends Plugin {
     });
   }
 
-  openScrap(scrap: Scrap) {
-    // Task 4で実装。一旦コンソールログ
-    console.log("Open scrap:", scrap.title);
+  async openScrap(scrap: Scrap) {
+    this.currentScrap = scrap;
+    const { workspace } = this.app;
+    const leaf = workspace.getLeaf(true);
+    if (leaf) {
+      await leaf.setViewState({ type: VIEW_TYPE_SCRAP_DETAIL, active: true });
+      workspace.revealLeaf(leaf);
+    }
   }
 
   async onunload() {}
