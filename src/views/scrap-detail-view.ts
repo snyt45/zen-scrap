@@ -1,4 +1,5 @@
-import { ItemView, WorkspaceLeaf, MarkdownRenderer, Component } from "obsidian";
+import { ItemView, WorkspaceLeaf } from "obsidian";
+import markdownToHtml from "zenn-markdown-html";
 import { Scrap } from "../data/types";
 import { ScrapRepository } from "../data/scrap-repository";
 import { EventBus } from "../events/event-bus";
@@ -10,13 +11,10 @@ export class ScrapDetailView extends ItemView {
   private repo: ScrapRepository;
   private eventBus: EventBus;
   private scrap: Scrap | undefined;
-  private renderComponent: Component;
-
   constructor(leaf: WorkspaceLeaf, repo: ScrapRepository, eventBus: EventBus) {
     super(leaf);
     this.repo = repo;
     this.eventBus = eventBus;
-    this.renderComponent = new Component();
   }
 
   getViewType(): string {
@@ -47,12 +45,10 @@ export class ScrapDetailView extends ItemView {
   }
 
   async onOpen(): Promise<void> {
-    this.renderComponent.load();
     await this.render();
   }
 
   async onClose(): Promise<void> {
-    this.renderComponent.unload();
   }
 
   async render(): Promise<void> {
@@ -94,14 +90,18 @@ export class ScrapDetailView extends ItemView {
       const entryHeader = entryEl.createDiv({ cls: "zen-scrap-entry-header" });
       entryHeader.createSpan({ text: entry.timestamp, cls: "zen-scrap-entry-time" });
 
-      const entryBody = entryEl.createDiv({ cls: "zen-scrap-entry-body" });
-      await MarkdownRenderer.render(
-        this.app,
-        entry.body,
-        entryBody,
-        this.scrap!.filePath,
-        this.renderComponent
-      );
+      const toggleBtn = entryHeader.createEl("button", { cls: "zen-scrap-entry-toggle" });
+      toggleBtn.innerHTML = "&#x25BC;"; // ▼
+
+      const entryBody = entryEl.createDiv({ cls: "zen-scrap-entry-body znc" });
+      entryBody.innerHTML = await markdownToHtml(entry.body);
+
+      toggleBtn.addEventListener("click", () => {
+        const collapsed = entryBody.style.display === "none";
+        entryBody.style.display = collapsed ? "" : "none";
+        toggleBtn.innerHTML = collapsed ? "&#x25BC;" : "&#x25B6;"; // ▼ or ▶
+        entryEl.toggleClass("zen-scrap-entry-collapsed", !collapsed);
+      });
     }
 
     timeline.scrollTop = timeline.scrollHeight;
@@ -109,11 +109,43 @@ export class ScrapDetailView extends ItemView {
 
   private renderInputArea(container: HTMLElement): void {
     const inputArea = container.createDiv({ cls: "zen-scrap-input-area" });
+
+    // タブヘッダー
+    const tabHeader = inputArea.createDiv({ cls: "zen-scrap-input-tabs" });
+    const mdTab = tabHeader.createEl("button", { text: "Markdown", cls: "zen-scrap-input-tab zen-scrap-input-tab-active" });
+    const pvTab = tabHeader.createEl("button", { text: "Preview", cls: "zen-scrap-input-tab" });
+
+    // Markdownエディタ
     const textarea = inputArea.createEl("textarea", {
       placeholder: "ここに書き散らす...",
       cls: "zen-scrap-textarea",
     });
 
+    // プレビューエリア
+    const preview = inputArea.createDiv({ cls: "zen-scrap-preview znc" });
+    preview.style.display = "none";
+
+    // タブ切り替え
+    mdTab.addEventListener("click", () => {
+      mdTab.addClass("zen-scrap-input-tab-active");
+      pvTab.removeClass("zen-scrap-input-tab-active");
+      textarea.style.display = "";
+      preview.style.display = "none";
+    });
+
+    pvTab.addEventListener("click", async () => {
+      pvTab.addClass("zen-scrap-input-tab-active");
+      mdTab.removeClass("zen-scrap-input-tab-active");
+      textarea.style.display = "none";
+      preview.style.display = "";
+      if (textarea.value.trim()) {
+        preview.innerHTML = await markdownToHtml(textarea.value);
+      } else {
+        preview.innerHTML = '<p style="color: var(--text-muted)">プレビューする内容がありません</p>';
+      }
+    });
+
+    // 投稿ボタン
     const submitBtn = inputArea.createEl("button", { text: "投稿", cls: "zen-scrap-submit-btn" });
     submitBtn.addEventListener("click", async () => {
       const body = textarea.value.trim();
