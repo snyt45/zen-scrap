@@ -4,7 +4,7 @@
   "description": "Zenn-scrap-like threaded notes for Obsidian",
   "main": "main.js",
   "scripts": {
-    "dev": "node esbuild.config.mjs",
+    "dev": "OBSIDIAN_PLUGIN_DIR=../my-vault-2nd-brain/.obsidian/plugins/zen-scrap node esbuild.config.mjs",
     "build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production"
   },
   "devDependencies": {
