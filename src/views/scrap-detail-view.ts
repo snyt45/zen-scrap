@@ -149,32 +149,28 @@ export class ScrapDetailView extends ItemView {
   private renderInputArea(container: HTMLElement): void {
     const inputArea = container.createDiv({ cls: "zen-scrap-input-area" });
 
-    // タブヘッダー
-    const tabHeader = inputArea.createDiv({ cls: "zen-scrap-input-tabs" });
-    const mdTab = tabHeader.createEl("button", { text: "Markdown", cls: "zen-scrap-input-tab zen-scrap-input-tab-active" });
-    const pvTab = tabHeader.createEl("button", { text: "Preview", cls: "zen-scrap-input-tab" });
+    const tabHeader = inputArea.createDiv({ cls: "zen-scrap-pill-tabs" });
+    const mdTab = tabHeader.createEl("button", { text: "Markdown", cls: "zen-scrap-pill-tab zen-scrap-pill-tab-active" });
+    const pvTab = tabHeader.createEl("button", { text: "Preview", cls: "zen-scrap-pill-tab" });
 
-    // Markdownエディタ
     const textarea = inputArea.createEl("textarea", {
-      placeholder: "ここに書き散らす...",
+      placeholder: "スクラップにコメントを追加",
       cls: "zen-scrap-textarea",
     });
 
-    // プレビューエリア
     const preview = inputArea.createDiv({ cls: "zen-scrap-preview znc" });
     preview.style.display = "none";
 
-    // タブ切り替え
     mdTab.addEventListener("click", () => {
-      mdTab.addClass("zen-scrap-input-tab-active");
-      pvTab.removeClass("zen-scrap-input-tab-active");
+      mdTab.addClass("zen-scrap-pill-tab-active");
+      pvTab.removeClass("zen-scrap-pill-tab-active");
       textarea.style.display = "";
       preview.style.display = "none";
     });
 
     pvTab.addEventListener("click", async () => {
-      pvTab.addClass("zen-scrap-input-tab-active");
-      mdTab.removeClass("zen-scrap-input-tab-active");
+      pvTab.addClass("zen-scrap-pill-tab-active");
+      mdTab.removeClass("zen-scrap-pill-tab-active");
       textarea.style.display = "none";
       preview.style.display = "";
       if (textarea.value.trim()) {
@@ -184,8 +180,14 @@ export class ScrapDetailView extends ItemView {
       }
     });
 
-    // 投稿ボタン
-    const submitBtn = inputArea.createEl("button", { text: "投稿", cls: "zen-scrap-submit-btn" });
+    const actionBar = inputArea.createDiv({ cls: "zen-scrap-action-bar" });
+
+    const imgBtn = actionBar.createEl("button", { text: "画像", cls: "zen-scrap-img-btn" });
+    imgBtn.addEventListener("click", () => this.handleImageUpload(textarea));
+
+    this.renderEmbedButton(actionBar, textarea);
+
+    const submitBtn = actionBar.createEl("button", { text: "投稿する", cls: "zen-scrap-submit-btn-new" });
     submitBtn.addEventListener("click", async () => {
       const body = textarea.value.trim();
       if (!body || !this.scrap) return;
@@ -199,6 +201,14 @@ export class ScrapDetailView extends ItemView {
         submitBtn.click();
       }
     });
+  }
+
+  private handleImageUpload(textarea: HTMLTextAreaElement): void {
+    // Will be implemented in Task 5
+  }
+
+  private renderEmbedButton(parent: HTMLElement, textarea: HTMLTextAreaElement): void {
+    // Will be implemented in Task 4
   }
 }
 

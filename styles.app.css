@@ -394,47 +394,71 @@
   border-color: var(--interactive-accent);
 }
 
-.zen-scrap-submit-btn {
-  margin-top: 8px;
-  padding: 6px 16px;
-  border-radius: 4px;
-  background: var(--interactive-accent);
-  color: var(--text-on-accent);
-  border: none;
-  cursor: pointer;
-  float: right;
-}
-
-.zen-scrap-submit-btn:hover {
-  opacity: 0.9;
-}
-
-/* Markdown/Preview タブ */
-.zen-scrap-input-tabs {
+/* pill風タブ */
+.zen-scrap-pill-tabs {
   display: flex;
-  gap: 0;
+  gap: 8px;
   margin-bottom: 8px;
-  border-bottom: 1px solid var(--background-modifier-border);
 }
 
-.zen-scrap-input-tab {
+.zen-scrap-pill-tab {
   padding: 6px 16px;
+  border-radius: 20px;
+  border: 1px solid var(--background-modifier-border);
   background: none;
-  border: none;
-  border-bottom: 2px solid transparent;
   color: var(--text-muted);
   cursor: pointer;
   font-size: 0.85em;
   font-weight: 600;
 }
 
-.zen-scrap-input-tab:hover {
+.zen-scrap-pill-tab:hover {
   color: var(--text-normal);
 }
 
-.zen-scrap-input-tab-active {
+.zen-scrap-pill-tab-active {
+  background: var(--interactive-accent);
+  color: var(--text-on-accent);
+  border-color: var(--interactive-accent);
+}
+
+/* アクションバー */
+.zen-scrap-action-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.zen-scrap-img-btn {
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--background-modifier-border);
+  background: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 0.85em;
+}
+
+.zen-scrap-img-btn:hover {
   color: var(--text-normal);
-  border-bottom-color: var(--interactive-accent);
+  background: var(--background-secondary);
+}
+
+/* 新しい投稿ボタン */
+.zen-scrap-submit-btn-new {
+  margin-left: auto;
+  padding: 8px 20px;
+  border-radius: 20px;
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.zen-scrap-submit-btn-new:hover {
+  background: #1d4ed8;
 }
 
 /* プレビューエリア */
