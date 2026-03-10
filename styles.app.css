@@ -221,8 +221,7 @@
 /* Zen Scrap - Detail View */
 .zen-scrap-detail-container {
   padding: 16px;
-  display: flex;
-  flex-direction: column;
+  overflow-y: auto;
   height: 100%;
 }
 
@@ -231,17 +230,26 @@
 }
 
 .zen-scrap-back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
   background: none;
-  border: none;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 6px;
   color: var(--text-muted);
   cursor: pointer;
-  padding: 4px 0;
-  margin-bottom: 12px;
-  font-size: 0.9em;
+  padding: 6px 12px;
+  margin-bottom: 16px;
+  font-size: 0.85em;
 }
 
 .zen-scrap-back-btn:hover {
   color: var(--text-normal);
+  background: var(--background-secondary);
+}
+
+.zen-scrap-back-btn svg {
+  flex-shrink: 0;
 }
 
 .zen-scrap-detail-title {
@@ -259,6 +267,22 @@
 .zen-scrap-detail-meta-text {
   font-size: 0.9em;
   color: var(--text-muted);
+}
+
+.zen-scrap-status-toggle-btn {
+  margin-left: auto;
+  padding: 4px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--background-modifier-border);
+  background: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 0.85em;
+}
+
+.zen-scrap-status-toggle-btn:hover {
+  color: var(--text-normal);
+  background: var(--background-secondary);
 }
 
 .zen-scrap-detail-title-row {
@@ -317,8 +341,6 @@
 }
 
 .zen-scrap-timeline {
-  flex: 1;
-  overflow-y: auto;
   margin-bottom: 16px;
 }
 
@@ -611,4 +633,123 @@
 
 .zen-scrap-link-card a:hover {
   text-decoration: underline;
+}
+
+/* ツイート埋め込み */
+.zen-scrap-tweet-embed {
+  margin: 8px 0;
+}
+
+.zen-scrap-tweet-embed blockquote {
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 12px;
+  padding: 16px;
+  margin: 0;
+  background: var(--background-secondary);
+}
+
+/* OGPカード */
+.zen-scrap-ogp-card {
+  display: flex;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 8px;
+  overflow: hidden;
+  margin: 8px 0;
+  text-decoration: none !important;
+  color: var(--text-normal) !important;
+  background: var(--background-secondary);
+}
+
+.zen-scrap-ogp-card:hover {
+  background: var(--background-modifier-hover);
+}
+
+.zen-scrap-ogp-image-wrapper {
+  width: 200px;
+  min-height: 100px;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.zen-scrap-ogp-image-wrapper img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.zen-scrap-ogp-content {
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 0;
+}
+
+.zen-scrap-ogp-title {
+  font-weight: 600;
+  font-size: 0.95em;
+  margin-bottom: 4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.zen-scrap-ogp-desc {
+  font-size: 0.85em;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.zen-scrap-ogp-site {
+  font-size: 0.8em;
+  color: var(--text-faint);
+}
+
+/* GitHub埋め込み */
+.zen-scrap-github-embed {
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 8px;
+  overflow: hidden;
+  margin: 8px 0;
+}
+
+.zen-scrap-github-header {
+  padding: 8px 12px;
+  background: var(--background-secondary);
+  border-bottom: 1px solid var(--background-modifier-border);
+  font-size: 0.85em;
+}
+
+.zen-scrap-github-header a {
+  color: var(--text-accent);
+  text-decoration: none;
+}
+
+.zen-scrap-github-header a:hover {
+  text-decoration: underline;
+}
+
+.zen-scrap-github-code {
+  margin: 0;
+  padding: 12px;
+  font-size: 0.85em;
+  overflow-x: auto;
+  background: var(--code-background, var(--background-primary));
+}
+
+.zen-scrap-gh-line {
+  display: block;
+}
+
+.zen-scrap-gh-num {
+  display: inline-block;
+  width: 3em;
+  text-align: right;
+  margin-right: 12px;
+  color: var(--text-faint);
+  user-select: none;
 }

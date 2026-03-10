@@ -1,10 +1,11 @@
-import { ItemView, WorkspaceLeaf } from "obsidian";
+import { ItemView, WorkspaceLeaf, TFile } from "obsidian";
 import markdownToHtml from "zenn-markdown-html";
 import { Scrap } from "../data/types";
 import { ScrapRepository } from "../data/scrap-repository";
 import { EventBus } from "../events/event-bus";
 import { EVENTS } from "../events/constants";
 import { EmbedModal, EmbedType } from "../ui/embed-modal";
+import { renderEmbed } from "../ui/embed-renderer";
 
 export const VIEW_TYPE_SCRAP_DETAIL = "zen-scrap-detail";
 
@@ -66,7 +67,8 @@ export class ScrapDetailView extends ItemView {
   private renderHeader(container: HTMLElement): void {
     const header = container.createDiv({ cls: "zen-scrap-detail-header" });
 
-    const backBtn = header.createEl("button", { text: "← 一覧", cls: "zen-scrap-back-btn" });
+    const backBtn = header.createEl("button", { cls: "zen-scrap-back-btn" });
+    backBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg> 一覧へ戻る';
     backBtn.addEventListener("click", () => this.eventBus.emit(EVENTS.NAV_BACK_TO_LIST));
 
     const metaRow = header.createDiv({ cls: "zen-scrap-detail-meta" });
@@ -76,8 +78,21 @@ export class ScrapDetailView extends ItemView {
     metaRow.createSpan({ text: formatDate(this.scrap!.created) + "に作成", cls: "zen-scrap-detail-meta-text" });
     metaRow.createSpan({ text: `${this.scrap!.entries.length}件のコメント`, cls: "zen-scrap-detail-meta-text" });
 
+    // クローズ/オープンボタン
+    const statusBtn = metaRow.createEl("button", {
+      text: this.scrap!.status === "open" ? "クローズする" : "オープンにする",
+      cls: "zen-scrap-status-toggle-btn",
+    });
+    statusBtn.addEventListener("click", async () => {
+      this.scrap!.status = this.scrap!.status === "open" ? "closed" : "open";
+      this.scrap!.updated = new Date().toISOString();
+      await this.repo.save(this.scrap!);
+      this.eventBus.emit(EVENTS.SCRAP_CHANGED);
+      await this.render();
+    });
+
     const titleRow = header.createDiv({ cls: "zen-scrap-detail-title-row" });
-    const titleEl = titleRow.createEl("h2", { text: this.scrap!.title, cls: "zen-scrap-detail-title" });
+    titleRow.createEl("h2", { text: this.scrap!.title, cls: "zen-scrap-detail-title" });
 
     const editBtn = titleRow.createEl("button", { cls: "zen-scrap-title-edit-btn" });
     editBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>';
@@ -131,7 +146,6 @@ export class ScrapDetailView extends ItemView {
       const entryHeader = entryEl.createDiv({ cls: "zen-scrap-entry-header" });
       entryHeader.createSpan({ text: entry.timestamp, cls: "zen-scrap-entry-time" });
 
-      // メニューボタン
       const menuWrapper = entryHeader.createDiv({ cls: "zen-scrap-entry-menu" });
       const menuBtn = menuWrapper.createEl("button", { cls: "zen-scrap-entry-menu-btn" });
       menuBtn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>';
@@ -152,16 +166,14 @@ export class ScrapDetailView extends ItemView {
       });
 
       const entryBody = entryEl.createDiv({ cls: "zen-scrap-entry-body znc" });
-      entryBody.innerHTML = postProcessEmbeds(await markdownToHtml(entry.body));
+      entryBody.innerHTML = await this.renderBody(entry.body);
 
-      // 編集
       editItem.addEventListener("click", (e) => {
         e.stopPropagation();
         menu.style.display = "none";
         this.renderEntryEditor(entryEl, entryBody, i);
       });
 
-      // 削除
       deleteItem.addEventListener("click", async (e) => {
         e.stopPropagation();
         menu.style.display = "none";
@@ -172,14 +184,51 @@ export class ScrapDetailView extends ItemView {
       });
     }
 
-    // 外側クリックでメニュー閉じる
     document.addEventListener("click", () => {
       timeline.querySelectorAll<HTMLElement>(".zen-scrap-entry-menu-dropdown").forEach((m) => {
         m.style.display = "none";
       });
     });
+  }
 
-    timeline.scrollTop = timeline.scrollHeight;
+  private async renderBody(body: string): Promise<string> {
+    // 1. 埋め込み記法を抽出してプレースホルダーに置換（youtubeはzenn-markdown-htmlが処理するので除外）
+    const embeds: { id: string; type: string; url: string }[] = [];
+    const processed = body.replace(/@\[(tweet|card|github)\]\(([^)]+)\)/g, (_, type, url) => {
+      const id = `__EMBED_${embeds.length}__`;
+      embeds.push({ id, type, url });
+      return id;
+    });
+
+    // 2. markdownToHtml
+    let html = await markdownToHtml(processed);
+
+    // 3. 埋め込みプレースホルダーをリッチHTMLに置換
+    for (const embed of embeds) {
+      const embedHtml = await renderEmbed(embed.type, embed.url);
+      html = html.replace(embed.id, embedHtml);
+    }
+
+    // 4. vault内画像パスをリソースURLに変換
+    html = this.fixImagePaths(html);
+
+    return html;
+  }
+
+  private fixImagePaths(html: string): string {
+    return html.replace(/<img([^>]+)src="([^"]+)"([^>]*)>/g, (match, before, src, after) => {
+      // 外部URLはスキップ
+      if (src.startsWith("http://") || src.startsWith("https://") || src.startsWith("app://")) {
+        return match;
+      }
+      // vault内パスをリソースURLに変換
+      const file = this.app.vault.getAbstractFileByPath(src);
+      if (file instanceof TFile) {
+        const resourcePath = this.app.vault.getResourcePath(file);
+        return `<img${before}src="${resourcePath}"${after}>`;
+      }
+      return match;
+    });
   }
 
   private renderInputArea(container: HTMLElement): void {
@@ -210,7 +259,7 @@ export class ScrapDetailView extends ItemView {
       textarea.style.display = "none";
       preview.style.display = "";
       if (textarea.value.trim()) {
-        preview.innerHTML = postProcessEmbeds(await markdownToHtml(textarea.value));
+        preview.innerHTML = await this.renderBody(textarea.value);
       } else {
         preview.innerHTML = '<p style="color: var(--text-muted)">プレビューする内容がありません</p>';
       }
@@ -312,26 +361,21 @@ export class ScrapDetailView extends ItemView {
   private renderEntryEditor(entryEl: HTMLElement, entryBody: HTMLElement, index: number): void {
     const entry = this.scrap!.entries[index];
 
-    // 本文を非表示にして編集エリアを追加
     entryBody.style.display = "none";
     const editArea = entryEl.createDiv({ cls: "zen-scrap-entry-edit" });
 
-    // pill風タブ
     const tabHeader = editArea.createDiv({ cls: "zen-scrap-pill-tabs" });
     const mdTab = tabHeader.createEl("button", { text: "Markdown", cls: "zen-scrap-pill-tab zen-scrap-pill-tab-active" });
     const pvTab = tabHeader.createEl("button", { text: "Preview", cls: "zen-scrap-pill-tab" });
 
-    // textarea
     const textarea = editArea.createEl("textarea", {
       cls: "zen-scrap-textarea",
     });
     textarea.value = entry.body;
 
-    // プレビュー
     const preview = editArea.createDiv({ cls: "zen-scrap-preview znc" });
     preview.style.display = "none";
 
-    // タブ切り替え
     mdTab.addEventListener("click", () => {
       mdTab.addClass("zen-scrap-pill-tab-active");
       pvTab.removeClass("zen-scrap-pill-tab-active");
@@ -345,13 +389,12 @@ export class ScrapDetailView extends ItemView {
       textarea.style.display = "none";
       preview.style.display = "";
       if (textarea.value.trim()) {
-        preview.innerHTML = postProcessEmbeds(await markdownToHtml(textarea.value));
+        preview.innerHTML = await this.renderBody(textarea.value);
       } else {
         preview.innerHTML = '<p style="color: var(--text-muted)">プレビューする内容がありません</p>';
       }
     });
 
-    // アクションバー
     const actionBar = editArea.createDiv({ cls: "zen-scrap-action-bar" });
 
     const imgBtn = actionBar.createEl("button", { text: "画像", cls: "zen-scrap-img-btn" });
@@ -387,22 +430,6 @@ export class ScrapDetailView extends ItemView {
 
     textarea.focus();
   }
-}
-
-function postProcessEmbeds(html: string): string {
-  // zenn-markdown-htmlがサポートしない埋め込みをリンクカードに変換
-  // tweet: x.com or twitter.com のリンクをツイートカードに
-  // card/github: 通常のURLリンクをカード風に
-  return html.replace(
-    /<a href="(https?:\/\/(?:x\.com|twitter\.com)\/[^"]+)"[^>]*>([^<]*)<\/a>/g,
-    '<div class="zen-scrap-link-card"><a href="$1" target="_blank" rel="noopener">X (Twitter): $2</a></div>'
-  ).replace(
-    /<a href="(https?:\/\/github\.com\/[^"]+)"[^>]*>([^<]*)<\/a>/g,
-    '<div class="zen-scrap-link-card"><a href="$1" target="_blank" rel="noopener">GitHub: $2</a></div>'
-  ).replace(
-    /<a href="(https?:\/\/(?!(?:x\.com|twitter\.com|github\.com|www\.youtube|youtu\.be))[^"]+)"[^>]*>([^<]*)<\/a>/g,
-    '<div class="zen-scrap-link-card"><a href="$1" target="_blank" rel="noopener">$2</a></div>'
-  );
 }
 
 function formatDate(isoString: string): string {
