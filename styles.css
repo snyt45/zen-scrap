@@ -14,23 +14,9 @@
   margin: 0;
 }
 
-.zen-scrap-list-controls {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-}
-
-.zen-scrap-filter {
-  padding: 4px 8px;
-  border-radius: 4px;
-  border: 1px solid var(--background-modifier-border);
-  background: var(--background-primary);
-  color: var(--text-normal);
-}
-
 .zen-scrap-new-btn {
-  padding: 4px 12px;
-  border-radius: 4px;
+  padding: 6px 16px;
+  border-radius: 20px;
   background: var(--interactive-accent);
   color: var(--text-on-accent);
   border: none;
@@ -89,6 +75,90 @@
   text-align: center;
   padding: 40px;
   color: var(--text-muted);
+}
+
+/* ステータスラベル（一覧用） */
+.zen-scrap-label-open {
+  background: #2563eb;
+  color: #fff;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.75em;
+  font-weight: 600;
+  margin-right: 8px;
+}
+
+.zen-scrap-label-closed {
+  background: #7c3aed;
+  color: #fff;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.75em;
+  font-weight: 600;
+  margin-right: 8px;
+}
+
+/* 検索欄 */
+.zen-scrap-search {
+  width: 100%;
+  padding: 8px 12px;
+  margin-bottom: 12px;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 6px;
+  background: var(--background-primary);
+  color: var(--text-normal);
+  font-size: 0.9em;
+}
+
+.zen-scrap-search:focus {
+  outline: none;
+  border-color: var(--interactive-accent);
+}
+
+/* ツールバー */
+.zen-scrap-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.zen-scrap-tabs {
+  display: flex;
+  gap: 4px;
+}
+
+.zen-scrap-tab {
+  padding: 4px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.85em;
+  color: var(--text-muted);
+  background: none;
+  border: none;
+}
+
+.zen-scrap-tab:hover {
+  background: var(--background-secondary);
+}
+
+.zen-scrap-tab-active {
+  background: var(--interactive-accent);
+  color: var(--text-on-accent);
+}
+
+.zen-scrap-tab-active:hover {
+  background: var(--interactive-accent);
+  opacity: 0.9;
+}
+
+.zen-scrap-sort {
+  padding: 4px 8px;
+  border-radius: 4px;
+  border: 1px solid var(--background-modifier-border);
+  background: var(--background-primary);
+  color: var(--text-normal);
+  font-size: 0.85em;
 }
 
 /* Zen Scrap - Detail View */
