@@ -891,3 +891,13 @@ pre:hover .zen-scrap-code-copy-btn {
   white-space: pre;
   vertical-align: top;
 }
+
+/* ダークモード: GitHub埋め込みの背景を暗く */
+.theme-dark .zen-scrap-gh-table {
+  background: var(--background-primary);
+  color: var(--text-normal);
+}
+
+.theme-dark .zen-scrap-gh-row:hover {
+  background: var(--background-secondary);
+}
