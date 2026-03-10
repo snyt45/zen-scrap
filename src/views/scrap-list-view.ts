@@ -1,6 +1,6 @@
 import { ItemView, WorkspaceLeaf } from "obsidian";
-import { Scrap } from "./types";
-import { ScrapRepository } from "./scrap-repository";
+import { Scrap } from "../data/types";
+import { ScrapRepository } from "../data/scrap-repository";
 
 export const VIEW_TYPE_SCRAP_LIST = "zen-scrap-list";
 

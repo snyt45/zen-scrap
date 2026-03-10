@@ -1,9 +1,9 @@
 import { Plugin } from "obsidian";
-import { ScrapRepository } from "./scrap-repository";
-import { ScrapListView, VIEW_TYPE_SCRAP_LIST } from "./scrap-list-view";
-import { ScrapDetailView, VIEW_TYPE_SCRAP_DETAIL } from "./scrap-detail-view";
-import { TitlePromptModal } from "./title-prompt-modal";
-import { Scrap } from "./types";
+import { ScrapRepository } from "./data/scrap-repository";
+import { ScrapListView, VIEW_TYPE_SCRAP_LIST } from "./views/scrap-list-view";
+import { ScrapDetailView, VIEW_TYPE_SCRAP_DETAIL } from "./views/scrap-detail-view";
+import { TitlePromptModal } from "./ui/title-prompt-modal";
+import { Scrap } from "./data/types";
 
 export default class ZenScrapPlugin extends Plugin {
   private repo!: ScrapRepository;

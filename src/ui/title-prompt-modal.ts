@@ -18,12 +18,14 @@ export class TitlePromptModal extends Modal {
     input.addEventListener("keydown", (e: KeyboardEvent) => {
       if (e.isComposing) return;
       if (e.key === "Enter") {
+        const value = input.value.trim() || null;
+        const r = this.resolve;
+        this.resolve = () => {};
         this.close();
-        this.resolve(input.value.trim() || null);
+        r(value);
       }
       if (e.key === "Escape") {
         this.close();
-        this.resolve(null);
       }
     });
     input.focus();
