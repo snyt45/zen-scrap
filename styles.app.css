@@ -233,10 +233,15 @@
 .zen-scrap-back-btn {
   background: none;
   border: none;
-  color: var(--text-accent);
+  color: var(--text-muted);
   cursor: pointer;
-  padding: 0;
-  margin-bottom: 8px;
+  padding: 4px 0;
+  margin-bottom: 12px;
+  font-size: 0.9em;
+}
+
+.zen-scrap-back-btn:hover {
+  color: var(--text-normal);
 }
 
 .zen-scrap-detail-title {
@@ -248,7 +253,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-bottom: 8px;
+  margin-bottom: 12px;
 }
 
 .zen-scrap-detail-meta-text {
@@ -543,4 +548,29 @@
   border: 1px solid var(--background-modifier-border);
   border-radius: 6px;
   background: var(--background-primary);
+}
+
+/* ダークモード: インラインコードの背景を落ち着かせる */
+.theme-dark .znc code:not(pre code) {
+  background: var(--background-secondary) !important;
+  color: var(--text-normal) !important;
+}
+
+/* リンクカード（埋め込み用） */
+.zen-scrap-link-card {
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin: 8px 0;
+  background: var(--background-secondary);
+}
+
+.zen-scrap-link-card a {
+  color: var(--text-accent);
+  text-decoration: none;
+  word-break: break-all;
+}
+
+.zen-scrap-link-card a:hover {
+  text-decoration: underline;
 }

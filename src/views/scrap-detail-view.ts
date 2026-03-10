@@ -134,7 +134,7 @@ export class ScrapDetailView extends ItemView {
       toggleBtn.innerHTML = "&#x25BC;"; // ▼
 
       const entryBody = entryEl.createDiv({ cls: "zen-scrap-entry-body znc" });
-      entryBody.innerHTML = await markdownToHtml(entry.body);
+      entryBody.innerHTML = postProcessEmbeds(await markdownToHtml(entry.body));
 
       toggleBtn.addEventListener("click", () => {
         const collapsed = entryBody.style.display === "none";
@@ -175,7 +175,7 @@ export class ScrapDetailView extends ItemView {
       textarea.style.display = "none";
       preview.style.display = "";
       if (textarea.value.trim()) {
-        preview.innerHTML = await markdownToHtml(textarea.value);
+        preview.innerHTML = postProcessEmbeds(await markdownToHtml(textarea.value));
       } else {
         preview.innerHTML = '<p style="color: var(--text-muted)">プレビューする内容がありません</p>';
       }
@@ -273,6 +273,22 @@ export class ScrapDetailView extends ItemView {
       menu.style.display = "none";
     });
   }
+}
+
+function postProcessEmbeds(html: string): string {
+  // zenn-markdown-htmlがサポートしない埋め込みをリンクカードに変換
+  // tweet: x.com or twitter.com のリンクをツイートカードに
+  // card/github: 通常のURLリンクをカード風に
+  return html.replace(
+    /<a href="(https?:\/\/(?:x\.com|twitter\.com)\/[^"]+)"[^>]*>([^<]*)<\/a>/g,
+    '<div class="zen-scrap-link-card"><a href="$1" target="_blank" rel="noopener">X (Twitter): $2</a></div>'
+  ).replace(
+    /<a href="(https?:\/\/github\.com\/[^"]+)"[^>]*>([^<]*)<\/a>/g,
+    '<div class="zen-scrap-link-card"><a href="$1" target="_blank" rel="noopener">GitHub: $2</a></div>'
+  ).replace(
+    /<a href="(https?:\/\/(?!(?:x\.com|twitter\.com|github\.com|www\.youtube|youtu\.be))[^"]+)"[^>]*>([^<]*)<\/a>/g,
+    '<div class="zen-scrap-link-card"><a href="$1" target="_blank" rel="noopener">$2</a></div>'
+  );
 }
 
 function formatDate(isoString: string): string {
