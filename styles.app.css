@@ -688,17 +688,77 @@ pre:hover .zen-scrap-code-copy-btn {
   text-decoration: underline;
 }
 
-/* ツイート埋め込み */
-.zen-scrap-tweet-embed {
-  margin: 8px 0;
-}
-
-.zen-scrap-tweet-embed blockquote {
+/* ツイートカード */
+.zen-scrap-tweet-card {
   border: 1px solid var(--background-modifier-border);
   border-radius: 12px;
   padding: 16px;
-  margin: 0;
+  margin: 8px 0;
   background: var(--background-secondary);
+}
+
+.zen-scrap-tweet-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.zen-scrap-tweet-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.zen-scrap-tweet-author {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+
+.zen-scrap-tweet-name {
+  font-weight: 700;
+  font-size: 0.95em;
+}
+
+.zen-scrap-tweet-handle {
+  font-size: 0.85em;
+  color: var(--text-muted);
+}
+
+.zen-scrap-tweet-logo {
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.zen-scrap-tweet-text {
+  font-size: 0.95em;
+  line-height: 1.5;
+  margin-bottom: 8px;
+}
+
+.zen-scrap-tweet-media {
+  width: 100%;
+  border-radius: 8px;
+  margin-bottom: 8px;
+}
+
+.zen-scrap-tweet-date {
+  font-size: 0.8em;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+
+.zen-scrap-tweet-link {
+  font-size: 0.85em;
+  color: var(--text-accent);
+  text-decoration: none;
+}
+
+.zen-scrap-tweet-link:hover {
+  text-decoration: underline;
 }
 
 /* OGPカード */
@@ -718,16 +778,20 @@ pre:hover .zen-scrap-code-copy-btn {
 }
 
 .zen-scrap-ogp-image-wrapper {
-  width: 200px;
-  min-height: 100px;
+  width: 220px;
   flex-shrink: 0;
   overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--background-modifier-border);
 }
 
 .zen-scrap-ogp-image-wrapper img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  display: block;
 }
 
 .zen-scrap-ogp-content {
@@ -765,16 +829,24 @@ pre:hover .zen-scrap-code-copy-btn {
 /* GitHub埋め込み */
 .zen-scrap-github-embed {
   border: 1px solid var(--background-modifier-border);
-  border-radius: 8px;
+  border-radius: 6px;
   overflow: hidden;
   margin: 8px 0;
 }
 
 .zen-scrap-github-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   padding: 8px 12px;
   background: var(--background-secondary);
   border-bottom: 1px solid var(--background-modifier-border);
   font-size: 0.85em;
+}
+
+.zen-scrap-gh-icon {
+  flex-shrink: 0;
+  color: var(--text-muted);
 }
 
 .zen-scrap-github-header a {
@@ -786,23 +858,36 @@ pre:hover .zen-scrap-code-copy-btn {
   text-decoration: underline;
 }
 
-.zen-scrap-github-code {
-  margin: 0;
-  padding: 12px;
-  font-size: 0.85em;
+.zen-scrap-github-code-wrapper {
   overflow-x: auto;
-  background: var(--code-background, var(--background-primary));
 }
 
-.zen-scrap-gh-line {
-  display: block;
+.zen-scrap-gh-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85em;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  line-height: 1.4;
+}
+
+.zen-scrap-gh-row:hover {
+  background: var(--background-modifier-hover);
 }
 
 .zen-scrap-gh-num {
-  display: inline-block;
-  width: 3em;
+  width: 1%;
+  min-width: 40px;
+  padding: 0 10px;
   text-align: right;
-  margin-right: 12px;
   color: var(--text-faint);
   user-select: none;
+  white-space: nowrap;
+  vertical-align: top;
+  border-right: 1px solid var(--background-modifier-border);
+}
+
+.zen-scrap-gh-code {
+  padding: 0 12px;
+  white-space: pre;
+  vertical-align: top;
 }
