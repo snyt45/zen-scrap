@@ -6,19 +6,17 @@ export const VIEW_TYPE_SCRAP_DETAIL = "zen-scrap-detail";
 
 export class ScrapDetailView extends ItemView {
   private repo: ScrapRepository;
-  private scrap: Scrap;
+  private scrap: Scrap | undefined;
   private onBack: () => void;
   private renderComponent: Component;
 
   constructor(
     leaf: WorkspaceLeaf,
     repo: ScrapRepository,
-    scrap: Scrap,
     onBack: () => void
   ) {
     super(leaf);
     this.repo = repo;
-    this.scrap = scrap;
     this.onBack = onBack;
     this.renderComponent = new Component();
   }
@@ -28,7 +26,23 @@ export class ScrapDetailView extends ItemView {
   }
 
   getDisplayText(): string {
-    return this.scrap.title;
+    return this.scrap?.title || "Zen Scrap";
+  }
+
+  async setState(state: { filePath?: string }, result: any): Promise<void> {
+    if (state.filePath) {
+      const scraps = await this.repo.listAll();
+      const found = scraps.find((s) => s.filePath === state.filePath);
+      if (found) {
+        this.scrap = found;
+        await this.render();
+      }
+    }
+    await super.setState(state, result);
+  }
+
+  getState(): Record<string, unknown> {
+    return { filePath: this.scrap?.filePath };
   }
 
   getIcon(): string {
@@ -47,6 +61,7 @@ export class ScrapDetailView extends ItemView {
   async render(): Promise<void> {
     const container = this.containerEl.children[1] as HTMLElement;
     container.empty();
+    if (!this.scrap) return;
     container.addClass("zen-scrap-detail-container");
 
     // ヘッダー
@@ -96,7 +111,7 @@ export class ScrapDetailView extends ItemView {
     const submitBtn = inputArea.createEl("button", { text: "投稿", cls: "zen-scrap-submit-btn" });
     submitBtn.addEventListener("click", async () => {
       const body = textarea.value.trim();
-      if (!body) return;
+      if (!body || !this.scrap) return;
       this.scrap = await this.repo.addEntry(this.scrap, body);
       await this.render();
     });

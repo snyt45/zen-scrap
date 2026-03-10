@@ -6,7 +6,6 @@ import { Scrap } from "./types";
 
 export default class ZenScrapPlugin extends Plugin {
   private repo!: ScrapRepository;
-  private currentScrap: Scrap | null = null;
 
   async onload() {
     this.repo = new ScrapRepository(this.app);
@@ -21,12 +20,7 @@ export default class ZenScrapPlugin extends Plugin {
     );
 
     this.registerView(VIEW_TYPE_SCRAP_DETAIL, (leaf) =>
-      new ScrapDetailView(
-        leaf,
-        this.repo,
-        this.currentScrap!,
-        () => this.activateListView()
-      )
+      new ScrapDetailView(leaf, this.repo, () => this.activateListView())
     );
 
     this.addRibbonIcon("message-square", "Zen Scrap", () => {
@@ -89,13 +83,17 @@ export default class ZenScrapPlugin extends Plugin {
   }
 
   async openScrap(scrap: Scrap) {
-    this.currentScrap = scrap;
     const { workspace } = this.app;
-    const leaf = workspace.getLeaf(true);
-    if (leaf) {
-      await leaf.setViewState({ type: VIEW_TYPE_SCRAP_DETAIL, active: true });
-      workspace.revealLeaf(leaf);
+    let leaf = workspace.getLeavesOfType(VIEW_TYPE_SCRAP_DETAIL)[0];
+    if (!leaf) {
+      leaf = workspace.getLeaf(true)!;
     }
+    await leaf.setViewState({
+      type: VIEW_TYPE_SCRAP_DETAIL,
+      active: true,
+      state: { filePath: scrap.filePath },
+    });
+    workspace.revealLeaf(leaf);
   }
 
   async onunload() {}
