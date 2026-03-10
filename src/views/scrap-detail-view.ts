@@ -1,23 +1,21 @@
 import { ItemView, WorkspaceLeaf, MarkdownRenderer, Component } from "obsidian";
 import { Scrap } from "../data/types";
 import { ScrapRepository } from "../data/scrap-repository";
+import { EventBus } from "../events/event-bus";
+import { EVENTS } from "../events/constants";
 
 export const VIEW_TYPE_SCRAP_DETAIL = "zen-scrap-detail";
 
 export class ScrapDetailView extends ItemView {
   private repo: ScrapRepository;
+  private eventBus: EventBus;
   private scrap: Scrap | undefined;
-  private onBack: () => void;
   private renderComponent: Component;
 
-  constructor(
-    leaf: WorkspaceLeaf,
-    repo: ScrapRepository,
-    onBack: () => void
-  ) {
+  constructor(leaf: WorkspaceLeaf, repo: ScrapRepository, eventBus: EventBus) {
     super(leaf);
     this.repo = repo;
-    this.onBack = onBack;
+    this.eventBus = eventBus;
     this.renderComponent = new Component();
   }
 
@@ -71,7 +69,7 @@ export class ScrapDetailView extends ItemView {
   private renderHeader(container: HTMLElement): void {
     const header = container.createDiv({ cls: "zen-scrap-detail-header" });
     const backBtn = header.createEl("button", { text: "← 一覧", cls: "zen-scrap-back-btn" });
-    backBtn.addEventListener("click", () => this.onBack());
+    backBtn.addEventListener("click", () => this.eventBus.emit(EVENTS.NAV_BACK_TO_LIST));
 
     header.createEl("h2", { text: this.scrap!.title, cls: "zen-scrap-detail-title" });
 

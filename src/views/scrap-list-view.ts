@@ -1,25 +1,22 @@
 import { ItemView, WorkspaceLeaf } from "obsidian";
 import { Scrap } from "../data/types";
 import { ScrapRepository } from "../data/scrap-repository";
+import { EventBus } from "../events/event-bus";
+import { EVENTS } from "../events/constants";
 
 export const VIEW_TYPE_SCRAP_LIST = "zen-scrap-list";
 
 export class ScrapListView extends ItemView {
   private repo: ScrapRepository;
+  private eventBus: EventBus;
   private filter: "open" | "closed" | "all" = "open";
-  private onScrapSelect: (scrap: Scrap) => void;
-  private onCreateNew: () => void;
+  private onScrapChangedHandler: () => void;
 
-  constructor(
-    leaf: WorkspaceLeaf,
-    repo: ScrapRepository,
-    onScrapSelect: (scrap: Scrap) => void,
-    onCreateNew: () => void
-  ) {
+  constructor(leaf: WorkspaceLeaf, repo: ScrapRepository, eventBus: EventBus) {
     super(leaf);
     this.repo = repo;
-    this.onScrapSelect = onScrapSelect;
-    this.onCreateNew = onCreateNew;
+    this.eventBus = eventBus;
+    this.onScrapChangedHandler = () => this.render();
   }
 
   getViewType(): string {
@@ -35,7 +32,12 @@ export class ScrapListView extends ItemView {
   }
 
   async onOpen(): Promise<void> {
+    this.eventBus.on(EVENTS.SCRAP_CHANGED, this.onScrapChangedHandler);
     await this.render();
+  }
+
+  async onClose(): Promise<void> {
+    this.eventBus.off(EVENTS.SCRAP_CHANGED, this.onScrapChangedHandler);
   }
 
   async render(): Promise<void> {
@@ -66,7 +68,7 @@ export class ScrapListView extends ItemView {
 
     // 新規ボタン
     const newBtn = controls.createEl("button", { text: "+ 新規", cls: "zen-scrap-new-btn" });
-    newBtn.addEventListener("click", () => this.onCreateNew());
+    newBtn.addEventListener("click", () => this.eventBus.emit(EVENTS.SCRAP_CREATE_REQUEST));
   }
 
   private async renderList(container: HTMLElement): Promise<void> {
@@ -86,7 +88,7 @@ export class ScrapListView extends ItemView {
 
     for (const scrap of filtered) {
       const item = list.createDiv({ cls: "zen-scrap-list-item" });
-      item.addEventListener("click", () => this.onScrapSelect(scrap));
+      item.addEventListener("click", () => this.eventBus.emit(EVENTS.SCRAP_SELECT, scrap));
 
       const titleRow = item.createDiv({ cls: "zen-scrap-item-title-row" });
       const statusIcon = scrap.status === "open" ? "●" : "○";
