@@ -901,3 +901,18 @@ pre:hover .zen-scrap-code-copy-btn {
   white-space: pre;
   vertical-align: top;
 }
+
+/* znc のテーブルスタイルを GitHub埋め込みで上書き */
+.znc .zen-scrap-gh-table {
+  margin: 0;
+  display: table;
+}
+
+.znc .zen-scrap-gh-table td {
+  background: transparent !important;
+  border: none !important;
+}
+
+.znc .zen-scrap-github-code-wrapper {
+  background: var(--background-primary);
+}
