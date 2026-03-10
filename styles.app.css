@@ -317,6 +317,16 @@
   margin-bottom: 16px;
 }
 
+.zen-scrap-empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  margin: 20px 0;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 8px;
+  color: var(--text-muted);
+  font-size: 0.95em;
+}
+
 .zen-scrap-entry {
   border: 1px solid var(--background-modifier-border);
   border-radius: 6px;

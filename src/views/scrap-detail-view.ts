@@ -117,6 +117,12 @@ export class ScrapDetailView extends ItemView {
   private async renderTimeline(container: HTMLElement): Promise<void> {
     const timeline = container.createDiv({ cls: "zen-scrap-timeline" });
 
+    if (this.scrap!.entries.length === 0) {
+      const emptyCard = timeline.createDiv({ cls: "zen-scrap-empty-state" });
+      emptyCard.setText("最初のコメントを追加しましょう");
+      return;
+    }
+
     for (const entry of this.scrap!.entries) {
       const entryEl = timeline.createDiv({ cls: "zen-scrap-entry" });
 
