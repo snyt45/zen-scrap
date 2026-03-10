@@ -187,12 +187,12 @@ export class ScrapListView extends ItemView {
 
       const menuWrapper = titleRow.createDiv({ cls: "zen-scrap-item-menu" });
       const menuBtn = menuWrapper.createEl("button", { cls: "zen-scrap-item-menu-btn" });
-      menuBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>';
+      menuBtn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>';
 
       const menu = menuWrapper.createDiv({ cls: "zen-scrap-item-menu-dropdown" });
       menu.style.display = "none";
 
-      const archiveLabel = scrap.archived ? "アーカイブ解除" : "アーカイブする";
+      const archiveLabel = scrap.archived ? "オープンに戻す" : "アーカイブする";
       const archiveItem = menu.createDiv({ cls: "zen-scrap-dropdown-item", text: archiveLabel });
       archiveItem.addEventListener("click", async (e) => {
         e.stopPropagation();
