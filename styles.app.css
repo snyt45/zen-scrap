@@ -973,8 +973,52 @@ pre:hover .zen-scrap-code-copy-btn {
 
 /* ==========================================================================
    7. znc Overrides (Obsidian Environment Adaptation)
-   zenn-content-css のスタイルが独自コンポーネントに漏れるのを防ぐ上書き
+   zenn-content-css の CSS 変数を Obsidian テーマ変数にマッピング。
+   data-theme 属性を使わずにライト/ダーク両対応する。
    ========================================================================== */
+
+/* znc CSS 変数を Obsidian テーマ変数にマッピング */
+
+.zen-scrap-entry-body.znc,
+.zen-scrap-preview.znc,
+.zen-scrap-guide-modal.znc {
+  --c-bg-base: var(--background-primary);
+  --c-bg-dim: var(--background-secondary);
+  --c-bg-code: var(--background-secondary);
+  --c-bg-code-block: #1a2638;
+  --c-border: var(--background-modifier-border);
+  --c-border-emphasis: var(--text-muted);
+  --c-text-subtle: var(--text-muted);
+  --c-text-link: var(--text-accent);
+}
+
+/* カード内見出しのマージン・ボーダー調整 */
+
+.zen-scrap-entry-body.znc h1,
+.zen-scrap-entry-body.znc h2,
+.zen-scrap-entry-body.znc h3,
+.zen-scrap-entry-body.znc h4,
+.zen-scrap-entry-body.znc h5,
+.zen-scrap-entry-body.znc h6 {
+  margin-top: 1.2em;
+  margin-bottom: 0.4em;
+}
+
+.zen-scrap-entry-body.znc h1,
+.zen-scrap-entry-body.znc h2 {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+/* Markdown ガイドモーダル */
+
+.zen-scrap-guide-modal.znc {
+  max-height: 70vh;
+  overflow-y: auto;
+  padding: 0 8px;
+}
+
+/* GitHub 埋め込みテーブルの znc テーブルスタイル漏れ防止 */
 
 .zen-scrap-entry-body .zen-scrap-github-embed .zen-scrap-gh-table {
   margin: 0;

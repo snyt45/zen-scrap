@@ -28,12 +28,15 @@ export function parseScrapMarkdown(content: string, filePath: string): Scrap {
   const body = content.slice(bodyStart).trim();
   const entries: ScrapEntry[] = [];
 
-  const entryRegex = /### (.+)\n([\s\S]*?)(?=\n---|\n### |$)/g;
+  // タイムスタンプ形式（YYYY-MM-DD HH:MM）の見出しのみをエントリ区切りとする
+  const entryRegex = /### (\d{4}-\d{2}-\d{2} \d{2}:\d{2})\n([\s\S]*?)(?=\n---\n\n### \d{4}-\d{2}-\d{2} \d{2}:\d{2}|$)/g;
   let match;
   while ((match = entryRegex.exec(body)) !== null) {
+    // 末尾の区切り線 "---" を除去
+    const entryBody = match[2].replace(/\n---\s*$/, "").trim();
     entries.push({
       timestamp: match[1].trim(),
-      body: match[2].trim(),
+      body: entryBody,
     });
   }
 

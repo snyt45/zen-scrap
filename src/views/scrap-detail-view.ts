@@ -1,4 +1,4 @@
-import { ItemView, WorkspaceLeaf, TFile } from "obsidian";
+import { ItemView, WorkspaceLeaf, TFile, Modal } from "obsidian";
 import markdownToHtml from "zenn-markdown-html";
 import { Scrap } from "../data/types";
 import { ScrapRepository } from "../data/scrap-repository";
@@ -13,7 +13,6 @@ export class ScrapDetailView extends ItemView {
   private repo: ScrapRepository;
   private eventBus: EventBus;
   private scrap: Scrap | undefined;
-  private themeObserver: MutationObserver | null = null;
   private isFullWidth = false;
   constructor(leaf: WorkspaceLeaf, repo: ScrapRepository, eventBus: EventBus) {
     super(leaf);
@@ -53,7 +52,6 @@ export class ScrapDetailView extends ItemView {
   }
 
   async onClose(): Promise<void> {
-    this.themeObserver?.disconnect();
   }
 
   async render(): Promise<void> {
@@ -62,7 +60,6 @@ export class ScrapDetailView extends ItemView {
     if (!this.scrap) return;
     container.addClass("zen-scrap-detail-container");
     if (this.isFullWidth) container.addClass("zen-scrap-fullwidth");
-    this.syncDataTheme(container);
 
     this.renderHeader(container);
     await this.renderTimeline(container);
@@ -435,9 +432,17 @@ export class ScrapDetailView extends ItemView {
       cls: "zen-scrap-md-guide-link",
       href: "#",
     });
-    link.addEventListener("click", (e) => {
+    link.addEventListener("click", async (e) => {
       e.preventDefault();
-      this.app.workspace.openLinkText("docs/markdown-guide.md", "", false);
+      const file = this.app.vault.getAbstractFileByPath("Scraps/markdown-guide.md");
+      if (!(file instanceof TFile)) return;
+      const content = await this.app.vault.read(file);
+      const modal = new Modal(this.app);
+      modal.titleEl.setText("Markdown ガイド");
+      modal.contentEl.addClass("znc", "zen-scrap-guide-modal");
+      modal.contentEl.innerHTML = await this.renderBody(content);
+      this.addCopyButtons(modal.contentEl);
+      modal.open();
     });
   }
 
@@ -447,18 +452,6 @@ export class ScrapDetailView extends ItemView {
       textarea.style.height = textarea.scrollHeight + "px";
     };
     textarea.addEventListener("input", adjust);
-  }
-
-  private syncDataTheme(container: HTMLElement): void {
-    const updateTheme = () => {
-      const isDark = document.body.classList.contains("theme-dark");
-      container.setAttribute("data-theme", isDark ? "dark" : "light");
-    };
-    updateTheme();
-
-    this.themeObserver?.disconnect();
-    this.themeObserver = new MutationObserver(updateTheme);
-    this.themeObserver.observe(document.body, { attributes: true, attributeFilter: ["class"] });
   }
 
   private renderEntryEditor(entryEl: HTMLElement, entryBody: HTMLElement, index: number): void {
