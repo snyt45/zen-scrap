@@ -90,3 +90,25 @@ archived: false
 
 ---
 ```
+
+## 開発
+
+Fork して手元で開発する場合の手順。
+
+```bash
+npm install
+cp .env.example .env
+```
+
+`.env` の `OBSIDIAN_PLUGIN_DIR` を自分の Vault のプラグインディレクトリに書き換える。
+
+```
+OBSIDIAN_PLUGIN_DIR=/path/to/vault/.obsidian/plugins/zen-scrap
+```
+
+設定後、`npm run dev` でビルド＆ファイル監視が起動し、変更のたびにプラグインディレクトリへ自動コピーされる。
+
+```bash
+npm run dev    # 開発モード（ファイル監視 + 自動コピー）
+npm run build  # 本番ビルド
+```
