@@ -6,6 +6,7 @@ import { EventBus } from "../events/event-bus";
 import { EVENTS } from "../events/constants";
 import { EmbedModal, EmbedType } from "../ui/embed-modal";
 import { renderEmbed } from "../ui/embed-renderer";
+import { formatDate } from "../utils";
 import markdownGuideRaw from "../../docs/markdown-guide.md";
 import sampleImageUrl from "../../assets/sample.png";
 
@@ -16,6 +17,8 @@ export class ScrapDetailView extends ItemView {
   private eventBus: EventBus;
   private scrap: Scrap | undefined;
   private isFullWidth = false;
+  private documentClickHandlers: (() => void)[] = [];
+
   constructor(leaf: WorkspaceLeaf, repo: ScrapRepository, eventBus: EventBus) {
     super(leaf);
     this.repo = repo;
@@ -54,9 +57,18 @@ export class ScrapDetailView extends ItemView {
   }
 
   async onClose(): Promise<void> {
+    this.cleanupDocumentListeners();
+  }
+
+  private cleanupDocumentListeners(): void {
+    for (const handler of this.documentClickHandlers) {
+      document.removeEventListener("click", handler);
+    }
+    this.documentClickHandlers = [];
   }
 
   async render(): Promise<void> {
+    this.cleanupDocumentListeners();
     const container = this.containerEl.children[1] as HTMLElement;
     container.empty();
     if (!this.scrap) return;
@@ -157,6 +169,7 @@ export class ScrapDetailView extends ItemView {
 
     const closeMenu = () => { actionMenu.style.display = "none"; };
     document.addEventListener("click", closeMenu);
+    this.documentClickHandlers.push(closeMenu);
 
     const titleRow = header.createDiv({ cls: "zen-scrap-detail-title-row" });
     titleRow.createEl("h2", { text: this.scrap!.title, cls: "zen-scrap-detail-title" });
@@ -252,11 +265,13 @@ export class ScrapDetailView extends ItemView {
       });
     }
 
-    document.addEventListener("click", () => {
+    const closeEntryMenus = () => {
       timeline.querySelectorAll<HTMLElement>(".zen-scrap-entry-menu-dropdown").forEach((m) => {
         m.style.display = "none";
       });
-    });
+    };
+    document.addEventListener("click", closeEntryMenus);
+    this.documentClickHandlers.push(closeEntryMenus);
   }
 
   private async renderBody(body: string): Promise<string> {
@@ -429,9 +444,9 @@ export class ScrapDetailView extends ItemView {
       menu.style.display = menu.style.display === "none" ? "" : "none";
     });
 
-    document.addEventListener("click", () => {
-      menu.style.display = "none";
-    });
+    const closeEmbedMenu = () => { menu.style.display = "none"; };
+    document.addEventListener("click", closeEmbedMenu);
+    this.documentClickHandlers.push(closeEmbedMenu);
   }
 
   private addCopyButtons(container: HTMLElement): void {
@@ -578,12 +593,4 @@ export class ScrapDetailView extends ItemView {
 
     textarea.focus();
   }
-}
-
-function formatDate(isoString: string): string {
-  const d = new Date(isoString);
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-  return `${y}/${m}/${day}`;
 }

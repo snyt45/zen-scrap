@@ -3,6 +3,7 @@ import { Scrap } from "../data/types";
 import { ScrapRepository } from "../data/scrap-repository";
 import { EventBus } from "../events/event-bus";
 import { EVENTS } from "../events/constants";
+import { formatDate } from "../utils";
 
 export const VIEW_TYPE_SCRAP_LIST = "zen-scrap-list";
 
@@ -13,6 +14,7 @@ export class ScrapListView extends ItemView {
   private sort: "created" | "updated" = "created";
   private searchQuery = "";
   private onScrapChangedHandler: () => void;
+  private documentClickHandlers: (() => void)[] = [];
 
   constructor(leaf: WorkspaceLeaf, repo: ScrapRepository, eventBus: EventBus) {
     super(leaf);
@@ -40,9 +42,18 @@ export class ScrapListView extends ItemView {
 
   async onClose(): Promise<void> {
     this.eventBus.off(EVENTS.SCRAP_CHANGED, this.onScrapChangedHandler);
+    this.cleanupDocumentListeners();
+  }
+
+  private cleanupDocumentListeners(): void {
+    for (const handler of this.documentClickHandlers) {
+      document.removeEventListener("click", handler);
+    }
+    this.documentClickHandlers = [];
   }
 
   async render(): Promise<void> {
+    this.cleanupDocumentListeners();
     const container = this.containerEl.children[1] as HTMLElement;
     container.empty();
     container.addClass("zen-scrap-list-container");
@@ -150,9 +161,9 @@ export class ScrapListView extends ItemView {
     });
 
     // 外側クリックで閉じる
-    document.addEventListener("click", () => {
-      menu.style.display = "none";
-    });
+    const closeDropdown = () => { menu.style.display = "none"; };
+    document.addEventListener("click", closeDropdown);
+    this.documentClickHandlers.push(closeDropdown);
   }
 
   private async renderList(container: HTMLElement): Promise<void> {
@@ -245,18 +256,12 @@ export class ScrapListView extends ItemView {
     }
 
     // 外側クリックでメニュー閉じる
-    document.addEventListener("click", () => {
+    const closeMenus = () => {
       list.querySelectorAll<HTMLElement>(".zen-scrap-item-menu-dropdown").forEach((m) => {
         m.style.display = "none";
       });
-    });
+    };
+    document.addEventListener("click", closeMenus);
+    this.documentClickHandlers.push(closeMenus);
   }
-}
-
-function formatDate(isoString: string): string {
-  const d = new Date(isoString);
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-  return `${y}/${m}/${day}`;
 }
