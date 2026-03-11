@@ -6,6 +6,8 @@ import { EventBus } from "../events/event-bus";
 import { EVENTS } from "../events/constants";
 import { EmbedModal, EmbedType } from "../ui/embed-modal";
 import { renderEmbed } from "../ui/embed-renderer";
+import markdownGuideRaw from "../../docs/markdown-guide.md";
+import sampleImageUrl from "../../assets/sample.png";
 
 export const VIEW_TYPE_SCRAP_DETAIL = "zen-scrap-detail";
 
@@ -454,9 +456,7 @@ export class ScrapDetailView extends ItemView {
     });
     link.addEventListener("click", async (e) => {
       e.preventDefault();
-      const file = this.app.vault.getAbstractFileByPath("Scraps/markdown-guide.md");
-      if (!(file instanceof TFile)) return;
-      const content = await this.app.vault.read(file);
+      const content = markdownGuideRaw.replace("{{SAMPLE_IMAGE}}", sampleImageUrl);
       const modal = new Modal(this.app);
       modal.titleEl.setText("Markdown ガイド");
       modal.modalEl.addClass("zen-scrap-guide-modal");

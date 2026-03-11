@@ -36,7 +36,6 @@ export default class ZenScrapPlugin extends Plugin {
       callback: () => this.activateListView(),
     });
 
-    this.repo.ensureMarkdownGuide();
   }
 
   async activateListView() {
