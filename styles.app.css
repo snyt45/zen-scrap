@@ -1,5 +1,10 @@
-/* Zen Scrap - List View */
+/* ==========================================================================
+   1. App UI - List View
+   ========================================================================== */
+
 .zen-scrap-list-container {
+  max-width: 840px;
+  margin: 0 auto;
   padding: 16px;
 }
 
@@ -119,7 +124,6 @@
   color: var(--text-muted);
 }
 
-/* ステータスラベル（一覧用） */
 .zen-scrap-label-open {
   background: #2563eb;
   color: #fff;
@@ -138,7 +142,6 @@
   font-weight: 600;
 }
 
-/* 検索欄 */
 .zen-scrap-search {
   width: 100%;
   padding: 8px 12px;
@@ -155,7 +158,6 @@
   border-color: var(--interactive-accent);
 }
 
-/* ツールバー */
 .zen-scrap-toolbar {
   display: flex;
   align-items: center;
@@ -163,7 +165,10 @@
   margin-bottom: 12px;
 }
 
-/* カスタムドロップダウン */
+/* ==========================================================================
+   2. App UI - Shared (Dropdown)
+   ========================================================================== */
+
 .zen-scrap-dropdown {
   position: relative;
 }
@@ -218,14 +223,38 @@
   color: var(--interactive-accent);
 }
 
-/* Zen Scrap - Detail View */
+.zen-scrap-dropdown-item.zen-scrap-dropdown-item-danger {
+  color: var(--text-error);
+}
+
+.zen-scrap-dropdown-item.zen-scrap-dropdown-item-danger:hover {
+  background: var(--background-modifier-error);
+}
+
+/* ==========================================================================
+   3. App UI - Detail View
+   ========================================================================== */
+
 .zen-scrap-detail-container {
+  max-width: 780px;
+  margin: 0 auto;
   padding: 16px;
   overflow-y: auto;
   height: 100%;
 }
 
+.zen-scrap-detail-container.zen-scrap-fullwidth {
+  max-width: 100%;
+}
+
 .zen-scrap-detail-header {
+  margin-bottom: 16px;
+}
+
+.zen-scrap-detail-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   margin-bottom: 16px;
 }
 
@@ -239,7 +268,6 @@
   color: var(--text-muted);
   cursor: pointer;
   padding: 6px 12px;
-  margin-bottom: 16px;
   font-size: 0.85em;
 }
 
@@ -256,7 +284,22 @@
   margin: 4px 0;
 }
 
-/* 詳細ヘッダー改善 */
+.zen-scrap-fullwidth-toggle {
+  background: none;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 6px;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 4px 8px;
+  display: inline-flex;
+  align-items: center;
+}
+
+.zen-scrap-fullwidth-toggle:hover {
+  color: var(--text-normal);
+  background: var(--background-secondary);
+}
+
 .zen-scrap-detail-meta {
   display: flex;
   align-items: center;
@@ -269,36 +312,39 @@
   color: var(--text-muted);
 }
 
-.zen-scrap-status-toggle-btn {
+.zen-scrap-pill-actions {
   margin-left: auto;
-  padding: 4px 14px;
+  display: inline-flex;
+  border: 1px solid var(--background-modifier-border);
   border-radius: 20px;
+  overflow: hidden;
+}
+
+.zen-scrap-pill-action {
+  padding: 4px 14px;
   border: none;
-  background: #7c3aed;
-  color: #fff;
+  border-right: 1px solid var(--background-modifier-border);
+  background: var(--background-primary);
+  color: var(--text-normal);
   cursor: pointer;
   font-size: 0.85em;
   font-weight: 600;
 }
 
-.zen-scrap-status-toggle-btn:hover {
-  background: #6d28d9;
+.zen-scrap-pill-action:last-child {
+  border-right: none;
 }
 
-.zen-scrap-json-copy-btn,
-.zen-scrap-open-file-btn {
-  padding: 4px 14px;
-  border-radius: 20px;
-  border: 1px solid var(--background-modifier-border);
-  background: var(--background-primary);
-  color: var(--text-normal);
-  cursor: pointer;
-  font-size: 0.85em;
-}
-
-.zen-scrap-json-copy-btn:hover,
-.zen-scrap-open-file-btn:hover {
+.zen-scrap-pill-action:hover {
   background: var(--background-secondary);
+}
+
+.zen-scrap-pill-action-danger {
+  color: var(--text-error);
+}
+
+.zen-scrap-pill-action-danger:hover {
+  background: var(--background-modifier-error);
 }
 
 .zen-scrap-detail-title-row {
@@ -387,7 +433,6 @@
   overflow: hidden;
 }
 
-/* エントリ折りたたみ */
 .zen-scrap-entry-header {
   display: flex;
   justify-content: space-between;
@@ -397,7 +442,6 @@
   border-bottom: 1px solid var(--background-modifier-border);
 }
 
-/* エントリメニュー */
 .zen-scrap-entry-menu {
   position: relative;
 }
@@ -441,15 +485,6 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
-.zen-scrap-dropdown-item.zen-scrap-dropdown-item-danger {
-  color: var(--text-error);
-}
-
-.zen-scrap-dropdown-item.zen-scrap-dropdown-item-danger:hover {
-  background: var(--background-modifier-error);
-}
-
-/* エントリ編集エリア */
 .zen-scrap-entry-edit {
   padding: 12px;
 }
@@ -484,6 +519,10 @@
   cursor: text;
 }
 
+/* ==========================================================================
+   4. App UI - Editor (Input Area, Tabs, Action Bar)
+   ========================================================================== */
+
 .zen-scrap-input-area {
   border-top: 1px solid var(--background-modifier-border);
   padding-top: 12px;
@@ -491,7 +530,8 @@
 
 .zen-scrap-textarea {
   width: 100%;
-  min-height: 100px;
+  min-height: 200px;
+  max-height: 500px;
   padding: 8px;
   border: 1px solid var(--background-modifier-border);
   border-radius: 6px;
@@ -499,6 +539,7 @@
   color: var(--text-normal);
   resize: vertical;
   font-family: inherit;
+  overflow-y: auto;
 }
 
 .zen-scrap-textarea:focus {
@@ -506,7 +547,6 @@
   border-color: var(--interactive-accent);
 }
 
-/* pill風タブ */
 .zen-scrap-pill-tabs {
   display: flex;
   gap: 8px;
@@ -534,7 +574,19 @@
   border-color: var(--interactive-accent);
 }
 
-/* アクションバー */
+.zen-scrap-md-guide-link {
+  margin-left: auto;
+  font-size: 0.85em;
+  color: var(--text-muted);
+  text-decoration: none;
+  align-self: center;
+}
+
+.zen-scrap-md-guide-link:hover {
+  color: var(--text-accent);
+  text-decoration: underline;
+}
+
 .zen-scrap-action-bar {
   display: flex;
   align-items: center;
@@ -557,7 +609,6 @@
   background: var(--background-secondary);
 }
 
-/* 新しい投稿ボタン */
 .zen-scrap-submit-btn-new {
   padding: 8px 20px;
   border-radius: 20px;
@@ -572,7 +623,6 @@
   background: #1d4ed8;
 }
 
-/* 埋め込みボタン */
 .zen-scrap-embed-wrapper {
   position: relative;
 }
@@ -606,7 +656,6 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
-/* 埋め込みモーダル */
 .zen-scrap-embed-input {
   padding: 8px 12px;
   border: 1px solid var(--background-modifier-border);
@@ -647,7 +696,6 @@
   cursor: pointer;
 }
 
-/* プレビューエリア */
 .zen-scrap-preview {
   min-height: 100px;
   padding: 8px;
@@ -656,7 +704,10 @@
   background: var(--background-primary);
 }
 
-/* コードブロック コピーボタン */
+/* ==========================================================================
+   5. Custom Components - Code Copy Button
+   ========================================================================== */
+
 .zen-scrap-code-copy-btn {
   position: absolute;
   top: 8px;
@@ -681,14 +732,12 @@ pre:hover .zen-scrap-code-copy-btn {
   background: var(--background-secondary);
 }
 
-/* ダークモード: インラインコードの背景を落ち着かせる */
-.theme-dark .zen-scrap-entry-body.znc code:not(pre code),
-.theme-dark .zen-scrap-preview.znc code:not(pre code) {
-  background: var(--background-secondary);
-  color: var(--text-normal);
-}
+/* ==========================================================================
+   6. Custom Components - Embed Cards (Link, Tweet, OGP, GitHub)
+   ========================================================================== */
 
-/* リンクカード（埋め込み用） */
+/* --- Link Card --- */
+
 .zen-scrap-link-card {
   border: 1px solid var(--background-modifier-border);
   border-radius: 8px;
@@ -707,7 +756,8 @@ pre:hover .zen-scrap-code-copy-btn {
   text-decoration: underline;
 }
 
-/* ツイートカード */
+/* --- Tweet Card --- */
+
 .zen-scrap-tweet-card {
   border: 1px solid var(--background-modifier-border);
   border-radius: 12px;
@@ -780,7 +830,8 @@ pre:hover .zen-scrap-code-copy-btn {
   text-decoration: underline;
 }
 
-/* OGPカード */
+/* --- OGP Card --- */
+
 .znc a.zen-scrap-ogp-card {
   display: flex;
   border: 1px solid var(--background-modifier-border);
@@ -846,7 +897,8 @@ pre:hover .zen-scrap-code-copy-btn {
   color: var(--text-faint);
 }
 
-/* GitHub埋め込み */
+/* --- GitHub Embed --- */
+
 .zen-scrap-github-embed {
   border: 1px solid var(--background-modifier-border);
   border-radius: 10px;
@@ -864,11 +916,6 @@ pre:hover .zen-scrap-code-copy-btn {
   color: #e1e4e8;
   font-size: 0.85em;
   line-height: 1.4;
-}
-
-.theme-light .zen-scrap-github-header {
-  background: #24292e;
-  color: #e1e4e8;
 }
 
 .zen-scrap-gh-icon {
@@ -924,7 +971,11 @@ pre:hover .zen-scrap-code-copy-btn {
   vertical-align: top;
 }
 
-/* znc のテーブルスタイルを GitHub埋め込みで上書き（詳細度で勝つ） */
+/* ==========================================================================
+   7. znc Overrides (Obsidian Environment Adaptation)
+   zenn-content-css のスタイルが独自コンポーネントに漏れるのを防ぐ上書き
+   ========================================================================== */
+
 .zen-scrap-entry-body .zen-scrap-github-embed .zen-scrap-gh-table {
   margin: 0;
   display: table;

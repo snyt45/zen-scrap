@@ -72,4 +72,11 @@ export class ScrapRepository {
       await this.app.vault.modify(file, serializeScrap(scrap));
     }
   }
+
+  async delete(scrap: Scrap): Promise<void> {
+    const file = this.app.vault.getAbstractFileByPath(scrap.filePath);
+    if (file instanceof TFile) {
+      await this.app.vault.trash(file, false);
+    }
+  }
 }

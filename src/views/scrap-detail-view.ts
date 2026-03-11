@@ -13,6 +13,8 @@ export class ScrapDetailView extends ItemView {
   private repo: ScrapRepository;
   private eventBus: EventBus;
   private scrap: Scrap | undefined;
+  private themeObserver: MutationObserver | null = null;
+  private isFullWidth = false;
   constructor(leaf: WorkspaceLeaf, repo: ScrapRepository, eventBus: EventBus) {
     super(leaf);
     this.repo = repo;
@@ -51,6 +53,7 @@ export class ScrapDetailView extends ItemView {
   }
 
   async onClose(): Promise<void> {
+    this.themeObserver?.disconnect();
   }
 
   async render(): Promise<void> {
@@ -58,6 +61,8 @@ export class ScrapDetailView extends ItemView {
     container.empty();
     if (!this.scrap) return;
     container.addClass("zen-scrap-detail-container");
+    if (this.isFullWidth) container.addClass("zen-scrap-fullwidth");
+    this.syncDataTheme(container);
 
     this.renderHeader(container);
     await this.renderTimeline(container);
@@ -67,9 +72,22 @@ export class ScrapDetailView extends ItemView {
   private renderHeader(container: HTMLElement): void {
     const header = container.createDiv({ cls: "zen-scrap-detail-header" });
 
-    const backBtn = header.createEl("button", { cls: "zen-scrap-back-btn" });
+    const navRow = header.createDiv({ cls: "zen-scrap-detail-nav" });
+
+    const backBtn = navRow.createEl("button", { cls: "zen-scrap-back-btn" });
     backBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg> 一覧へ戻る';
     backBtn.addEventListener("click", () => this.eventBus.emit(EVENTS.NAV_BACK_TO_LIST));
+
+    const fullWidthBtn = navRow.createEl("button", { cls: "zen-scrap-fullwidth-toggle" });
+    const expandIcon = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 3 21 3 21 9"></polyline><polyline points="9 21 3 21 3 15"></polyline><line x1="21" y1="3" x2="14" y2="10"></line><line x1="3" y1="21" x2="10" y2="14"></line></svg>';
+    const shrinkIcon = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 14 10 14 10 20"></polyline><polyline points="20 10 14 10 14 4"></polyline><line x1="14" y1="10" x2="21" y2="3"></line><line x1="3" y1="21" x2="10" y2="14"></line></svg>';
+    fullWidthBtn.innerHTML = this.isFullWidth ? shrinkIcon : expandIcon;
+    fullWidthBtn.addEventListener("click", () => {
+      this.isFullWidth = !this.isFullWidth;
+      const container = this.containerEl.children[1] as HTMLElement;
+      container.toggleClass("zen-scrap-fullwidth", this.isFullWidth);
+      fullWidthBtn.innerHTML = this.isFullWidth ? shrinkIcon : expandIcon;
+    });
 
     const metaRow = header.createDiv({ cls: "zen-scrap-detail-meta" });
     const labelCls = this.scrap!.status === "open" ? "zen-scrap-label-open" : "zen-scrap-label-closed";
@@ -78,10 +96,12 @@ export class ScrapDetailView extends ItemView {
     metaRow.createSpan({ text: formatDate(this.scrap!.created) + "に作成", cls: "zen-scrap-detail-meta-text" });
     metaRow.createSpan({ text: `${this.scrap!.entries.length}件のコメント`, cls: "zen-scrap-detail-meta-text" });
 
-    // クローズ/オープンボタン
-    const statusBtn = metaRow.createEl("button", {
+    // Pill アクショングループ
+    const pill = metaRow.createDiv({ cls: "zen-scrap-pill-actions" });
+
+    const statusBtn = pill.createEl("button", {
       text: this.scrap!.status === "open" ? "クローズする" : "オープンにする",
-      cls: "zen-scrap-status-toggle-btn",
+      cls: "zen-scrap-pill-action",
     });
     statusBtn.addEventListener("click", async () => {
       this.scrap!.status = this.scrap!.status === "open" ? "closed" : "open";
@@ -91,23 +111,32 @@ export class ScrapDetailView extends ItemView {
       await this.render();
     });
 
-    // JSONコピーボタン
-    const jsonCopyBtn = metaRow.createEl("button", {
-      text: "JSONをコピー",
-      cls: "zen-scrap-json-copy-btn",
+    const jsonCopyBtn = pill.createEl("button", {
+      text: "JSON",
+      cls: "zen-scrap-pill-action",
     });
     jsonCopyBtn.addEventListener("click", () => {
       const json = JSON.stringify(this.scrap!, null, 2);
       navigator.clipboard.writeText(json);
     });
 
-    // ファイルを開くボタン
-    const openFileBtn = metaRow.createEl("button", {
-      text: "ファイルを開く",
-      cls: "zen-scrap-open-file-btn",
+    const openFileBtn = pill.createEl("button", {
+      text: "ファイル",
+      cls: "zen-scrap-pill-action",
     });
     openFileBtn.addEventListener("click", () => {
       this.app.workspace.openLinkText(this.scrap!.filePath, "", true);
+    });
+
+    const deleteFileBtn = pill.createEl("button", {
+      text: "削除",
+      cls: "zen-scrap-pill-action zen-scrap-pill-action-danger",
+    });
+    deleteFileBtn.addEventListener("click", async () => {
+      if (!confirm(`「${this.scrap!.title}」を削除しますか？`)) return;
+      await this.repo.delete(this.scrap!);
+      this.eventBus.emit(EVENTS.SCRAP_CHANGED);
+      this.eventBus.emit(EVENTS.NAV_BACK_TO_LIST);
     });
 
     const titleRow = header.createDiv({ cls: "zen-scrap-detail-title-row" });
@@ -262,11 +291,13 @@ export class ScrapDetailView extends ItemView {
     const tabHeader = inputArea.createDiv({ cls: "zen-scrap-pill-tabs" });
     const mdTab = tabHeader.createEl("button", { text: "Markdown", cls: "zen-scrap-pill-tab zen-scrap-pill-tab-active" });
     const pvTab = tabHeader.createEl("button", { text: "Preview", cls: "zen-scrap-pill-tab" });
+    this.renderMarkdownGuideLink(tabHeader);
 
     const textarea = inputArea.createEl("textarea", {
       placeholder: "スクラップにコメントを追加",
       cls: "zen-scrap-textarea",
     });
+    this.setupAutoGrow(textarea);
 
     const preview = inputArea.createDiv({ cls: "zen-scrap-preview znc" });
     preview.style.display = "none";
@@ -398,6 +429,38 @@ export class ScrapDetailView extends ItemView {
     });
   }
 
+  private renderMarkdownGuideLink(parent: HTMLElement): void {
+    const link = parent.createEl("a", {
+      text: "Markdownガイド",
+      cls: "zen-scrap-md-guide-link",
+      href: "#",
+    });
+    link.addEventListener("click", (e) => {
+      e.preventDefault();
+      this.app.workspace.openLinkText("docs/markdown-guide.md", "", false);
+    });
+  }
+
+  private setupAutoGrow(textarea: HTMLTextAreaElement): void {
+    const adjust = () => {
+      textarea.style.height = "auto";
+      textarea.style.height = textarea.scrollHeight + "px";
+    };
+    textarea.addEventListener("input", adjust);
+  }
+
+  private syncDataTheme(container: HTMLElement): void {
+    const updateTheme = () => {
+      const isDark = document.body.classList.contains("theme-dark");
+      container.setAttribute("data-theme", isDark ? "dark" : "light");
+    };
+    updateTheme();
+
+    this.themeObserver?.disconnect();
+    this.themeObserver = new MutationObserver(updateTheme);
+    this.themeObserver.observe(document.body, { attributes: true, attributeFilter: ["class"] });
+  }
+
   private renderEntryEditor(entryEl: HTMLElement, entryBody: HTMLElement, index: number): void {
     const entry = this.scrap!.entries[index];
 
@@ -407,11 +470,17 @@ export class ScrapDetailView extends ItemView {
     const tabHeader = editArea.createDiv({ cls: "zen-scrap-pill-tabs" });
     const mdTab = tabHeader.createEl("button", { text: "Markdown", cls: "zen-scrap-pill-tab zen-scrap-pill-tab-active" });
     const pvTab = tabHeader.createEl("button", { text: "Preview", cls: "zen-scrap-pill-tab" });
+    this.renderMarkdownGuideLink(tabHeader);
 
     const textarea = editArea.createEl("textarea", {
       cls: "zen-scrap-textarea",
     });
     textarea.value = entry.body;
+    this.setupAutoGrow(textarea);
+    requestAnimationFrame(() => {
+      textarea.style.height = "auto";
+      textarea.style.height = textarea.scrollHeight + "px";
+    });
 
     const preview = editArea.createDiv({ cls: "zen-scrap-preview znc" });
     preview.style.display = "none";
