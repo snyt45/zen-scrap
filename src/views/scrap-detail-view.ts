@@ -456,7 +456,7 @@ export class ScrapDetailView extends ItemView {
     });
     link.addEventListener("click", async (e) => {
       e.preventDefault();
-      const content = markdownGuideRaw.replace("{{SAMPLE_IMAGE}}", sampleImageUrl);
+      const content = markdownGuideRaw;
       const modal = new Modal(this.app);
       modal.titleEl.setText("Markdown ガイド");
       modal.modalEl.addClass("zen-scrap-guide-modal");
@@ -466,7 +466,9 @@ export class ScrapDetailView extends ItemView {
       const mdTab = tabHeader.createEl("button", { text: "Markdown", cls: "zen-scrap-pill-tab" });
 
       const previewEl = modal.contentEl.createDiv({ cls: "znc zen-scrap-guide-content" });
-      previewEl.innerHTML = await this.renderBody(content);
+      let guideHtml = await this.renderBody(content);
+      guideHtml = guideHtml.replace(/src="zen-scrap-sample-image"/, `src="${sampleImageUrl}"`);
+      previewEl.innerHTML = guideHtml;
       this.addCopyButtons(previewEl);
 
       const markdownEl = modal.contentEl.createEl("pre", { cls: "zen-scrap-guide-content zen-scrap-guide-raw" });

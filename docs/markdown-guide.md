@@ -37,7 +37,7 @@ https://zenn.dev
 
 ## 画像
 
-![サンプル画像]({{SAMPLE_IMAGE}})
+![サンプル画像](zen-scrap-sample-image)
 
 vault内のパスまたは外部URLを指定できます。
 
