@@ -37,9 +37,12 @@ https://zenn.dev
 
 ## 画像
 
-![代替テキスト](https://via.placeholder.com/600x200)
+画像はvault内のパスまたはURLを指定できます。
 
-*画像のキャプション*
+```
+![代替テキスト](Scraps/images/sample.png)
+![外部画像](https://example.com/image.png)
+```
 
 ---
 

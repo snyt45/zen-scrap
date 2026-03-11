@@ -1012,10 +1012,34 @@ pre:hover .zen-scrap-code-copy-btn {
 
 /* Markdown ガイドモーダル */
 
-.zen-scrap-guide-modal.znc {
-  max-height: 70vh;
+.zen-scrap-guide-modal {
+  width: 90vw;
+  max-width: 860px;
+}
+
+.zen-scrap-guide-modal .modal-content {
+  padding: 0 16px 16px;
+}
+
+.zen-scrap-guide-content {
+  max-height: 65vh;
   overflow-y: auto;
-  padding: 0 8px;
+}
+
+.zen-scrap-guide-raw {
+  background: var(--background-secondary);
+  padding: 16px;
+  border-radius: 6px;
+  font-size: 0.9em;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.zen-scrap-guide-raw code {
+  background: none;
+  padding: 0;
+  font-size: inherit;
 }
 
 /* GitHub 埋め込みテーブルの znc テーブルスタイル漏れ防止 */

@@ -83,8 +83,12 @@ export class ScrapRepository {
   async ensureMarkdownGuide(): Promise<void> {
     await this.ensureFolder();
     const path = normalizePath(`${SCRAPS_FOLDER}/markdown-guide.md`);
-    if (this.app.vault.getAbstractFileByPath(path)) return;
-    await this.app.vault.create(path, MARKDOWN_GUIDE);
+    const existing = this.app.vault.getAbstractFileByPath(path);
+    if (existing instanceof TFile) {
+      await this.app.vault.modify(existing, MARKDOWN_GUIDE);
+    } else {
+      await this.app.vault.create(path, MARKDOWN_GUIDE);
+    }
   }
 }
 
@@ -127,9 +131,12 @@ https://zenn.dev
 
 ## 画像
 
-![代替テキスト](https://via.placeholder.com/600x200)
+画像はvault内のパスまたはURLを指定できます。
 
-*画像のキャプション*
+\\\`\\\`\\\`
+![代替テキスト](Scraps/images/sample.png)
+![外部画像](https://example.com/image.png)
+\\\`\\\`\\\`
 
 ---
 

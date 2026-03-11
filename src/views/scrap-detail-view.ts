@@ -439,9 +439,33 @@ export class ScrapDetailView extends ItemView {
       const content = await this.app.vault.read(file);
       const modal = new Modal(this.app);
       modal.titleEl.setText("Markdown ガイド");
-      modal.contentEl.addClass("znc", "zen-scrap-guide-modal");
-      modal.contentEl.innerHTML = await this.renderBody(content);
-      this.addCopyButtons(modal.contentEl);
+      modal.modalEl.addClass("zen-scrap-guide-modal");
+
+      const tabHeader = modal.contentEl.createDiv({ cls: "zen-scrap-pill-tabs" });
+      const pvTab = tabHeader.createEl("button", { text: "Preview", cls: "zen-scrap-pill-tab zen-scrap-pill-tab-active" });
+      const mdTab = tabHeader.createEl("button", { text: "Markdown", cls: "zen-scrap-pill-tab" });
+
+      const previewEl = modal.contentEl.createDiv({ cls: "znc zen-scrap-guide-content" });
+      previewEl.innerHTML = await this.renderBody(content);
+      this.addCopyButtons(previewEl);
+
+      const markdownEl = modal.contentEl.createEl("pre", { cls: "zen-scrap-guide-content zen-scrap-guide-raw" });
+      markdownEl.createEl("code", { text: content });
+      markdownEl.style.display = "none";
+
+      pvTab.addEventListener("click", () => {
+        pvTab.addClass("zen-scrap-pill-tab-active");
+        mdTab.removeClass("zen-scrap-pill-tab-active");
+        previewEl.style.display = "";
+        markdownEl.style.display = "none";
+      });
+      mdTab.addEventListener("click", () => {
+        mdTab.addClass("zen-scrap-pill-tab-active");
+        pvTab.removeClass("zen-scrap-pill-tab-active");
+        previewEl.style.display = "none";
+        markdownEl.style.display = "";
+      });
+
       modal.open();
     });
   }
