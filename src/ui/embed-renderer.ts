@@ -1,4 +1,5 @@
 import { requestUrl } from "obsidian";
+import markdownToHtml from "zenn-markdown-html";
 
 const cache = new Map<string, string>();
 
@@ -114,6 +115,22 @@ async function renderOgpCard(url: string): Promise<string> {
   return parts.join("");
 }
 
+function extToLang(path: string): string {
+  const ext = path.split(".").pop()?.toLowerCase() || "";
+  const map: Record<string, string> = {
+    ts: "ts", tsx: "tsx", js: "js", jsx: "jsx",
+    py: "python", rb: "ruby", go: "go", rs: "rust",
+    java: "java", kt: "kotlin", swift: "swift",
+    c: "c", cpp: "cpp", h: "c", hpp: "cpp",
+    cs: "csharp", php: "php", sh: "bash", bash: "bash", zsh: "bash",
+    html: "html", css: "css", scss: "scss",
+    json: "json", yaml: "yaml", yml: "yaml", toml: "toml",
+    md: "markdown", sql: "sql", graphql: "graphql",
+    dockerfile: "dockerfile", makefile: "makefile",
+  };
+  return map[ext] || "";
+}
+
 async function renderGithubEmbed(url: string): Promise<string> {
   const match = url.match(/github\.com\/([^/]+)\/([^/]+)\/blob\/([^/]+)\/([^#]+)(?:#L(\d+)(?:-L(\d+))?)?/);
   if (!match) return fallbackCard(url, "GitHub");
@@ -133,12 +150,16 @@ async function renderGithubEmbed(url: string): Promise<string> {
     displayLines = lines.slice(0, 30);
   }
 
-  const codeRows = displayLines.map((line, i) => {
-    const num = lineStart + i;
-    return `<tr class="zen-scrap-gh-row"><td class="zen-scrap-gh-num">${num}</td><td class="zen-scrap-gh-code">${esc(line) || " "}</td></tr>`;
-  }).join("");
+  const lang = extToLang(path);
+  const code = displayLines.join("\n");
+  const md = "```" + lang + "\n" + code + "\n```";
+  let codeHtml = await markdownToHtml(md);
+  // 各行に行番号spanを挿入
+  let lineNum = lineStart;
+  codeHtml = codeHtml.replace(/<span class="line">/g, () => {
+    return `<span class="line"><span class="zen-scrap-gh-line-num">${lineNum++}</span>`;
+  });
 
-  const lineEnd = endLineStr ? parseInt(endLineStr) : (startLineStr ? parseInt(startLineStr) : null);
   const subText = startLineStr
     ? `Lines ${startLineStr} to ${endLineStr || startLineStr} in ${branch}`
     : branch;
@@ -152,9 +173,7 @@ async function renderGithubEmbed(url: string): Promise<string> {
     `<span class="zen-scrap-gh-sub">${esc(subText)}</span>`,
     `</div>`,
     `</div>`,
-    `<div class="zen-scrap-github-code-wrapper">`,
-    `<table class="zen-scrap-gh-table"><tbody>${codeRows}</tbody></table>`,
-    `</div>`,
+    `<div class="zen-scrap-github-code-wrapper">${codeHtml}</div>`,
     `</div>`,
   ];
   return parts.join("");

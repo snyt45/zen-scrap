@@ -941,30 +941,21 @@ pre:hover .zen-scrap-code-copy-btn {
   background: var(--background-primary);
 }
 
-.zen-scrap-gh-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 0.85em;
-  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
-  line-height: 1.2;
+.zen-scrap-github-code-wrapper pre {
+  margin: 0;
+  border-radius: 0;
 }
 
-.zen-scrap-gh-num {
-  width: 1%;
+.zen-scrap-gh-line-num {
+  display: inline-block;
   min-width: 40px;
-  padding: 1px 10px;
+  padding-right: 12px;
   text-align: right;
   color: var(--text-faint);
   user-select: none;
-  white-space: nowrap;
-  vertical-align: top;
 }
 
-.zen-scrap-gh-code {
-  padding: 1px 12px;
-  white-space: pre;
-  vertical-align: top;
-}
+
 
 /* ==========================================================================
    7. znc Overrides (Obsidian Environment Adaptation)
@@ -1054,19 +1045,6 @@ pre:hover .zen-scrap-code-copy-btn {
   font-size: inherit;
 }
 
-/* GitHub 埋め込みテーブルの znc テーブルスタイル漏れ防止 */
-
-.zen-scrap-entry-body .zen-scrap-github-embed .zen-scrap-gh-table {
-  margin: 0;
-  display: table;
-}
-
-.zen-scrap-entry-body .zen-scrap-gh-table td,
-.zen-scrap-preview .zen-scrap-gh-table td {
-  background: transparent;
-  border: none;
-  padding: 1px 10px;
-}
 
 .zen-scrap-entry-body .zen-scrap-github-code-wrapper,
 .zen-scrap-preview .zen-scrap-github-code-wrapper {

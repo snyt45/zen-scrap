@@ -12,6 +12,7 @@ import markdownGuideRaw from "../../docs/markdown-guide.md";
 import sampleImageUrl from "../../assets/sample.png";
 
 export const VIEW_TYPE_SCRAP_DETAIL = "zen-scrap-detail";
+const EMPTY_PREVIEW_HTML = '<p style="color: var(--text-muted)">プレビューする内容がありません</p>';
 
 export class ScrapDetailView extends ItemView {
   private repo: ScrapRepository;
@@ -351,7 +352,7 @@ export class ScrapDetailView extends ItemView {
         preview.innerHTML = await this.renderBody(textarea.value);
         this.addCopyButtons(preview);
       } else {
-        preview.innerHTML = '<p style="color: var(--text-muted)">プレビューする内容がありません</p>';
+        preview.innerHTML = EMPTY_PREVIEW_HTML;
       }
     });
 
@@ -554,7 +555,7 @@ export class ScrapDetailView extends ItemView {
         preview.innerHTML = await this.renderBody(textarea.value);
         this.addCopyButtons(preview);
       } else {
-        preview.innerHTML = '<p style="color: var(--text-muted)">プレビューする内容がありません</p>';
+        preview.innerHTML = EMPTY_PREVIEW_HTML;
       }
     });
 
