@@ -312,18 +312,15 @@
   color: var(--text-muted);
 }
 
-.zen-scrap-pill-actions {
+.zen-scrap-action-dropdown {
   margin-left: auto;
-  display: inline-flex;
-  border: 1px solid var(--background-modifier-border);
-  border-radius: 20px;
-  overflow: hidden;
+  position: relative;
 }
 
-.zen-scrap-pill-action {
+.zen-scrap-action-dropdown-btn {
   padding: 4px 14px;
-  border: none;
-  border-right: 1px solid var(--background-modifier-border);
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 20px;
   background: var(--background-primary);
   color: var(--text-normal);
   cursor: pointer;
@@ -331,20 +328,8 @@
   font-weight: 600;
 }
 
-.zen-scrap-pill-action:last-child {
-  border-right: none;
-}
-
-.zen-scrap-pill-action:hover {
+.zen-scrap-action-dropdown-btn:hover {
   background: var(--background-secondary);
-}
-
-.zen-scrap-pill-action-danger {
-  color: var(--text-error);
-}
-
-.zen-scrap-pill-action-danger:hover {
-  background: var(--background-modifier-error);
 }
 
 .zen-scrap-detail-title-row {

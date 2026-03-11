@@ -93,14 +93,23 @@ export class ScrapDetailView extends ItemView {
     metaRow.createSpan({ text: formatDate(this.scrap!.created) + "に作成", cls: "zen-scrap-detail-meta-text" });
     metaRow.createSpan({ text: `${this.scrap!.entries.length}件のコメント`, cls: "zen-scrap-detail-meta-text" });
 
-    // Pill アクショングループ
-    const pill = metaRow.createDiv({ cls: "zen-scrap-pill-actions" });
-
-    const statusBtn = pill.createEl("button", {
-      text: this.scrap!.status === "open" ? "クローズする" : "オープンにする",
-      cls: "zen-scrap-pill-action",
+    // アクションドロップダウン
+    const actionWrapper = metaRow.createDiv({ cls: "zen-scrap-action-dropdown" });
+    const actionBtn = actionWrapper.createEl("button", {
+      cls: "zen-scrap-action-dropdown-btn",
     });
-    statusBtn.addEventListener("click", async () => {
+    actionBtn.innerHTML = `操作 <span class="zen-scrap-dropdown-arrow"><svg width="10" height="10" viewBox="0 0 20 20" fill="currentColor"><path d="M5 8l5 5 5-5z"/></svg></span>`;
+
+    const actionMenu = actionWrapper.createDiv({ cls: "zen-scrap-dropdown-menu" });
+    actionMenu.style.display = "none";
+    actionMenu.style.left = "auto";
+    actionMenu.style.right = "0";
+
+    const statusItem = actionMenu.createDiv({
+      text: this.scrap!.status === "open" ? "クローズする" : "オープンにする",
+      cls: "zen-scrap-dropdown-item",
+    });
+    statusItem.addEventListener("click", async () => {
       this.scrap!.status = this.scrap!.status === "open" ? "closed" : "open";
       this.scrap!.updated = new Date().toISOString();
       await this.repo.save(this.scrap!);
@@ -108,33 +117,44 @@ export class ScrapDetailView extends ItemView {
       await this.render();
     });
 
-    const jsonCopyBtn = pill.createEl("button", {
-      text: "JSON",
-      cls: "zen-scrap-pill-action",
+    const jsonItem = actionMenu.createDiv({
+      text: "JSONをコピー",
+      cls: "zen-scrap-dropdown-item",
     });
-    jsonCopyBtn.addEventListener("click", () => {
+    jsonItem.addEventListener("click", () => {
       const json = JSON.stringify(this.scrap!, null, 2);
       navigator.clipboard.writeText(json);
+      actionMenu.style.display = "none";
     });
 
-    const openFileBtn = pill.createEl("button", {
-      text: "ファイル",
-      cls: "zen-scrap-pill-action",
+    const openFileItem = actionMenu.createDiv({
+      text: "ファイルを開く",
+      cls: "zen-scrap-dropdown-item",
     });
-    openFileBtn.addEventListener("click", () => {
+    openFileItem.addEventListener("click", () => {
       this.app.workspace.openLinkText(this.scrap!.filePath, "", true);
+      actionMenu.style.display = "none";
     });
 
-    const deleteFileBtn = pill.createEl("button", {
+    const deleteItem = actionMenu.createDiv({
       text: "削除",
-      cls: "zen-scrap-pill-action zen-scrap-pill-action-danger",
+      cls: "zen-scrap-dropdown-item zen-scrap-dropdown-item-danger",
     });
-    deleteFileBtn.addEventListener("click", async () => {
+    deleteItem.addEventListener("click", async () => {
       if (!confirm(`「${this.scrap!.title}」を削除しますか？`)) return;
       await this.repo.delete(this.scrap!);
       this.eventBus.emit(EVENTS.SCRAP_CHANGED);
       this.eventBus.emit(EVENTS.NAV_BACK_TO_LIST);
     });
+
+    actionBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const isOpen = actionMenu.style.display !== "none";
+      actionMenu.style.display = isOpen ? "none" : "block";
+    });
+
+    const closeMenu = () => { actionMenu.style.display = "none"; };
+    document.addEventListener("click", closeMenu);
 
     const titleRow = header.createDiv({ cls: "zen-scrap-detail-title-row" });
     titleRow.createEl("h2", { text: this.scrap!.title, cls: "zen-scrap-detail-title" });

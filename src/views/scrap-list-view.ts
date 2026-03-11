@@ -213,6 +213,14 @@ export class ScrapListView extends ItemView {
         this.eventBus.emit(EVENTS.SCRAP_CHANGED);
       });
 
+      const deleteItem = menu.createDiv({ cls: "zen-scrap-dropdown-item zen-scrap-dropdown-item-danger", text: "削除する" });
+      deleteItem.addEventListener("click", async (e) => {
+        e.stopPropagation();
+        if (!confirm(`「${scrap.title}」を削除しますか？`)) return;
+        await this.repo.delete(scrap);
+        this.eventBus.emit(EVENTS.SCRAP_CHANGED);
+      });
+
       menuBtn.addEventListener("click", (e) => {
         e.stopPropagation();
         const isOpen = menu.style.display !== "none";
