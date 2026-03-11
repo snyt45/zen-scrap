@@ -229,6 +229,7 @@
 
 .zen-scrap-dropdown-item.zen-scrap-dropdown-item-danger:hover {
   background: var(--background-modifier-error);
+  color: var(--text-on-accent);
 }
 
 /* ==========================================================================

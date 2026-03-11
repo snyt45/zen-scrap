@@ -291,7 +291,7 @@ export class ScrapDetailView extends ItemView {
   private fixImagePaths(html: string): string {
     return html.replace(/<img([^>]+)src="([^"]+)"([^>]*)>/g, (match, before, src, after) => {
       // 外部URLはスキップ
-      if (src.startsWith("http://") || src.startsWith("https://") || src.startsWith("app://")) {
+      if (src.startsWith("http://") || src.startsWith("https://") || src.startsWith("app://") || src.startsWith("data:")) {
         return match;
       }
       // vault内パスをリソースURLに変換
