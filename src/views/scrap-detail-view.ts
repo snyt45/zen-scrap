@@ -91,6 +91,25 @@ export class ScrapDetailView extends ItemView {
       await this.render();
     });
 
+    // JSONコピーボタン
+    const jsonCopyBtn = metaRow.createEl("button", {
+      text: "JSONをコピー",
+      cls: "zen-scrap-json-copy-btn",
+    });
+    jsonCopyBtn.addEventListener("click", () => {
+      const json = JSON.stringify(this.scrap!, null, 2);
+      navigator.clipboard.writeText(json);
+    });
+
+    // ファイルを開くボタン
+    const openFileBtn = metaRow.createEl("button", {
+      text: "ファイルを開く",
+      cls: "zen-scrap-open-file-btn",
+    });
+    openFileBtn.addEventListener("click", () => {
+      this.app.workspace.openLinkText(this.scrap!.filePath, "", true);
+    });
+
     const titleRow = header.createDiv({ cls: "zen-scrap-detail-title-row" });
     titleRow.createEl("h2", { text: this.scrap!.title, cls: "zen-scrap-detail-title" });
 

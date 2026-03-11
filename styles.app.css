@@ -285,6 +285,22 @@
   background: #6d28d9;
 }
 
+.zen-scrap-json-copy-btn,
+.zen-scrap-open-file-btn {
+  padding: 4px 14px;
+  border-radius: 20px;
+  border: 1px solid var(--background-modifier-border);
+  background: var(--background-primary);
+  color: var(--text-normal);
+  cursor: pointer;
+  font-size: 0.85em;
+}
+
+.zen-scrap-json-copy-btn:hover,
+.zen-scrap-open-file-btn:hover {
+  background: var(--background-secondary);
+}
+
 .zen-scrap-detail-title-row {
   display: flex;
   align-items: center;
