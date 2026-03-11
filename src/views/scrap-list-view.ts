@@ -234,8 +234,8 @@ export class ScrapListView extends ItemView {
       // 2行目: ステータス + 日付情報
       const metaRow = item.createDiv({ cls: "zen-scrap-item-meta" });
       metaRow.addEventListener("click", () => this.eventBus.emit(EVENTS.SCRAP_SELECT, scrap));
-      const labelCls = scrap.status === "open" ? "zen-scrap-label-open" : "zen-scrap-label-closed";
-      const labelText = scrap.status === "open" ? "Open" : "Closed";
+      const labelCls = scrap.archived ? "zen-scrap-label-archived" : scrap.status === "open" ? "zen-scrap-label-open" : "zen-scrap-label-closed";
+      const labelText = scrap.archived ? "Archived" : scrap.status === "open" ? "Open" : "Closed";
       metaRow.createSpan({ text: labelText, cls: labelCls });
       metaRow.createSpan({ text: formatDate(scrap.created) + "に作成", cls: "zen-scrap-item-time" });
       if (scrap.status === "closed") {

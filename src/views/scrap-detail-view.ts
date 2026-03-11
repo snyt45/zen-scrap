@@ -89,8 +89,8 @@ export class ScrapDetailView extends ItemView {
     });
 
     const metaRow = header.createDiv({ cls: "zen-scrap-detail-meta" });
-    const labelCls = this.scrap!.status === "open" ? "zen-scrap-label-open" : "zen-scrap-label-closed";
-    const labelText = this.scrap!.status === "open" ? "Open" : "Closed";
+    const labelCls = this.scrap!.archived ? "zen-scrap-label-archived" : this.scrap!.status === "open" ? "zen-scrap-label-open" : "zen-scrap-label-closed";
+    const labelText = this.scrap!.archived ? "Archived" : this.scrap!.status === "open" ? "Open" : "Closed";
     metaRow.createSpan({ text: labelText, cls: labelCls });
     metaRow.createSpan({ text: formatDate(this.scrap!.created) + "に作成", cls: "zen-scrap-detail-meta-text" });
     metaRow.createSpan({ text: `${this.scrap!.entries.length}件のコメント`, cls: "zen-scrap-detail-meta-text" });
