@@ -7,6 +7,7 @@ import { EVENTS } from "../events/constants";
 import { EmbedModal, EmbedType } from "../ui/embed-modal";
 import { renderEmbed } from "../ui/embed-renderer";
 import { formatDate } from "../utils";
+import { chevronDownIcon, chevronLeftIcon, EXPAND_ICON, SHRINK_ICON, TRIANGLE_DOWN_ICON, EDIT_ICON } from "../icons";
 import markdownGuideRaw from "../../docs/markdown-guide.md";
 import sampleImageUrl from "../../assets/sample.png";
 
@@ -86,18 +87,16 @@ export class ScrapDetailView extends ItemView {
     const navRow = header.createDiv({ cls: "zen-scrap-detail-nav" });
 
     const backBtn = navRow.createEl("button", { cls: "zen-scrap-back-btn" });
-    backBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg> 一覧へ戻る';
+    backBtn.innerHTML = `${chevronLeftIcon(14)} 一覧へ戻る`;
     backBtn.addEventListener("click", () => this.eventBus.emit(EVENTS.NAV_BACK_TO_LIST));
 
     const fullWidthBtn = navRow.createEl("button", { cls: "zen-scrap-fullwidth-toggle" });
-    const expandIcon = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 3 21 3 21 9"></polyline><polyline points="9 21 3 21 3 15"></polyline><line x1="21" y1="3" x2="14" y2="10"></line><line x1="3" y1="21" x2="10" y2="14"></line></svg>';
-    const shrinkIcon = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 14 10 14 10 20"></polyline><polyline points="20 10 14 10 14 4"></polyline><line x1="14" y1="10" x2="21" y2="3"></line><line x1="3" y1="21" x2="10" y2="14"></line></svg>';
-    fullWidthBtn.innerHTML = this.isFullWidth ? shrinkIcon : expandIcon;
+    fullWidthBtn.innerHTML = this.isFullWidth ? SHRINK_ICON : EXPAND_ICON;
     fullWidthBtn.addEventListener("click", () => {
       this.isFullWidth = !this.isFullWidth;
       const container = this.containerEl.children[1] as HTMLElement;
       container.toggleClass("zen-scrap-fullwidth", this.isFullWidth);
-      fullWidthBtn.innerHTML = this.isFullWidth ? shrinkIcon : expandIcon;
+      fullWidthBtn.innerHTML = this.isFullWidth ? SHRINK_ICON : EXPAND_ICON;
     });
 
     const metaRow = header.createDiv({ cls: "zen-scrap-detail-meta" });
@@ -112,7 +111,7 @@ export class ScrapDetailView extends ItemView {
     const actionBtn = actionWrapper.createEl("button", {
       cls: "zen-scrap-action-dropdown-btn",
     });
-    actionBtn.innerHTML = `操作 <span class="zen-scrap-dropdown-arrow"><svg width="10" height="10" viewBox="0 0 20 20" fill="currentColor"><path d="M5 8l5 5 5-5z"/></svg></span>`;
+    actionBtn.innerHTML = `操作 <span class="zen-scrap-dropdown-arrow">${TRIANGLE_DOWN_ICON}</span>`;
 
     const actionMenu = actionWrapper.createDiv({ cls: "zen-scrap-dropdown-menu" });
     actionMenu.style.display = "none";
@@ -175,7 +174,7 @@ export class ScrapDetailView extends ItemView {
     titleRow.createEl("h2", { text: this.scrap!.title, cls: "zen-scrap-detail-title" });
 
     const editBtn = titleRow.createEl("button", { cls: "zen-scrap-title-edit-btn" });
-    editBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>';
+    editBtn.innerHTML = EDIT_ICON;
 
     editBtn.addEventListener("click", () => {
       titleRow.empty();
@@ -228,7 +227,7 @@ export class ScrapDetailView extends ItemView {
 
       const menuWrapper = entryHeader.createDiv({ cls: "zen-scrap-entry-menu" });
       const menuBtn = menuWrapper.createEl("button", { cls: "zen-scrap-entry-menu-btn" });
-      menuBtn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>';
+      menuBtn.innerHTML = chevronDownIcon(18);
 
       const menu = menuWrapper.createDiv({ cls: "zen-scrap-entry-menu-dropdown" });
       menu.style.display = "none";

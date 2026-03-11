@@ -4,6 +4,7 @@ import { ScrapRepository } from "../data/scrap-repository";
 import { EventBus } from "../events/event-bus";
 import { EVENTS } from "../events/constants";
 import { formatDate } from "../utils";
+import { chevronDownIcon } from "../icons";
 
 export const VIEW_TYPE_SCRAP_LIST = "zen-scrap-list";
 
@@ -132,7 +133,7 @@ export class ScrapListView extends ItemView {
     const btn = wrapper.createEl("button", { cls: "zen-scrap-dropdown-btn" });
     btn.createSpan({ text: displayText });
     const arrow = btn.createSpan({ cls: "zen-scrap-dropdown-arrow" });
-    arrow.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>';
+    arrow.innerHTML = chevronDownIcon(12);
 
     const menu = wrapper.createDiv({ cls: "zen-scrap-dropdown-menu" });
     menu.style.display = "none";
@@ -210,7 +211,7 @@ export class ScrapListView extends ItemView {
 
       const menuWrapper = titleRow.createDiv({ cls: "zen-scrap-item-menu" });
       const menuBtn = menuWrapper.createEl("button", { cls: "zen-scrap-item-menu-btn" });
-      menuBtn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>';
+      menuBtn.innerHTML = chevronDownIcon(20, 2.5);
 
       const menu = menuWrapper.createDiv({ cls: "zen-scrap-item-menu-dropdown" });
       menu.style.display = "none";
