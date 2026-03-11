@@ -37,12 +37,9 @@ https://zenn.dev
 
 ## 画像
 
-画像はvault内のパスまたはURLを指定できます。
+![サンプル画像](Scraps/images/sample.png)
 
-```
-![代替テキスト](Scraps/images/sample.png)
-![外部画像](https://example.com/image.png)
-```
+vault内のパスまたは外部URLを指定できます。
 
 ---
 
@@ -261,20 +258,6 @@ class EventBus {
 :::message alert
 これは警告メッセージです。重要な注意事項に使います。
 :::
-
----
-
-## 数式（KaTeX）
-
-### インライン数式
-
-$a^2 + b^2 = c^2$ はピタゴラスの定理です。
-
-### ブロック数式
-
-$$
-\int_{0}^{\infty} e^{-x^2} dx = \frac{\sqrt{\pi}}{2}
-$$
 
 ---
 

@@ -981,15 +981,32 @@ pre:hover .zen-scrap-code-copy-btn {
 
 .zen-scrap-entry-body.znc,
 .zen-scrap-preview.znc,
-.zen-scrap-guide-modal.znc {
+.zen-scrap-guide-content.znc {
   --c-bg-base: var(--background-primary);
   --c-bg-dim: var(--background-secondary);
   --c-bg-code: var(--background-secondary);
   --c-bg-code-block: #1a2638;
+  --c-bg-image: transparent;
+  --c-bg-warning: #fff6e4;
+  --c-bg-warning-icon: #ffa909;
+  --c-bg-alert: #fff0f0;
+  --c-bg-alert-icon: #ff6868;
   --c-border: var(--background-modifier-border);
   --c-border-emphasis: var(--text-muted);
   --c-text-subtle: var(--text-muted);
   --c-text-link: var(--text-accent);
+  --c-gray-700: var(--text-muted);
+}
+
+.theme-dark .zen-scrap-entry-body.znc,
+.theme-dark .zen-scrap-preview.znc,
+.theme-dark .zen-scrap-guide-content.znc {
+  --c-bg-code: var(--background-secondary);
+  --c-bg-warning: #39352c;
+  --c-bg-warning-icon: #e5a21a;
+  --c-bg-alert: #311818;
+  --c-bg-alert-icon: #c63939;
+  --c-bg-image: #fff;
 }
 
 /* カード内見出しのマージン・ボーダー調整 */

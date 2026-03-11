@@ -82,6 +82,16 @@ export class ScrapRepository {
 
   async ensureMarkdownGuide(): Promise<void> {
     await this.ensureFolder();
+
+    const imgFolder = normalizePath(`${SCRAPS_FOLDER}/images`);
+    if (!this.app.vault.getAbstractFileByPath(imgFolder)) {
+      await this.app.vault.createFolder(imgFolder);
+    }
+    const imgPath = normalizePath(`${SCRAPS_FOLDER}/images/sample.png`);
+    if (!this.app.vault.getAbstractFileByPath(imgPath)) {
+      await this.app.vault.createBinary(imgPath, createSampleImage());
+    }
+
     const path = normalizePath(`${SCRAPS_FOLDER}/markdown-guide.md`);
     const existing = this.app.vault.getAbstractFileByPath(path);
     if (existing instanceof TFile) {
@@ -90,6 +100,85 @@ export class ScrapRepository {
       await this.app.vault.create(path, MARKDOWN_GUIDE);
     }
   }
+}
+
+function createSampleImage(): ArrayBuffer {
+  // 200x60 のシンプルなPNG（グラデーション風）を生成
+  const w = 200, h = 60;
+  const raw: number[] = [];
+  for (let y = 0; y < h; y++) {
+    raw.push(0); // filter none
+    for (let x = 0; x < w; x++) {
+      const r = Math.round(100 + (x / w) * 100);
+      const g = Math.round(140 + (y / h) * 80);
+      const b = Math.round(200 - (x / w) * 60);
+      raw.push(r, g, b, 255);
+    }
+  }
+
+  // Deflate (uncompressed blocks)
+  const rawBytes = new Uint8Array(raw);
+  const deflated = deflateUncompressed(rawBytes);
+
+  // PNG construction
+  const sig = [137, 80, 78, 71, 13, 10, 26, 10];
+  const ihdr = pngChunk("IHDR", [
+    ...u32be(w), ...u32be(h),
+    8, // bit depth
+    6, // color type RGBA
+    0, 0, 0, // compression, filter, interlace
+  ]);
+  const idat = pngChunk("IDAT", Array.from(deflated));
+  const iend = pngChunk("IEND", []);
+
+  const png = new Uint8Array([...sig, ...ihdr, ...idat, ...iend]);
+  return png.buffer;
+}
+
+function u32be(v: number): number[] {
+  return [(v >> 24) & 0xff, (v >> 16) & 0xff, (v >> 8) & 0xff, v & 0xff];
+}
+
+function pngChunk(type: string, data: number[]): number[] {
+  const typeBytes = Array.from(type).map((c) => c.charCodeAt(0));
+  const crcInput = [...typeBytes, ...data];
+  const crc = crc32(crcInput);
+  return [...u32be(data.length), ...typeBytes, ...data, ...u32be(crc)];
+}
+
+function crc32(data: number[]): number {
+  let crc = 0xffffffff;
+  for (const byte of data) {
+    crc ^= byte;
+    for (let i = 0; i < 8; i++) {
+      crc = (crc >>> 1) ^ (crc & 1 ? 0xedb88320 : 0);
+    }
+  }
+  return (crc ^ 0xffffffff) >>> 0;
+}
+
+function deflateUncompressed(data: Uint8Array): Uint8Array {
+  // zlib header + uncompressed deflate blocks + adler32
+  const blocks: number[] = [0x78, 0x01]; // zlib header (no compression)
+  const maxBlock = 65535;
+  for (let i = 0; i < data.length; i += maxBlock) {
+    const remaining = data.length - i;
+    const len = Math.min(remaining, maxBlock);
+    const isFinal = i + len >= data.length ? 1 : 0;
+    blocks.push(isFinal);
+    blocks.push(len & 0xff, (len >> 8) & 0xff);
+    blocks.push((~len) & 0xff, ((~len) >> 8) & 0xff);
+    for (let j = 0; j < len; j++) blocks.push(data[i + j]);
+  }
+  // Adler-32
+  let a = 1, b = 0;
+  for (let i = 0; i < data.length; i++) {
+    a = (a + data[i]) % 65521;
+    b = (b + a) % 65521;
+  }
+  const adler = ((b << 16) | a) >>> 0;
+  blocks.push(...u32be(adler));
+  return new Uint8Array(blocks);
 }
 
 const MARKDOWN_GUIDE = `# Markdown ガイド
@@ -131,12 +220,9 @@ https://zenn.dev
 
 ## 画像
 
-画像はvault内のパスまたはURLを指定できます。
+![サンプル画像](Scraps/images/sample.png)
 
-\\\`\\\`\\\`
-![代替テキスト](Scraps/images/sample.png)
-![外部画像](https://example.com/image.png)
-\\\`\\\`\\\`
+vault内のパスまたは外部URLを指定できます。
 
 ---
 
@@ -331,20 +417,6 @@ console.log("コードブロックも可");
 :::message alert
 これは警告メッセージです。重要な注意事項に使います。
 :::
-
----
-
-## 数式（KaTeX）
-
-### インライン数式
-
-$a^2 + b^2 = c^2$ はピタゴラスの定理です。
-
-### ブロック数式
-
-$$
-\\\\int_{0}^{\\\\infty} e^{-x^2} dx = \\\\frac{\\\\sqrt{\\\\pi}}{2}
-$$
 
 ---
 
