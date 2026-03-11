@@ -1037,12 +1037,15 @@ pre:hover .zen-scrap-code-copy-btn {
   line-height: 1.6;
   white-space: pre-wrap;
   word-break: break-word;
+  user-select: text;
+  cursor: text;
 }
 
 .zen-scrap-guide-raw code {
   background: none;
   padding: 0;
   font-size: inherit;
+  user-select: text;
 }
 
 

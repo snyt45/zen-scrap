@@ -457,7 +457,10 @@ export class ScrapDetailView extends ItemView {
       btn.textContent = "Copy";
       btn.addEventListener("click", () => {
         const code = pre.querySelector("code");
-        if (code) navigator.clipboard.writeText(code.textContent || "");
+        if (!code) return;
+        const clone = code.cloneNode(true) as HTMLElement;
+        clone.querySelectorAll(".zen-scrap-gh-line-num").forEach((el) => el.remove());
+        navigator.clipboard.writeText(clone.textContent || "");
       });
       pre.prepend(btn);
     });
