@@ -4,8 +4,6 @@
 
 ## インストール
 
-### 手動インストール
-
 1. [Releases](https://github.com/snyt45/zen-scrap/releases) から最新の `main.js`、`styles.css`、`manifest.json` をダウンロード
 2. Vault の `.obsidian/plugins/zen-scrap/` フォルダを作成し、3ファイルを配置
 3. Obsidian を再起動して「設定 > コミュニティプラグイン」から Zen Scrap を有効化
@@ -68,7 +66,7 @@
 
 ## データの保存形式
 
-スクラップは Vault 内の `Scraps/` フォルダに Markdown ファイルとして保存される。frontmatter にメタ情報、本文にエントリが `### タイムスタンプ` + `---` 区切りで並ぶ構造。
+スクラップは Vault 内の `Scraps/` フォルダに Markdown ファイルとして保存される。frontmatter にメタ情報、本文にエントリが `### タイムスタンプ` + `---` 区切りで並ぶ構造。通常の Markdown ファイルなので、他のエディタやツールからも読み書きできる。
 
 ```markdown
 ---
@@ -92,67 +90,3 @@ archived: false
 
 ---
 ```
-
-通常の Markdown ファイルなので、他のエディタやツールからも読み書きできる。
-
-## 開発
-
-### セットアップ
-
-```bash
-npm install
-```
-
-### 開発モード
-
-```bash
-npm run dev
-```
-
-`.env` に `OBSIDIAN_PLUGIN_DIR` を設定しておくと、ビルド成果物がプラグインディレクトリへ自動コピーされる。
-
-```
-OBSIDIAN_PLUGIN_DIR=/path/to/vault/.obsidian/plugins/zen-scrap
-```
-
-### ビルド
-
-```bash
-npm run build
-```
-
-`main.js` と `styles.css` が生成される。`manifest.json` と合わせた3ファイルがプラグインの配布物。
-
-### プロジェクト構成
-
-```
-src/
-├── main.ts                    # プラグインのエントリポイント
-├── assets.d.ts                # 静的アセット(md, png)のimport型定義
-├── data/
-│   ├── types.ts               # データ型定義
-│   ├── scrap-parser.ts        # Markdownとの相互変換
-│   └── scrap-repository.ts    # ファイルI/OとCRUD
-├── events/
-│   ├── constants.ts           # イベント名定数
-│   ├── event-bus.ts           # イベントバス
-│   ├── nav-handlers.ts        # 画面遷移ハンドラ
-│   └── scrap-handlers.ts      # スクラップ操作ハンドラ
-├── ui/
-│   ├── title-prompt-modal.ts  # タイトル入力モーダル
-│   ├── embed-modal.ts         # 埋め込みURL入力モーダル
-│   └── embed-renderer.ts      # 埋め込みコンテンツのレンダリング
-└── views/
-    ├── scrap-list-view.ts     # 一覧ビュー
-    └── scrap-detail-view.ts   # 詳細ビュー
-docs/
-└── markdown-guide.md          # Markdownガイド（ビルド時にバンドル）
-assets/
-└── sample.png                 # ガイド用サンプル画像（ビルド時にバンドル）
-```
-
-### 技術スタック
-
-- TypeScript + esbuild
-- [zenn-markdown-html](https://github.com/zenn-dev/zenn-editor) でMarkdownレンダリング
-- Obsidian Plugin API
