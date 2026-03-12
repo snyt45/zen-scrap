@@ -187,13 +187,8 @@ async function uploadAndInsert(file: File, textarea: HTMLTextAreaElement, deps: 
   const filePath = `${folderPath}/${fileName}`;
   await deps.app.vault.createBinary(filePath, buffer);
 
-  const syntax = `![](${filePath})`;
-  const pos = textarea.selectionStart;
-  const before = textarea.value.substring(0, pos);
-  const after = textarea.value.substring(pos);
-  textarea.value = before + syntax + "\n" + after;
-  textarea.focus();
-  textarea.selectionStart = textarea.selectionEnd = pos + syntax.length + 1;
+  const syntax = `![](${filePath})\n`;
+  insertTextAtCursor(textarea, syntax);
 }
 
 function handleImageUpload(textarea: HTMLTextAreaElement, deps: InputAreaDeps): void {
@@ -229,12 +224,7 @@ function renderEmbedButton(parent: HTMLElement, textarea: HTMLTextAreaElement, d
       e.stopPropagation();
       menu.style.display = "none";
       new EmbedModal(deps.app, item.type, (syntax) => {
-        const pos = textarea.selectionStart;
-        const before = textarea.value.substring(0, pos);
-        const after = textarea.value.substring(pos);
-        textarea.value = before + syntax + "\n" + after;
-        textarea.focus();
-        textarea.selectionStart = textarea.selectionEnd = pos + syntax.length + 1;
+        insertTextAtCursor(textarea, syntax + "\n");
       }).open();
     });
   }
@@ -291,6 +281,13 @@ function renderMarkdownGuideLink(parent: HTMLElement, deps: InputAreaDeps): void
 
     modal.open();
   });
+}
+
+function insertTextAtCursor(textarea: HTMLTextAreaElement, text: string): void {
+  textarea.focus();
+  textarea.setSelectionRange(textarea.selectionStart, textarea.selectionEnd);
+  document.execCommand("insertText", false, text);
+  textarea.dispatchEvent(new Event("input", { bubbles: true }));
 }
 
 function setupAutoGrow(textarea: HTMLTextAreaElement): void {

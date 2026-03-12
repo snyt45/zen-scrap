@@ -45,7 +45,7 @@ export default class ZenScrapPlugin extends Plugin {
 
     let vaultChangeTimer: ReturnType<typeof setTimeout> | null = null;
     const emitIfScrapFile = (file: unknown) => {
-      if (file instanceof TFile && file.path.startsWith(this.settings.scrapsFolder + "/")) {
+      if (file instanceof TFile && file.extension === "md" && file.path.startsWith(this.settings.scrapsFolder + "/")) {
         if (vaultChangeTimer) clearTimeout(vaultChangeTimer);
         vaultChangeTimer = setTimeout(() => {
           vaultChangeTimer = null;
