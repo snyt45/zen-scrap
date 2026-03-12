@@ -5,3 +5,4 @@ styles.css
 *.map
 data.json
 .DS_Store
+.worktrees/
