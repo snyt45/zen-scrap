@@ -363,7 +363,7 @@ export class ScrapDetailView extends ItemView {
 
     this.renderEmbedButton(actionBar, textarea);
 
-    const submitBtn = actionBar.createEl("button", { text: "投稿する", cls: "zen-scrap-submit-btn-new zen-scrap-ml-auto" });
+    const submitBtn = actionBar.createEl("button", { text: "ポストする", cls: "zen-scrap-submit-btn-new zen-scrap-ml-auto" });
     submitBtn.addEventListener("click", async () => {
       const body = textarea.value.trim();
       if (!body || !this.scrap) return;
@@ -374,6 +374,7 @@ export class ScrapDetailView extends ItemView {
     textarea.addEventListener("keydown", (e: KeyboardEvent) => {
       if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
         e.preventDefault();
+        e.stopPropagation();
         submitBtn.click();
       }
     });
@@ -590,6 +591,7 @@ export class ScrapDetailView extends ItemView {
     textarea.addEventListener("keydown", (e: KeyboardEvent) => {
       if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
         e.preventDefault();
+        e.stopPropagation();
         updateBtn.click();
       }
     });
