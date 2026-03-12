@@ -7,10 +7,10 @@ export class MarkdownRenderer {
 
   async renderBody(body: string): Promise<string> {
     // 0. Obsidianリンク [[ノート名]] / [[ノート名|表示テキスト]] をMarkdownリンクに変換
-    const vaultName = this.app.vault.getName();
+    // obsidian:// プロトコルはmarkdown-itにサニタイズされるため、#で代替しレンダリング後に処理する
     body = body.replace(/\[\[([^\]|]+)(?:\|([^\]]+))?\]\]/g, (_, target, alias) => {
       const display = alias || target;
-      return `[${display}](obsidian://open?vault=${encodeURIComponent(vaultName)}&file=${encodeURIComponent(target)})`;
+      return `[${display}](#zen-scrap-link:${encodeURIComponent(target)})`;
     });
 
     // 1. 埋め込み記法を抽出してプレースホルダーに置換（youtubeはzenn-markdown-htmlが処理するので除外）
@@ -68,9 +68,8 @@ export class MarkdownRenderer {
       e.preventDefault();
       e.stopPropagation();
 
-      if (href.startsWith("obsidian://open?")) {
-        const params = new URLSearchParams(href.replace("obsidian://open?", ""));
-        const file = params.get("file");
+      if (href.startsWith("#zen-scrap-link:")) {
+        const file = decodeURIComponent(href.replace("#zen-scrap-link:", ""));
         if (file) {
           this.app.workspace.openLinkText(file, "", false);
         }
