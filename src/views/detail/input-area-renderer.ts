@@ -61,6 +61,7 @@ export function renderInputArea(container: HTMLElement, deps: InputAreaDeps): vo
     if (textarea.value.trim()) {
       preview.innerHTML = await markdownRenderer.renderBody(textarea.value);
       markdownRenderer.addCopyButtons(preview);
+      markdownRenderer.addLinkHandler(preview);
     } else {
       preview.innerHTML = EMPTY_PREVIEW_HTML;
     }
@@ -133,6 +134,7 @@ export function renderEntryEditor(deps: EntryEditorDeps): void {
     if (textarea.value.trim()) {
       preview.innerHTML = await markdownRenderer.renderBody(textarea.value);
       markdownRenderer.addCopyButtons(preview);
+      markdownRenderer.addLinkHandler(preview);
     } else {
       preview.innerHTML = EMPTY_PREVIEW_HTML;
     }
@@ -291,6 +293,7 @@ function renderMarkdownGuideLink(parent: HTMLElement, deps: InputAreaDeps): void
     guideHtml = guideHtml.replace(/src="zen-scrap-sample-image"/, `src="${sampleImageUrl}"`);
     previewEl.innerHTML = guideHtml;
     deps.markdownRenderer.addCopyButtons(previewEl);
+    deps.markdownRenderer.addLinkHandler(previewEl);
 
     const markdownEl = modal.contentEl.createEl("pre", { cls: "zen-scrap-guide-content zen-scrap-guide-raw" });
     markdownEl.createEl("code", { text: content });

@@ -87,6 +87,7 @@ export async function renderTimeline(container: HTMLElement, deps: TimelineDeps)
     const entryBody = entryEl.createDiv({ cls: "zen-scrap-entry-body znc" });
     entryBody.innerHTML = await markdownRenderer.renderBody(entry.body);
     markdownRenderer.addCopyButtons(entryBody);
+    markdownRenderer.addLinkHandler(entryBody);
 
     editItem.addEventListener("click", (e) => {
       e.stopPropagation();

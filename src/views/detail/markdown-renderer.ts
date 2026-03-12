@@ -6,6 +6,13 @@ export class MarkdownRenderer {
   constructor(private app: App) {}
 
   async renderBody(body: string): Promise<string> {
+    // 0. Obsidianリンク [[ノート名]] / [[ノート名|表示テキスト]] をMarkdownリンクに変換
+    const vaultName = this.app.vault.getName();
+    body = body.replace(/\[\[([^\]|]+)(?:\|([^\]]+))?\]\]/g, (_, target, alias) => {
+      const display = alias || target;
+      return `[${display}](obsidian://open?vault=${encodeURIComponent(vaultName)}&file=${encodeURIComponent(target)})`;
+    });
+
     // 1. 埋め込み記法を抽出してプレースホルダーに置換（youtubeはzenn-markdown-htmlが処理するので除外）
     const embeds: { id: string; type: string; url: string }[] = [];
     const processed = body.replace(/@\[(tweet|card|github)\]\(([^)]+)\)/g, (_, type, url) => {
@@ -47,6 +54,23 @@ export class MarkdownRenderer {
         return `<img${before}src="${resourcePath}"${after}>`;
       }
       return match;
+    });
+  }
+
+  addLinkHandler(container: HTMLElement): void {
+    container.addEventListener("click", (e) => {
+      const target = e.target as HTMLElement;
+      const link = target.closest("a");
+      if (!link) return;
+      const href = link.getAttribute("href");
+      if (href?.startsWith("obsidian://open?")) {
+        e.preventDefault();
+        const params = new URLSearchParams(href.replace("obsidian://open?", ""));
+        const file = params.get("file");
+        if (file) {
+          this.app.workspace.openLinkText(file, "", false);
+        }
+      }
     });
   }
 
