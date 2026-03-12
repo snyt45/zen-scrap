@@ -44,12 +44,14 @@ export function renderInputArea(container: HTMLElement, deps: InputAreaDeps): vo
 
   const preview = inputArea.createDiv({ cls: "zen-scrap-preview znc" });
   preview.style.display = "none";
+  preview.tabIndex = -1;
 
   mdTab.addEventListener("click", () => {
     mdTab.addClass("zen-scrap-pill-tab-active");
     pvTab.removeClass("zen-scrap-pill-tab-active");
     textarea.style.display = "";
     preview.style.display = "none";
+    textarea.focus();
   });
 
   pvTab.addEventListener("click", async () => {
@@ -57,6 +59,7 @@ export function renderInputArea(container: HTMLElement, deps: InputAreaDeps): vo
     mdTab.removeClass("zen-scrap-pill-tab-active");
     textarea.style.display = "none";
     preview.style.display = "";
+    preview.focus();
     if (textarea.value.trim()) {
       preview.innerHTML = await markdownRenderer.renderBody(textarea.value);
       markdownRenderer.addCopyButtons(preview);
@@ -88,8 +91,19 @@ export function renderInputArea(container: HTMLElement, deps: InputAreaDeps): vo
     submitBtn.click();
     return false;
   });
+  submitScope.register(["Mod"], "E", (e: KeyboardEvent) => {
+    e.preventDefault();
+    if (preview.style.display === "none") {
+      pvTab.click();
+    } else {
+      mdTab.click();
+    }
+    return false;
+  });
   textarea.addEventListener("focus", () => app.keymap.pushScope(submitScope));
   textarea.addEventListener("blur", () => app.keymap.popScope(submitScope));
+  preview.addEventListener("focus", () => app.keymap.pushScope(submitScope));
+  preview.addEventListener("blur", () => app.keymap.popScope(submitScope));
 }
 
 export function renderEntryEditor(deps: EntryEditorDeps): void {
@@ -116,12 +130,14 @@ export function renderEntryEditor(deps: EntryEditorDeps): void {
 
   const preview = editArea.createDiv({ cls: "zen-scrap-preview znc" });
   preview.style.display = "none";
+  preview.tabIndex = -1;
 
   mdTab.addEventListener("click", () => {
     mdTab.addClass("zen-scrap-pill-tab-active");
     pvTab.removeClass("zen-scrap-pill-tab-active");
     textarea.style.display = "";
     preview.style.display = "none";
+    textarea.focus();
   });
 
   pvTab.addEventListener("click", async () => {
@@ -129,6 +145,7 @@ export function renderEntryEditor(deps: EntryEditorDeps): void {
     mdTab.removeClass("zen-scrap-pill-tab-active");
     textarea.style.display = "none";
     preview.style.display = "";
+    preview.focus();
     if (textarea.value.trim()) {
       preview.innerHTML = await markdownRenderer.renderBody(textarea.value);
       markdownRenderer.addCopyButtons(preview);
@@ -169,8 +186,19 @@ export function renderEntryEditor(deps: EntryEditorDeps): void {
     updateBtn.click();
     return false;
   });
+  updateScope.register(["Mod"], "E", (e: KeyboardEvent) => {
+    e.preventDefault();
+    if (preview.style.display === "none") {
+      pvTab.click();
+    } else {
+      mdTab.click();
+    }
+    return false;
+  });
   textarea.addEventListener("focus", () => app.keymap.pushScope(updateScope));
   textarea.addEventListener("blur", () => app.keymap.popScope(updateScope));
+  preview.addEventListener("focus", () => app.keymap.pushScope(updateScope));
+  preview.addEventListener("blur", () => app.keymap.popScope(updateScope));
 
   textarea.focus();
 }

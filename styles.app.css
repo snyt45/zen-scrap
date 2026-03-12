@@ -5,9 +5,11 @@
 .zen-scrap-new-btn,
 .zen-scrap-back-btn,
 .zen-scrap-fullwidth-toggle,
+.zen-scrap-help-btn,
 .zen-scrap-item-menu-btn,
 .zen-scrap-entry-menu-btn,
 .zen-scrap-action-dropdown-btn,
+.zen-scrap-action-more-btn,
 .zen-scrap-dropdown-btn,
 .zen-scrap-dropdown-item,
 .zen-scrap-pill-tab,
@@ -182,8 +184,8 @@
 }
 
 .zen-scrap-label-open {
-  background: var(--interactive-accent);
-  color: var(--text-on-accent);
+  background: #2563eb;
+  color: #fff;
   padding: 4px 12px;
   border-radius: 4px;
   font-size: 0.85em;
@@ -191,8 +193,8 @@
 }
 
 .zen-scrap-label-closed {
-  background: var(--text-accent);
-  color: var(--text-on-accent);
+  background: #7c3aed;
+  color: #fff;
   padding: 4px 12px;
   border-radius: 4px;
   font-size: 0.85em;
@@ -200,8 +202,101 @@
 }
 
 .zen-scrap-label-archived {
-  background: var(--text-faint);
-  color: var(--text-on-accent);
+  background: #6b7280;
+  color: #fff;
+  padding: 4px 12px;
+  border-radius: 4px;
+  font-size: 0.85em;
+  font-weight: 600;
+}
+
+/* --- Status Switcher --- */
+
+.zen-scrap-status-switcher {
+  position: relative;
+}
+
+.zen-scrap-status-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border: none;
+  cursor: pointer;
+  transition: filter 0.15s ease;
+}
+
+.zen-scrap-status-btn.zen-scrap-label-open {
+  background: #2563eb;
+  color: #fff;
+}
+
+.zen-scrap-status-btn.zen-scrap-label-closed {
+  background: #7c3aed;
+  color: #fff;
+}
+
+.zen-scrap-status-btn.zen-scrap-label-archived {
+  background: #6b7280;
+  color: #fff;
+}
+
+.zen-scrap-status-btn:hover {
+  filter: brightness(1.15);
+}
+
+.zen-scrap-status-btn:active {
+  transform: scale(0.97);
+}
+
+.zen-scrap-status-arrow {
+  display: inline-flex;
+  align-items: center;
+  opacity: 0.8;
+}
+
+.zen-scrap-status-arrow svg {
+  width: 12px;
+  height: 12px;
+}
+
+.zen-scrap-status-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 100;
+  min-width: 140px;
+  padding: 4px 0;
+  margin-top: 6px;
+  background: var(--background-primary);
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
+  opacity: 0;
+  transform: translateY(-4px);
+  pointer-events: none;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+.zen-scrap-status-menu.is-open {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.zen-scrap-status-menu-item {
+  padding: 8px 14px;
+  cursor: pointer;
+  font-size: 0.85em;
+  color: var(--text-normal);
+  transition: background-color 0.1s ease;
+}
+
+.zen-scrap-status-menu-item:hover {
+  background: var(--background-secondary);
+}
+
+.zen-scrap-status-dot {
+  display: inline-block;
   padding: 4px 12px;
   border-radius: 4px;
   font-size: 0.85em;
@@ -359,6 +454,12 @@
   margin-bottom: 12px;
 }
 
+.zen-scrap-detail-nav-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .zen-scrap-back-btn {
   display: inline-flex;
   align-items: center;
@@ -382,10 +483,23 @@
 }
 
 .zen-scrap-detail-title {
-  margin: 0 0 4px 0;
+  margin: 0;
 }
 
-.zen-scrap-fullwidth-toggle {
+.zen-scrap-detail-title-editable {
+  cursor: pointer;
+  border-radius: 6px;
+  padding: 2px 6px;
+  margin: -2px -6px;
+  transition: background-color 0.15s ease;
+}
+
+.zen-scrap-detail-title-editable:hover {
+  background: var(--background-secondary);
+}
+
+.zen-scrap-fullwidth-toggle,
+.zen-scrap-help-btn {
   background: none;
   border: 1px solid var(--background-modifier-border);
   border-radius: 6px;
@@ -396,7 +510,8 @@
   align-items: center;
 }
 
-.zen-scrap-fullwidth-toggle:hover {
+.zen-scrap-fullwidth-toggle:hover,
+.zen-scrap-help-btn:hover {
   color: var(--text-normal);
   background: var(--background-secondary);
 }
@@ -434,10 +549,31 @@
   background: var(--background-secondary);
 }
 
+.zen-scrap-action-more-btn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+}
+
+.zen-scrap-action-more-btn:hover {
+  color: var(--text-normal);
+  background: var(--background-secondary);
+}
+
+.zen-scrap-action-more-btn:active {
+  transform: scale(0.92);
+}
+
 .zen-scrap-detail-title-row {
   display: flex;
   align-items: center;
   gap: 8px;
+  margin-bottom: 12px;
 }
 
 .zen-scrap-detail-title-row h2 {
@@ -526,7 +662,7 @@
 .zen-scrap-entry {
   border: 1px solid var(--background-modifier-border);
   border-radius: 6px;
-  margin-bottom: 20px;
+  margin-bottom: 36px;
   overflow: hidden;
 }
 
@@ -663,7 +799,6 @@
    ========================================================================== */
 
 .zen-scrap-input-area {
-  border-top: 1px solid var(--background-modifier-border);
   padding-top: 16px;
 }
 
@@ -1308,6 +1443,7 @@ pre:hover .zen-scrap-code-copy-btn {
 
 .zen-scrap-back-btn:active,
 .zen-scrap-fullwidth-toggle:active,
+.zen-scrap-help-btn:active,
 .zen-scrap-title-cancel-btn:active,
 .zen-scrap-edit-cancel-btn:active,
 .zen-scrap-img-btn:active,

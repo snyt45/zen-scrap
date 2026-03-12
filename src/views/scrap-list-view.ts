@@ -108,7 +108,7 @@ export class ScrapListView extends ItemView {
   private renderToolbar(container: HTMLElement): void {
     const toolbar = container.createDiv({ cls: "zen-scrap-toolbar" });
 
-    renderDropdown(toolbar, "公開状態", "all", [
+    renderDropdown(toolbar, "公開状態", "open", [
       { value: "all", label: "All" },
       { value: "open", label: "Open" },
       { value: "closed", label: "Closed" },

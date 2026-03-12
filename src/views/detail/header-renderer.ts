@@ -1,14 +1,19 @@
+import { Modal, Notice } from "obsidian";
 import { Scrap } from "../../data/types";
 import { ScrapRepository } from "../../data/scrap-repository";
 import { EventBus } from "../../events/event-bus";
 import { EVENTS } from "../../events/constants";
 import { formatDate } from "../../utils";
-import { chevronLeftIcon, EXPAND_ICON, SHRINK_ICON, TRIANGLE_DOWN_ICON, EDIT_ICON } from "../../icons";
+import { chevronLeftIcon, EXPAND_ICON, SHRINK_ICON, TRIANGLE_DOWN_ICON, EDIT_ICON, MORE_ICON, HELP_ICON } from "../../icons";
+import { MarkdownRenderer } from "./markdown-renderer";
+import shortcutGuideRaw from "../../../docs/shortcut-guide.md";
 
 export interface HeaderDeps {
   scrap: Scrap;
   repo: ScrapRepository;
   eventBus: EventBus;
+  app: import("obsidian").App;
+  markdownRenderer: MarkdownRenderer;
   isFullWidth: boolean;
   setFullWidth: (v: boolean) => void;
   containerEl: HTMLElement;
@@ -27,20 +32,31 @@ export function renderHeader(container: HTMLElement, deps: HeaderDeps): void {
   backBtn.innerHTML = `${chevronLeftIcon(14)} 一覧へ戻る`;
   backBtn.addEventListener("click", () => eventBus.emit(EVENTS.NAV_BACK_TO_LIST));
 
-  const fullWidthBtn = navRow.createEl("button", { cls: "zen-scrap-fullwidth-toggle" });
+  const navRight = navRow.createDiv({ cls: "zen-scrap-detail-nav-right" });
+
+  const fullWidthBtn = navRight.createEl("button", { cls: "zen-scrap-fullwidth-toggle" });
   fullWidthBtn.innerHTML = deps.isFullWidth ? SHRINK_ICON : EXPAND_ICON;
   fullWidthBtn.addEventListener("click", async () => {
     deps.setFullWidth(!deps.isFullWidth);
     await deps.render();
   });
 
+  const helpBtn = navRight.createEl("button", { cls: "zen-scrap-help-btn" });
+  helpBtn.innerHTML = HELP_ICON;
+  helpBtn.setAttribute("aria-label", "ショートカットガイド");
+  helpBtn.addEventListener("click", async () => {
+    const modal = new Modal(deps.app);
+    modal.titleEl.setText("ショートカット・操作ガイド");
+    modal.modalEl.addClass("zen-scrap-guide-modal");
+    const content = modal.contentEl.createDiv({ cls: "znc zen-scrap-guide-content" });
+    content.innerHTML = await deps.markdownRenderer.renderBody(shortcutGuideRaw);
+    modal.open();
+  });
+
   const titleRow = header.createDiv({ cls: "zen-scrap-detail-title-row" });
-  titleRow.createEl("h2", { text: scrap.title, cls: "zen-scrap-detail-title" });
+  const titleEl = titleRow.createEl("h2", { text: scrap.title, cls: "zen-scrap-detail-title zen-scrap-detail-title-editable" });
 
-  const editBtn = titleRow.createEl("button", { cls: "zen-scrap-title-edit-btn" });
-  editBtn.innerHTML = EDIT_ICON;
-
-  editBtn.addEventListener("click", () => {
+  titleEl.addEventListener("click", () => {
     titleRow.empty();
     const input = titleRow.createEl("input", {
       type: "text",
@@ -73,46 +89,61 @@ export function renderHeader(container: HTMLElement, deps: HeaderDeps): void {
   });
 
   const metaRow = header.createDiv({ cls: "zen-scrap-detail-meta" });
-  const labelCls = scrap.archived ? "zen-scrap-label-archived" : scrap.status === "open" ? "zen-scrap-label-open" : "zen-scrap-label-closed";
-  const labelText = scrap.archived ? "Archived" : scrap.status === "open" ? "Open" : "Closed";
-  metaRow.createSpan({ text: labelText, cls: labelCls });
+
+  // ステータス切り替えドロップダウン
+  const statusWrapper = metaRow.createDiv({ cls: "zen-scrap-status-switcher" });
+  const currentStatus = scrap.archived ? "archived" : scrap.status;
+  const statusConfig: Record<string, { label: string; cls: string }> = {
+    open: { label: "Open", cls: "zen-scrap-label-open" },
+    closed: { label: "Closed", cls: "zen-scrap-label-closed" },
+    archived: { label: "Archived", cls: "zen-scrap-label-archived" },
+  };
+  const current = statusConfig[currentStatus];
+  const statusBtn = statusWrapper.createEl("button", {
+    text: current.label,
+    cls: `zen-scrap-status-btn ${current.cls}`,
+  });
+  statusBtn.innerHTML = `${current.label} <span class="zen-scrap-status-arrow">${TRIANGLE_DOWN_ICON}</span>`;
+
+  const statusMenu = statusWrapper.createDiv({ cls: "zen-scrap-status-menu" });
+  for (const [key, config] of Object.entries(statusConfig)) {
+    if (key === currentStatus) continue;
+    const item = statusMenu.createDiv({ cls: "zen-scrap-status-menu-item" });
+    item.createSpan({ text: config.label, cls: `zen-scrap-status-dot ${config.cls}` });
+    item.addEventListener("click", async () => {
+      if (key === "archived") {
+        scrap.archived = true;
+        scrap.status = "closed";
+      } else {
+        scrap.archived = false;
+        scrap.status = key as "open" | "closed";
+      }
+      scrap.updated = new Date().toISOString();
+      await repo.save(scrap);
+      eventBus.emit(EVENTS.SCRAP_CHANGED);
+      await render();
+    });
+  }
+
+  statusBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    statusMenu.classList.toggle("is-open");
+  });
+  const closeStatusMenu = () => { statusMenu.classList.remove("is-open"); };
+  addDocumentClickHandler(closeStatusMenu);
   metaRow.createSpan({ text: formatDate(scrap.created) + "に作成", cls: "zen-scrap-detail-meta-text" });
   metaRow.createSpan({ text: `${scrap.entries.length}件のコメント`, cls: "zen-scrap-detail-meta-text" });
 
   // アクションドロップダウン
   const actionWrapper = metaRow.createDiv({ cls: "zen-scrap-action-dropdown" });
   const actionBtn = actionWrapper.createEl("button", {
-    cls: "zen-scrap-action-dropdown-btn",
+    cls: "zen-scrap-action-more-btn",
   });
-  actionBtn.innerHTML = `操作 <span class="zen-scrap-dropdown-arrow">${TRIANGLE_DOWN_ICON}</span>`;
+  actionBtn.innerHTML = MORE_ICON;
 
   const actionMenu = actionWrapper.createDiv({ cls: "zen-scrap-dropdown-menu" });
   actionMenu.style.left = "auto";
   actionMenu.style.right = "0";
-
-  const statusItem = actionMenu.createDiv({
-    text: scrap.status === "open" ? "クローズする" : "オープンにする",
-    cls: "zen-scrap-dropdown-item",
-  });
-  statusItem.addEventListener("click", async () => {
-    scrap.status = scrap.status === "open" ? "closed" : "open";
-    scrap.updated = new Date().toISOString();
-    await repo.save(scrap);
-    eventBus.emit(EVENTS.SCRAP_CHANGED);
-    await render();
-  });
-
-  const pinItem = actionMenu.createDiv({
-    text: scrap.pinned ? "ピン解除" : "ピン留め",
-    cls: "zen-scrap-dropdown-item",
-  });
-  pinItem.addEventListener("click", async () => {
-    scrap.pinned = !scrap.pinned;
-    scrap.updated = new Date().toISOString();
-    await repo.save(scrap);
-    eventBus.emit(EVENTS.SCRAP_CHANGED);
-    await render();
-  });
 
   const jsonItem = actionMenu.createDiv({
     text: "JSONをコピー",
@@ -121,6 +152,7 @@ export function renderHeader(container: HTMLElement, deps: HeaderDeps): void {
   jsonItem.addEventListener("click", () => {
     const json = JSON.stringify(scrap, null, 2);
     navigator.clipboard.writeText(json);
+    new Notice("JSONをクリップボードにコピーしました");
     actionMenu.classList.remove("is-open");
   });
 

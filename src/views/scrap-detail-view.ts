@@ -18,7 +18,7 @@ export class ScrapDetailView extends ItemView {
   private settings: ZenScrapSettings;
   private scrap: Scrap | undefined;
   private isFullWidth = false;
-  private ignoreNextChange = false;
+  private ignoreChangeCount = 0;
   private cleanupManager = new CleanupManager();
   private markdownRenderer: MarkdownRenderer;
   private onScrapChangedHandler: () => void;
@@ -30,10 +30,11 @@ export class ScrapDetailView extends ItemView {
     this.settings = settings;
     this.markdownRenderer = new MarkdownRenderer(this.app);
     this.onScrapChangedHandler = async () => {
-      if (this.ignoreNextChange || !this.scrap) {
-        this.ignoreNextChange = false;
+      if (this.ignoreChangeCount > 0) {
+        this.ignoreChangeCount--;
         return;
       }
+      if (!this.scrap) return;
       const updated = await this.repo.getByPath(this.scrap.filePath);
       if (updated) {
         this.scrap = updated;
@@ -88,7 +89,7 @@ export class ScrapDetailView extends ItemView {
     container.toggleClass("zen-scrap-fullwidth", this.isFullWidth);
 
     const render = () => {
-      this.ignoreNextChange = true;
+      this.ignoreChangeCount = 2;
       return this.render();
     };
     const scrap = this.scrap;
@@ -97,6 +98,8 @@ export class ScrapDetailView extends ItemView {
       scrap,
       repo: this.repo,
       eventBus: this.eventBus,
+      app: this.app,
+      markdownRenderer: this.markdownRenderer,
       isFullWidth: this.isFullWidth,
       setFullWidth: (v) => { this.isFullWidth = v; },
       containerEl: container,
@@ -128,7 +131,7 @@ export class ScrapDetailView extends ItemView {
     };
     await renderTimeline(container, timelineDeps);
 
-    if (scrap.status === "closed") {
+    if (scrap.status === "closed" || scrap.archived) {
       renderClosedBanner(container, scrap);
     }
     renderInputArea(container, inputAreaDeps);

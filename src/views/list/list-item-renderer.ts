@@ -38,9 +38,11 @@ export function renderListItem(parent: HTMLElement, scrap: Scrap, deps: ListItem
   const pinItem = menu.createDiv({ cls: "zen-scrap-dropdown-item", text: pinLabel });
   pinItem.addEventListener("click", async (e) => {
     e.stopPropagation();
-    scrap.pinned = !scrap.pinned;
-    scrap.updated = new Date().toISOString();
-    await repo.save(scrap);
+    const fresh = await repo.getByPath(scrap.filePath);
+    if (!fresh) return;
+    fresh.pinned = !fresh.pinned;
+    fresh.updated = new Date().toISOString();
+    await repo.save(fresh);
     eventBus.emit(EVENTS.SCRAP_CHANGED);
   });
 
@@ -48,8 +50,10 @@ export function renderListItem(parent: HTMLElement, scrap: Scrap, deps: ListItem
   const archiveItem = menu.createDiv({ cls: "zen-scrap-dropdown-item", text: archiveLabel });
   archiveItem.addEventListener("click", async (e) => {
     e.stopPropagation();
-    scrap.archived = !scrap.archived;
-    await repo.save(scrap);
+    const fresh = await repo.getByPath(scrap.filePath);
+    if (!fresh) return;
+    fresh.archived = !fresh.archived;
+    await repo.save(fresh);
     eventBus.emit(EVENTS.SCRAP_CHANGED);
   });
 
