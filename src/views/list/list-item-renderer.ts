@@ -1,0 +1,67 @@
+import { Scrap } from "../../data/types";
+import { ScrapRepository } from "../../data/scrap-repository";
+import { EventBus } from "../../events/event-bus";
+import { EVENTS } from "../../events/constants";
+import { formatDate } from "../../utils";
+import { chevronDownIcon } from "../../icons";
+
+export interface ListItemDeps {
+  repo: ScrapRepository;
+  eventBus: EventBus;
+}
+
+export function renderListItem(parent: HTMLElement, scrap: Scrap, deps: ListItemDeps): void {
+  const { repo, eventBus } = deps;
+  const item = parent.createDiv({ cls: "zen-scrap-list-item" });
+
+  // 1行目: タイトル + メニューボタン
+  const titleRow = item.createDiv({ cls: "zen-scrap-item-title-row" });
+  titleRow.createSpan({ text: scrap.title, cls: "zen-scrap-item-title" });
+  titleRow.addEventListener("click", () => eventBus.emit(EVENTS.SCRAP_SELECT, scrap));
+
+  const menuWrapper = titleRow.createDiv({ cls: "zen-scrap-item-menu" });
+  const menuBtn = menuWrapper.createEl("button", { cls: "zen-scrap-item-menu-btn" });
+  menuBtn.innerHTML = chevronDownIcon(20, 2.5);
+
+  const menu = menuWrapper.createDiv({ cls: "zen-scrap-item-menu-dropdown" });
+  menu.style.display = "none";
+
+  const archiveLabel = scrap.archived ? "オープンに戻す" : "アーカイブする";
+  const archiveItem = menu.createDiv({ cls: "zen-scrap-dropdown-item", text: archiveLabel });
+  archiveItem.addEventListener("click", async (e) => {
+    e.stopPropagation();
+    scrap.archived = !scrap.archived;
+    await repo.save(scrap);
+    eventBus.emit(EVENTS.SCRAP_CHANGED);
+  });
+
+  const deleteItem = menu.createDiv({ cls: "zen-scrap-dropdown-item zen-scrap-dropdown-item-danger", text: "削除する" });
+  deleteItem.addEventListener("click", async (e) => {
+    e.stopPropagation();
+    if (!confirm(`「${scrap.title}」を削除しますか？`)) return;
+    await repo.delete(scrap);
+    eventBus.emit(EVENTS.SCRAP_CHANGED);
+  });
+
+  menuBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    const isOpen = menu.style.display !== "none";
+    // 他のメニューを閉じる
+    parent.querySelectorAll<HTMLElement>(".zen-scrap-item-menu-dropdown").forEach((m) => {
+      m.style.display = "none";
+    });
+    menu.style.display = isOpen ? "none" : "";
+  });
+
+  // 2行目: ステータス + 日付情報
+  const metaRow = item.createDiv({ cls: "zen-scrap-item-meta" });
+  metaRow.addEventListener("click", () => eventBus.emit(EVENTS.SCRAP_SELECT, scrap));
+  const labelCls = scrap.archived ? "zen-scrap-label-archived" : scrap.status === "open" ? "zen-scrap-label-open" : "zen-scrap-label-closed";
+  const labelText = scrap.archived ? "Archived" : scrap.status === "open" ? "Open" : "Closed";
+  metaRow.createSpan({ text: labelText, cls: labelCls });
+  metaRow.createSpan({ text: formatDate(scrap.created) + "に作成", cls: "zen-scrap-item-time" });
+  if (scrap.status === "closed") {
+    metaRow.createSpan({ text: " / " + formatDate(scrap.updated) + "にクローズ", cls: "zen-scrap-item-time" });
+  }
+  metaRow.createSpan({ text: `${scrap.entries.length}件`, cls: "zen-scrap-item-count" });
+}
