@@ -1071,6 +1071,41 @@ pre:hover .zen-scrap-code-copy-btn {
   background: var(--background-primary);
 }
 
+.zen-scrap-tag {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 12px;
+  background: var(--background-modifier-hover);
+  color: var(--text-muted);
+  font-size: 0.8em;
+  cursor: pointer;
+}
+
+.zen-scrap-tag:hover {
+  background: var(--interactive-accent);
+  color: var(--text-on-accent);
+}
+
+.zen-scrap-item-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 4px 0 0;
+}
+
+.zen-scrap-filter-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 12px;
+  background: var(--interactive-accent);
+  color: var(--text-on-accent);
+  font-size: 0.85em;
+  cursor: pointer;
+  margin-bottom: 8px;
+}
+
 .zen-scrap-tag-input {
   margin-top: 8px;
 }

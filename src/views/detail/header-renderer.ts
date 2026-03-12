@@ -43,6 +43,12 @@ export function renderHeader(container: HTMLElement, deps: HeaderDeps): void {
   metaRow.createSpan({ text: formatDate(scrap.created) + "に作成", cls: "zen-scrap-detail-meta-text" });
   metaRow.createSpan({ text: `${scrap.entries.length}件のコメント`, cls: "zen-scrap-detail-meta-text" });
 
+  if (scrap.tags.length > 0) {
+    for (const tag of scrap.tags) {
+      metaRow.createSpan({ text: tag, cls: "zen-scrap-tag" });
+    }
+  }
+
   // アクションドロップダウン
   const actionWrapper = metaRow.createDiv({ cls: "zen-scrap-action-dropdown" });
   const actionBtn = actionWrapper.createEl("button", {

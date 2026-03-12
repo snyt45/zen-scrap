@@ -14,6 +14,7 @@ export class ScrapListView extends ItemView {
   private filter: "all" | "open" | "closed" | "archived" = "open";
   private sort: "created" | "updated" = "created";
   private searchQuery = "";
+  private filterTag = "";
   private onScrapChangedHandler: () => void;
   private cleanupManager = new CleanupManager();
 
@@ -55,6 +56,7 @@ export class ScrapListView extends ItemView {
     this.renderHeader(container);
     this.renderSearch(container);
     this.renderToolbar(container);
+    this.renderFilterTag(container);
     await this.renderList(container);
   }
 
@@ -94,6 +96,15 @@ export class ScrapListView extends ItemView {
     await this.renderList(container);
   }
 
+  private renderFilterTag(container: HTMLElement): void {
+    if (!this.filterTag) return;
+    const pill = container.createDiv({ cls: "zen-scrap-filter-tag", text: `\u00d7 ${this.filterTag}` });
+    pill.addEventListener("click", () => {
+      this.filterTag = "";
+      this.render();
+    });
+  }
+
   private renderToolbar(container: HTMLElement): void {
     const toolbar = container.createDiv({ cls: "zen-scrap-toolbar" });
 
@@ -120,6 +131,11 @@ export class ScrapListView extends ItemView {
       return s.status === this.filter && !s.archived;
     });
 
+    // タグフィルタ
+    if (this.filterTag) {
+      filtered = filtered.filter((s) => s.tags.includes(this.filterTag));
+    }
+
     // 全文検索
     if (this.searchQuery) {
       const q = this.searchQuery.toLowerCase();
@@ -144,7 +160,14 @@ export class ScrapListView extends ItemView {
       return;
     }
 
-    const deps = { repo: this.repo, eventBus: this.eventBus };
+    const deps = {
+      repo: this.repo,
+      eventBus: this.eventBus,
+      onTagClick: (tag: string) => {
+        this.filterTag = tag;
+        this.render();
+      },
+    };
     for (const scrap of filtered) {
       renderListItem(list, scrap, deps);
     }

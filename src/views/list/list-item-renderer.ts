@@ -8,6 +8,7 @@ import { chevronDownIcon } from "../../icons";
 export interface ListItemDeps {
   repo: ScrapRepository;
   eventBus: EventBus;
+  onTagClick?: (tag: string) => void;
 }
 
 export function renderListItem(parent: HTMLElement, scrap: Scrap, deps: ListItemDeps): void {
@@ -64,4 +65,16 @@ export function renderListItem(parent: HTMLElement, scrap: Scrap, deps: ListItem
     metaRow.createSpan({ text: " / " + formatDate(scrap.updated) + "にクローズ", cls: "zen-scrap-item-time" });
   }
   metaRow.createSpan({ text: `${scrap.entries.length}件`, cls: "zen-scrap-item-count" });
+
+  // 3行目: タグ
+  if (scrap.tags.length > 0) {
+    const tagRow = item.createDiv({ cls: "zen-scrap-item-tags" });
+    for (const tag of scrap.tags) {
+      const pill = tagRow.createSpan({ text: tag, cls: "zen-scrap-tag" });
+      pill.addEventListener("click", (e) => {
+        e.stopPropagation();
+        deps.onTagClick?.(tag);
+      });
+    }
+  }
 }
