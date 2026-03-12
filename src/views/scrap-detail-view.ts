@@ -2,6 +2,7 @@ import { ItemView, WorkspaceLeaf } from "obsidian";
 import { Scrap } from "../data/types";
 import { ScrapRepository } from "../data/scrap-repository";
 import { EventBus } from "../events/event-bus";
+import { EVENTS } from "../events/constants";
 import { MarkdownRenderer } from "./detail/markdown-renderer";
 import { renderHeader, HeaderDeps } from "./detail/header-renderer";
 import { renderTimeline, renderClosedBanner, TimelineDeps } from "./detail/timeline-renderer";
@@ -17,8 +18,10 @@ export class ScrapDetailView extends ItemView {
   private settings: ZenScrapSettings;
   private scrap: Scrap | undefined;
   private isFullWidth = false;
+  private ignoreNextChange = false;
   private cleanupManager = new CleanupManager();
   private markdownRenderer: MarkdownRenderer;
+  private onScrapChangedHandler: () => void;
 
   constructor(leaf: WorkspaceLeaf, repo: ScrapRepository, eventBus: EventBus, settings: ZenScrapSettings) {
     super(leaf);
@@ -26,6 +29,17 @@ export class ScrapDetailView extends ItemView {
     this.eventBus = eventBus;
     this.settings = settings;
     this.markdownRenderer = new MarkdownRenderer(this.app);
+    this.onScrapChangedHandler = async () => {
+      if (this.ignoreNextChange || !this.scrap) {
+        this.ignoreNextChange = false;
+        return;
+      }
+      const updated = await this.repo.getByPath(this.scrap.filePath);
+      if (updated) {
+        this.scrap = updated;
+        await this.render();
+      }
+    };
   }
 
   getViewType(): string {
@@ -56,10 +70,12 @@ export class ScrapDetailView extends ItemView {
   }
 
   async onOpen(): Promise<void> {
+    this.eventBus.on(EVENTS.SCRAP_CHANGED, this.onScrapChangedHandler);
     await this.render();
   }
 
   async onClose(): Promise<void> {
+    this.eventBus.off(EVENTS.SCRAP_CHANGED, this.onScrapChangedHandler);
     this.cleanupManager.cleanup();
   }
 
@@ -71,7 +87,10 @@ export class ScrapDetailView extends ItemView {
     container.addClass("zen-scrap-detail-container");
     if (this.isFullWidth) container.addClass("zen-scrap-fullwidth");
 
-    const render = () => this.render();
+    const render = () => {
+      this.ignoreNextChange = true;
+      return this.render();
+    };
     const scrap = this.scrap;
 
     const headerDeps: HeaderDeps = {

@@ -1,4 +1,4 @@
-import { Plugin } from "obsidian";
+import { Plugin, TFile } from "obsidian";
 import { ScrapRepository } from "./data/scrap-repository";
 import { ScrapListView, VIEW_TYPE_SCRAP_LIST } from "./views/scrap-list-view";
 import { ScrapDetailView, VIEW_TYPE_SCRAP_DETAIL } from "./views/scrap-detail-view";
@@ -6,6 +6,7 @@ import { Scrap } from "./data/types";
 import { EventBus } from "./events/event-bus";
 import { registerScrapHandlers } from "./events/scrap-handlers";
 import { registerNavHandlers } from "./events/nav-handlers";
+import { EVENTS } from "./events/constants";
 import { ZenScrapSettings, DEFAULT_SETTINGS, ZenScrapSettingTab } from "./settings";
 
 export default class ZenScrapPlugin extends Plugin {
@@ -41,6 +42,20 @@ export default class ZenScrapPlugin extends Plugin {
     });
 
     this.addSettingTab(new ZenScrapSettingTab(this.app, this));
+
+    let vaultChangeTimer: ReturnType<typeof setTimeout> | null = null;
+    const emitIfScrapFile = (file: unknown) => {
+      if (file instanceof TFile && file.path.startsWith(this.settings.scrapsFolder + "/")) {
+        if (vaultChangeTimer) clearTimeout(vaultChangeTimer);
+        vaultChangeTimer = setTimeout(() => {
+          vaultChangeTimer = null;
+          this.eventBus.emit(EVENTS.SCRAP_CHANGED);
+        }, 300);
+      }
+    };
+    this.registerEvent(this.app.vault.on("modify", emitIfScrapFile));
+    this.registerEvent(this.app.vault.on("delete", emitIfScrapFile));
+    this.registerEvent(this.app.vault.on("create", emitIfScrapFile));
   }
 
   async loadSettings() {
