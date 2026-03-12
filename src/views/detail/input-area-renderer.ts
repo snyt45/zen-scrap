@@ -41,7 +41,6 @@ export function renderInputArea(container: HTMLElement, deps: InputAreaDeps): vo
     cls: "zen-scrap-textarea",
   });
   setupAutoGrow(textarea);
-  setupImageDrop(textarea, deps);
 
   const preview = inputArea.createDiv({ cls: "zen-scrap-preview znc" });
   preview.style.display = "none";
@@ -110,7 +109,6 @@ export function renderEntryEditor(deps: EntryEditorDeps): void {
   });
   textarea.value = entry.body;
   setupAutoGrow(textarea);
-  setupImageDrop(textarea, deps);
   requestAnimationFrame(() => {
     textarea.style.height = "auto";
     textarea.style.height = textarea.scrollHeight + "px";
@@ -210,28 +208,6 @@ function handleImageUpload(textarea: HTMLTextAreaElement, deps: InputAreaDeps): 
   input.click();
 }
 
-function setupImageDrop(textarea: HTMLTextAreaElement, deps: InputAreaDeps): void {
-  textarea.addEventListener("dragover", (e) => {
-    e.preventDefault();
-    textarea.addClass("zen-scrap-textarea-dragover");
-  });
-
-  textarea.addEventListener("dragleave", () => {
-    textarea.removeClass("zen-scrap-textarea-dragover");
-  });
-
-  textarea.addEventListener("drop", async (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    textarea.removeClass("zen-scrap-textarea-dragover");
-    const files = e.dataTransfer?.files;
-    if (!files) return;
-    for (let i = 0; i < files.length; i++) {
-      if (!files[i].type.startsWith("image/")) continue;
-      await uploadAndInsert(files[i], textarea, deps);
-    }
-  });
-}
 
 function renderEmbedButton(parent: HTMLElement, textarea: HTMLTextAreaElement, deps: InputAreaDeps): void {
   const wrapper = parent.createDiv({ cls: "zen-scrap-embed-wrapper" });

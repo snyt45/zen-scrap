@@ -1,7 +1,7 @@
 import { Scrap } from "../../data/types";
 import { ScrapRepository } from "../../data/scrap-repository";
 import { formatDate } from "../../utils";
-import { chevronDownIcon, chevronUpIcon } from "../../icons";
+import { chevronDownIcon, GRIP_ICON } from "../../icons";
 import { MarkdownRenderer } from "./markdown-renderer";
 import { renderEntryEditor, EntryEditorDeps } from "./input-area-renderer";
 
@@ -34,41 +34,106 @@ export async function renderTimeline(container: HTMLElement, deps: TimelineDeps)
     return;
   }
 
+  // 自動スクロール用: 詳細画面のスクロールコンテナを取得
+  const scrollContainer = timeline.closest(".zen-scrap-detail-container") as HTMLElement | null;
+  let autoScrollRaf = 0;
+
+  const startAutoScroll = (clientY: number) => {
+    cancelAnimationFrame(autoScrollRaf);
+    if (!scrollContainer) return;
+    const rect = scrollContainer.getBoundingClientRect();
+    const edgeZone = 60;
+    const maxSpeed = 12;
+
+    const tick = () => {
+      const top = clientY - rect.top;
+      const bottom = rect.bottom - clientY;
+      if (top < edgeZone) {
+        scrollContainer.scrollTop -= maxSpeed * (1 - top / edgeZone);
+      } else if (bottom < edgeZone) {
+        scrollContainer.scrollTop += maxSpeed * (1 - bottom / edgeZone);
+      }
+      autoScrollRaf = requestAnimationFrame(tick);
+    };
+    autoScrollRaf = requestAnimationFrame(tick);
+  };
+
+  const stopAutoScroll = () => cancelAnimationFrame(autoScrollRaf);
+
   for (let i = 0; i < scrap.entries.length; i++) {
     const entry = scrap.entries[i];
     const entryEl = timeline.createDiv({ cls: "zen-scrap-entry" });
 
-    const entryHeader = entryEl.createDiv({ cls: "zen-scrap-entry-header" });
-    entryHeader.createSpan({ text: entry.timestamp, cls: "zen-scrap-entry-time" });
-
-    // 並べ替えボタン（エントリが2件以上のときのみ表示）
+    // ドラッグ&ドロップ並べ替え（ハンドルからのみ）
     if (scrap.entries.length > 1) {
-      const reorderBtns = entryHeader.createDiv({ cls: "zen-scrap-reorder-btns" });
+      entryEl.dataset.entryIndex = String(i);
 
-      if (i > 0) {
-        const upBtn = reorderBtns.createEl("button", { cls: "zen-scrap-reorder-btn" });
-        upBtn.innerHTML = chevronUpIcon(14, 2.5);
-        upBtn.addEventListener("click", async (e) => {
-          e.stopPropagation();
-          [scrap.entries[i - 1], scrap.entries[i]] = [scrap.entries[i], scrap.entries[i - 1]];
-          scrap.updated = new Date().toISOString();
-          await repo.save(scrap);
-          await render();
-        });
-      }
+      entryEl.addEventListener("dragstart", (e) => {
+        // ハンドル以外からのドラッグを無効化
+        const target = e.target as HTMLElement;
+        if (!target.closest(".zen-scrap-drag-handle")) {
+          e.preventDefault();
+          return;
+        }
+        entryEl.addClass("zen-scrap-entry-dragging");
+        e.dataTransfer!.effectAllowed = "move";
+        e.dataTransfer!.setData("text/plain", String(i));
+      });
 
-      if (i < scrap.entries.length - 1) {
-        const downBtn = reorderBtns.createEl("button", { cls: "zen-scrap-reorder-btn" });
-        downBtn.innerHTML = chevronDownIcon(14, 2.5);
-        downBtn.addEventListener("click", async (e) => {
-          e.stopPropagation();
-          [scrap.entries[i], scrap.entries[i + 1]] = [scrap.entries[i + 1], scrap.entries[i]];
-          scrap.updated = new Date().toISOString();
-          await repo.save(scrap);
-          await render();
+      entryEl.addEventListener("dragend", () => {
+        entryEl.removeClass("zen-scrap-entry-dragging");
+        stopAutoScroll();
+        timeline.querySelectorAll(".zen-scrap-entry-dragover").forEach((el) => {
+          el.removeClass("zen-scrap-entry-dragover");
         });
-      }
+      });
+
+      entryEl.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        e.dataTransfer!.dropEffect = "move";
+        startAutoScroll(e.clientY);
+        if (!entryEl.hasClass("zen-scrap-entry-dragging")) {
+          entryEl.addClass("zen-scrap-entry-dragover");
+        }
+      });
+
+      entryEl.addEventListener("dragleave", () => {
+        entryEl.removeClass("zen-scrap-entry-dragover");
+      });
+
+      entryEl.addEventListener("drop", async (e) => {
+        e.preventDefault();
+        stopAutoScroll();
+        entryEl.removeClass("zen-scrap-entry-dragover");
+        const fromIndex = Number(e.dataTransfer!.getData("text/plain"));
+        const toIndex = i;
+        if (fromIndex === toIndex) return;
+
+        const [moved] = scrap.entries.splice(fromIndex, 1);
+        scrap.entries.splice(toIndex, 0, moved);
+        scrap.updated = new Date().toISOString();
+        await repo.save(scrap);
+        await render();
+      });
     }
+
+    const entryHeader = entryEl.createDiv({ cls: "zen-scrap-entry-header" });
+
+    // ドラッグハンドル
+    if (scrap.entries.length > 1) {
+      const handle = entryHeader.createEl("button", { cls: "zen-scrap-drag-handle" });
+      handle.innerHTML = GRIP_ICON;
+      handle.setAttribute("draggable", "true");
+      handle.addEventListener("dragstart", (e) => {
+        // ハンドルのdragstartを親のentryElに伝搬させる
+        entryEl.dispatchEvent(new DragEvent("dragstart", {
+          dataTransfer: e.dataTransfer,
+          bubbles: true,
+        }));
+      });
+    }
+
+    entryHeader.createSpan({ text: entry.timestamp, cls: "zen-scrap-entry-time" });
 
     const menuWrapper = entryHeader.createDiv({ cls: "zen-scrap-entry-menu" });
     const menuBtn = menuWrapper.createEl("button", { cls: "zen-scrap-entry-menu-btn" });

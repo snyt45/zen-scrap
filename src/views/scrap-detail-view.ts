@@ -85,7 +85,7 @@ export class ScrapDetailView extends ItemView {
     container.empty();
     if (!this.scrap) return;
     container.addClass("zen-scrap-detail-container");
-    if (this.isFullWidth) container.addClass("zen-scrap-fullwidth");
+    container.toggleClass("zen-scrap-fullwidth", this.isFullWidth);
 
     const render = () => {
       this.ignoreNextChange = true;

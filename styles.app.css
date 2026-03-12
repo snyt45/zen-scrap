@@ -445,26 +445,29 @@
   border-bottom: 1px solid var(--background-modifier-border);
 }
 
-.zen-scrap-reorder-btns {
-  display: flex;
-  align-items: center;
-  gap: 2px;
-}
-
-.zen-scrap-reorder-btn {
+.zen-scrap-drag-handle {
   background: none;
   border: none;
   color: var(--text-faint);
-  cursor: pointer;
+  cursor: grab;
   padding: 2px;
   display: inline-flex;
   align-items: center;
   border-radius: 4px;
+  flex-shrink: 0;
 }
 
-.zen-scrap-reorder-btn:hover {
-  color: var(--text-normal);
+.zen-scrap-drag-handle:hover {
+  color: var(--text-muted);
   background: var(--background-modifier-hover);
+}
+
+.zen-scrap-entry-dragging {
+  opacity: 0.4;
+}
+
+.zen-scrap-entry-dragover {
+  border-top: 2px solid var(--interactive-accent);
 }
 
 .zen-scrap-entry-menu {
@@ -589,10 +592,6 @@
   border-color: var(--interactive-accent);
 }
 
-.zen-scrap-textarea-dragover {
-  border-color: var(--interactive-accent) !important;
-  background: var(--background-secondary);
-}
 
 .zen-scrap-pill-tabs {
   display: flex;
