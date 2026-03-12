@@ -48,6 +48,30 @@ export async function renderTimeline(container: HTMLElement, deps: TimelineDeps)
     const menu = menuWrapper.createDiv({ cls: "zen-scrap-entry-menu-dropdown" });
     menu.style.display = "none";
 
+    if (i > 0) {
+      const moveUpItem = menu.createDiv({ cls: "zen-scrap-dropdown-item", text: "上へ移動" });
+      moveUpItem.addEventListener("click", async (e) => {
+        e.stopPropagation();
+        menu.style.display = "none";
+        [scrap.entries[i - 1], scrap.entries[i]] = [scrap.entries[i], scrap.entries[i - 1]];
+        scrap.updated = new Date().toISOString();
+        await repo.save(scrap);
+        await render();
+      });
+    }
+
+    if (i < scrap.entries.length - 1) {
+      const moveDownItem = menu.createDiv({ cls: "zen-scrap-dropdown-item", text: "下へ移動" });
+      moveDownItem.addEventListener("click", async (e) => {
+        e.stopPropagation();
+        menu.style.display = "none";
+        [scrap.entries[i], scrap.entries[i + 1]] = [scrap.entries[i + 1], scrap.entries[i]];
+        scrap.updated = new Date().toISOString();
+        await repo.save(scrap);
+        await render();
+      });
+    }
+
     const editItem = menu.createDiv({ cls: "zen-scrap-dropdown-item", text: "編集" });
     const deleteItem = menu.createDiv({ cls: "zen-scrap-dropdown-item zen-scrap-dropdown-item-danger", text: "削除" });
 
