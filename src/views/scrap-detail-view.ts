@@ -1,4 +1,4 @@
-import { ItemView, WorkspaceLeaf, TFile, Modal } from "obsidian";
+import { ItemView, WorkspaceLeaf, TFile, Modal, Scope } from "obsidian";
 import markdownToHtml from "zenn-markdown-html";
 import { Scrap } from "../data/types";
 import { ScrapRepository } from "../data/scrap-repository";
@@ -371,13 +371,14 @@ export class ScrapDetailView extends ItemView {
       await this.render();
     });
 
-    textarea.addEventListener("keydown", (e: KeyboardEvent) => {
-      if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
-        e.preventDefault();
-        e.stopPropagation();
-        submitBtn.click();
-      }
+    const submitScope = new Scope(this.scope ?? undefined);
+    submitScope.register(["Mod"], "Enter", (e: KeyboardEvent) => {
+      e.preventDefault();
+      submitBtn.click();
+      return false;
     });
+    textarea.addEventListener("focus", () => this.app.keymap.pushScope(submitScope));
+    textarea.addEventListener("blur", () => this.app.keymap.popScope(submitScope));
   }
 
   private handleImageUpload(textarea: HTMLTextAreaElement): void {
@@ -588,13 +589,14 @@ export class ScrapDetailView extends ItemView {
       await this.render();
     });
 
-    textarea.addEventListener("keydown", (e: KeyboardEvent) => {
-      if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
-        e.preventDefault();
-        e.stopPropagation();
-        updateBtn.click();
-      }
+    const updateScope = new Scope(this.scope ?? undefined);
+    updateScope.register(["Mod"], "Enter", (e: KeyboardEvent) => {
+      e.preventDefault();
+      updateBtn.click();
+      return false;
     });
+    textarea.addEventListener("focus", () => this.app.keymap.pushScope(updateScope));
+    textarea.addEventListener("blur", () => this.app.keymap.popScope(updateScope));
 
     textarea.focus();
   }
