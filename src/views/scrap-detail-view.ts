@@ -7,6 +7,7 @@ import { renderHeader, HeaderDeps } from "./detail/header-renderer";
 import { renderTimeline, renderClosedBanner, TimelineDeps } from "./detail/timeline-renderer";
 import { renderInputArea, InputAreaDeps } from "./detail/input-area-renderer";
 import type { ZenScrapSettings } from "../settings";
+import { CleanupManager } from "../ui/cleanup-manager";
 
 export const VIEW_TYPE_SCRAP_DETAIL = "zen-scrap-detail";
 
@@ -16,7 +17,7 @@ export class ScrapDetailView extends ItemView {
   private settings: ZenScrapSettings;
   private scrap: Scrap | undefined;
   private isFullWidth = false;
-  private documentClickHandlers: (() => void)[] = [];
+  private cleanupManager = new CleanupManager();
   private markdownRenderer: MarkdownRenderer;
 
   constructor(leaf: WorkspaceLeaf, repo: ScrapRepository, eventBus: EventBus, settings: ZenScrapSettings) {
@@ -59,23 +60,11 @@ export class ScrapDetailView extends ItemView {
   }
 
   async onClose(): Promise<void> {
-    this.cleanupDocumentListeners();
+    this.cleanupManager.cleanup();
   }
-
-  private cleanupDocumentListeners(): void {
-    for (const handler of this.documentClickHandlers) {
-      document.removeEventListener("click", handler);
-    }
-    this.documentClickHandlers = [];
-  }
-
-  private addDocumentClickHandler = (handler: () => void): void => {
-    document.addEventListener("click", handler);
-    this.documentClickHandlers.push(handler);
-  };
 
   async render(): Promise<void> {
-    this.cleanupDocumentListeners();
+    this.cleanupManager.cleanup();
     const container = this.containerEl.children[1] as HTMLElement;
     container.empty();
     if (!this.scrap) return;
@@ -94,7 +83,7 @@ export class ScrapDetailView extends ItemView {
       containerEl: container,
       render,
       openFile: (path) => this.app.workspace.openLinkText(path, "", true),
-      addDocumentClickHandler: this.addDocumentClickHandler,
+      addDocumentClickHandler: (h) => this.cleanupManager.registerDocumentClick(h),
     };
     renderHeader(container, headerDeps);
 
@@ -106,7 +95,7 @@ export class ScrapDetailView extends ItemView {
       scope: this.scope,
       markdownRenderer: this.markdownRenderer,
       render,
-      addDocumentClickHandler: this.addDocumentClickHandler,
+      addDocumentClickHandler: (h) => this.cleanupManager.registerDocumentClick(h),
       setScrap: (s) => { this.scrap = s; },
     };
 
@@ -115,7 +104,7 @@ export class ScrapDetailView extends ItemView {
       repo: this.repo,
       render,
       markdownRenderer: this.markdownRenderer,
-      addDocumentClickHandler: this.addDocumentClickHandler,
+      addDocumentClickHandler: (h) => this.cleanupManager.registerDocumentClick(h),
       entryEditorDeps: inputAreaDeps,
     };
     await renderTimeline(container, timelineDeps);

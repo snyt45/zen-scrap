@@ -4,6 +4,7 @@ import { EventBus } from "../events/event-bus";
 import { EVENTS } from "../events/constants";
 import { renderDropdown } from "./list/toolbar-renderer";
 import { renderListItem } from "./list/list-item-renderer";
+import { CleanupManager } from "../ui/cleanup-manager";
 
 export const VIEW_TYPE_SCRAP_LIST = "zen-scrap-list";
 
@@ -14,7 +15,7 @@ export class ScrapListView extends ItemView {
   private sort: "created" | "updated" = "created";
   private searchQuery = "";
   private onScrapChangedHandler: () => void;
-  private documentClickHandlers: (() => void)[] = [];
+  private cleanupManager = new CleanupManager();
 
   constructor(leaf: WorkspaceLeaf, repo: ScrapRepository, eventBus: EventBus) {
     super(leaf);
@@ -42,22 +43,11 @@ export class ScrapListView extends ItemView {
 
   async onClose(): Promise<void> {
     this.eventBus.off(EVENTS.SCRAP_CHANGED, this.onScrapChangedHandler);
-    this.cleanupDocumentListeners();
+    this.cleanupManager.cleanup();
   }
-
-  private cleanupDocumentListeners(): void {
-    for (const handler of this.documentClickHandlers) {
-      document.removeEventListener("click", handler);
-    }
-    this.documentClickHandlers = [];
-  }
-
-  private addDocumentClickHandler = (handler: () => void): void => {
-    this.documentClickHandlers.push(handler);
-  };
 
   async render(): Promise<void> {
-    this.cleanupDocumentListeners();
+    this.cleanupManager.cleanup();
     const container = this.containerEl.children[1] as HTMLElement;
     container.empty();
     container.addClass("zen-scrap-list-container");
@@ -112,12 +102,12 @@ export class ScrapListView extends ItemView {
       { value: "open", label: "Open" },
       { value: "closed", label: "Closed" },
       { value: "archived", label: "Archived" },
-    ], this.filter, (v) => { this.filter = v as typeof this.filter; this.render(); }, this.addDocumentClickHandler);
+    ], this.filter, (v) => { this.filter = v as typeof this.filter; this.render(); }, (h: () => void) => this.cleanupManager.registerDocumentClick(h));
 
     renderDropdown(toolbar, "並び替え", "created", [
       { value: "created", label: "作成日が新しい順" },
       { value: "updated", label: "更新日が新しい順" },
-    ], this.sort, (v) => { this.sort = v as typeof this.sort; this.render(); }, this.addDocumentClickHandler);
+    ], this.sort, (v) => { this.sort = v as typeof this.sort; this.render(); }, (h: () => void) => this.cleanupManager.registerDocumentClick(h));
   }
 
   private async renderList(container: HTMLElement): Promise<void> {
@@ -165,7 +155,6 @@ export class ScrapListView extends ItemView {
         m.style.display = "none";
       });
     };
-    document.addEventListener("click", closeMenus);
-    this.documentClickHandlers.push(closeMenus);
+    this.cleanupManager.registerDocumentClick(closeMenus);
   }
 }
