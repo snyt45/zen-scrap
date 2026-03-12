@@ -1109,3 +1109,49 @@ pre:hover .zen-scrap-code-copy-btn {
 .zen-scrap-tag-input {
   margin-top: 8px;
 }
+
+.zen-scrap-tag-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.zen-scrap-tag-edit-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 4px;
+}
+
+.zen-scrap-tag-edit-btn:hover {
+  color: var(--text-accent);
+  background: var(--background-modifier-hover);
+}
+
+.zen-scrap-tag-add-link {
+  color: var(--text-muted);
+  font-size: 0.85em;
+  cursor: pointer;
+}
+
+.zen-scrap-tag-add-link:hover {
+  color: var(--text-accent);
+}
+
+.zen-scrap-tag-edit-input {
+  flex: 1;
+  min-width: 200px;
+  padding: 4px 8px;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 4px;
+  background: var(--background-primary);
+  color: var(--text-normal);
+  font-size: 0.85em;
+}

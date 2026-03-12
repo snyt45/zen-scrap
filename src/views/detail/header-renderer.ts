@@ -43,12 +43,6 @@ export function renderHeader(container: HTMLElement, deps: HeaderDeps): void {
   metaRow.createSpan({ text: formatDate(scrap.created) + "に作成", cls: "zen-scrap-detail-meta-text" });
   metaRow.createSpan({ text: `${scrap.entries.length}件のコメント`, cls: "zen-scrap-detail-meta-text" });
 
-  if (scrap.tags.length > 0) {
-    for (const tag of scrap.tags) {
-      metaRow.createSpan({ text: tag, cls: "zen-scrap-tag" });
-    }
-  }
-
   // アクションドロップダウン
   const actionWrapper = metaRow.createDiv({ cls: "zen-scrap-action-dropdown" });
   const actionBtn = actionWrapper.createEl("button", {
@@ -149,4 +143,58 @@ export function renderHeader(container: HTMLElement, deps: HeaderDeps): void {
     input.focus();
     input.select();
   });
+
+  // タグ行
+  const tagRow = header.createDiv({ cls: "zen-scrap-tag-row" });
+
+  const renderTagDisplay = () => {
+    tagRow.empty();
+    if (scrap.tags.length > 0) {
+      for (const tag of scrap.tags) {
+        tagRow.createSpan({ text: tag, cls: "zen-scrap-tag" });
+      }
+      const tagEditBtn = tagRow.createEl("button", { cls: "zen-scrap-tag-edit-btn" });
+      tagEditBtn.innerHTML = EDIT_ICON;
+      tagEditBtn.addEventListener("click", () => renderTagEdit());
+    } else {
+      const addLink = tagRow.createSpan({ text: "+ タグを追加", cls: "zen-scrap-tag-add-link" });
+      addLink.addEventListener("click", () => renderTagEdit());
+    }
+  };
+
+  const renderTagEdit = () => {
+    tagRow.empty();
+    const input = tagRow.createEl("input", {
+      type: "text",
+      value: scrap.tags.join(", "),
+      cls: "zen-scrap-tag-edit-input",
+      placeholder: "タグをカンマ区切りで入力",
+    });
+
+    const saveBtn = tagRow.createEl("button", { text: "保存", cls: "zen-scrap-title-save-btn" });
+    const cancelBtn = tagRow.createEl("button", { text: "キャンセル", cls: "zen-scrap-title-cancel-btn" });
+
+    const doSave = async () => {
+      const newTags = input.value
+        .split(",")
+        .map((t: string) => t.trim())
+        .filter((t: string) => t.length > 0);
+      scrap.tags = newTags;
+      scrap.updated = new Date().toISOString();
+      await repo.save(scrap);
+      eventBus.emit(EVENTS.SCRAP_CHANGED);
+      await render();
+    };
+
+    saveBtn.addEventListener("click", doSave);
+    cancelBtn.addEventListener("click", () => renderTagDisplay());
+    input.addEventListener("keydown", (e: KeyboardEvent) => {
+      if (e.isComposing) return;
+      if (e.key === "Enter") { e.preventDefault(); doSave(); }
+      if (e.key === "Escape") { renderTagDisplay(); }
+    });
+    input.focus();
+  };
+
+  renderTagDisplay();
 }
