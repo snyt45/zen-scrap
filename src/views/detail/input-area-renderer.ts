@@ -209,7 +209,6 @@ function renderEmbedButton(parent: HTMLElement, textarea: HTMLTextAreaElement, d
   const embedBtn = wrapper.createEl("button", { text: "+ 埋め込み", cls: "zen-scrap-embed-btn" });
 
   const menu = wrapper.createDiv({ cls: "zen-scrap-embed-menu" });
-  menu.style.display = "none";
 
   const items: { label: string; type: EmbedType }[] = [
     { label: "X (Twitter)", type: "tweet" },
@@ -222,7 +221,7 @@ function renderEmbedButton(parent: HTMLElement, textarea: HTMLTextAreaElement, d
     const menuItem = menu.createDiv({ cls: "zen-scrap-dropdown-item", text: item.label });
     menuItem.addEventListener("click", (e) => {
       e.stopPropagation();
-      menu.style.display = "none";
+      menu.classList.remove("is-open");
       new EmbedModal(deps.app, item.type, (syntax) => {
         insertTextAtCursor(textarea, syntax + "\n");
       }).open();
@@ -231,10 +230,10 @@ function renderEmbedButton(parent: HTMLElement, textarea: HTMLTextAreaElement, d
 
   embedBtn.addEventListener("click", (e) => {
     e.stopPropagation();
-    menu.style.display = menu.style.display === "none" ? "" : "none";
+    menu.classList.toggle("is-open");
   });
 
-  const closeEmbedMenu = () => { menu.style.display = "none"; };
+  const closeEmbedMenu = () => { menu.classList.remove("is-open"); };
   deps.addDocumentClickHandler(closeEmbedMenu);
 }
 

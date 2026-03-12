@@ -34,88 +34,6 @@ export function renderHeader(container: HTMLElement, deps: HeaderDeps): void {
     await deps.render();
   });
 
-  const metaRow = header.createDiv({ cls: "zen-scrap-detail-meta" });
-  const labelCls = scrap.archived ? "zen-scrap-label-archived" : scrap.status === "open" ? "zen-scrap-label-open" : "zen-scrap-label-closed";
-  const labelText = scrap.archived ? "Archived" : scrap.status === "open" ? "Open" : "Closed";
-  metaRow.createSpan({ text: labelText, cls: labelCls });
-  metaRow.createSpan({ text: formatDate(scrap.created) + "に作成", cls: "zen-scrap-detail-meta-text" });
-  metaRow.createSpan({ text: `${scrap.entries.length}件のコメント`, cls: "zen-scrap-detail-meta-text" });
-
-  // アクションドロップダウン
-  const actionWrapper = metaRow.createDiv({ cls: "zen-scrap-action-dropdown" });
-  const actionBtn = actionWrapper.createEl("button", {
-    cls: "zen-scrap-action-dropdown-btn",
-  });
-  actionBtn.innerHTML = `操作 <span class="zen-scrap-dropdown-arrow">${TRIANGLE_DOWN_ICON}</span>`;
-
-  const actionMenu = actionWrapper.createDiv({ cls: "zen-scrap-dropdown-menu" });
-  actionMenu.style.display = "none";
-  actionMenu.style.left = "auto";
-  actionMenu.style.right = "0";
-
-  const statusItem = actionMenu.createDiv({
-    text: scrap.status === "open" ? "クローズする" : "オープンにする",
-    cls: "zen-scrap-dropdown-item",
-  });
-  statusItem.addEventListener("click", async () => {
-    scrap.status = scrap.status === "open" ? "closed" : "open";
-    scrap.updated = new Date().toISOString();
-    await repo.save(scrap);
-    eventBus.emit(EVENTS.SCRAP_CHANGED);
-    await render();
-  });
-
-  const pinItem = actionMenu.createDiv({
-    text: scrap.pinned ? "ピン解除" : "ピン留め",
-    cls: "zen-scrap-dropdown-item",
-  });
-  pinItem.addEventListener("click", async () => {
-    scrap.pinned = !scrap.pinned;
-    scrap.updated = new Date().toISOString();
-    await repo.save(scrap);
-    eventBus.emit(EVENTS.SCRAP_CHANGED);
-    await render();
-  });
-
-  const jsonItem = actionMenu.createDiv({
-    text: "JSONをコピー",
-    cls: "zen-scrap-dropdown-item",
-  });
-  jsonItem.addEventListener("click", () => {
-    const json = JSON.stringify(scrap, null, 2);
-    navigator.clipboard.writeText(json);
-    actionMenu.style.display = "none";
-  });
-
-  const openFileItem = actionMenu.createDiv({
-    text: "ファイルを開く",
-    cls: "zen-scrap-dropdown-item",
-  });
-  openFileItem.addEventListener("click", () => {
-    openFile(scrap.filePath);
-    actionMenu.style.display = "none";
-  });
-
-  const deleteItem = actionMenu.createDiv({
-    text: "削除",
-    cls: "zen-scrap-dropdown-item zen-scrap-dropdown-item-danger",
-  });
-  deleteItem.addEventListener("click", async () => {
-    if (!confirm(`「${scrap.title}」を削除しますか？`)) return;
-    await repo.delete(scrap);
-    eventBus.emit(EVENTS.SCRAP_CHANGED);
-    eventBus.emit(EVENTS.NAV_BACK_TO_LIST);
-  });
-
-  actionBtn.addEventListener("click", (e) => {
-    e.stopPropagation();
-    const isOpen = actionMenu.style.display !== "none";
-    actionMenu.style.display = isOpen ? "none" : "block";
-  });
-
-  const closeMenu = () => { actionMenu.style.display = "none"; };
-  addDocumentClickHandler(closeMenu);
-
   const titleRow = header.createDiv({ cls: "zen-scrap-detail-title-row" });
   titleRow.createEl("h2", { text: scrap.title, cls: "zen-scrap-detail-title" });
 
@@ -153,6 +71,86 @@ export function renderHeader(container: HTMLElement, deps: HeaderDeps): void {
     input.focus();
     input.select();
   });
+
+  const metaRow = header.createDiv({ cls: "zen-scrap-detail-meta" });
+  const labelCls = scrap.archived ? "zen-scrap-label-archived" : scrap.status === "open" ? "zen-scrap-label-open" : "zen-scrap-label-closed";
+  const labelText = scrap.archived ? "Archived" : scrap.status === "open" ? "Open" : "Closed";
+  metaRow.createSpan({ text: labelText, cls: labelCls });
+  metaRow.createSpan({ text: formatDate(scrap.created) + "に作成", cls: "zen-scrap-detail-meta-text" });
+  metaRow.createSpan({ text: `${scrap.entries.length}件のコメント`, cls: "zen-scrap-detail-meta-text" });
+
+  // アクションドロップダウン
+  const actionWrapper = metaRow.createDiv({ cls: "zen-scrap-action-dropdown" });
+  const actionBtn = actionWrapper.createEl("button", {
+    cls: "zen-scrap-action-dropdown-btn",
+  });
+  actionBtn.innerHTML = `操作 <span class="zen-scrap-dropdown-arrow">${TRIANGLE_DOWN_ICON}</span>`;
+
+  const actionMenu = actionWrapper.createDiv({ cls: "zen-scrap-dropdown-menu" });
+  actionMenu.style.left = "auto";
+  actionMenu.style.right = "0";
+
+  const statusItem = actionMenu.createDiv({
+    text: scrap.status === "open" ? "クローズする" : "オープンにする",
+    cls: "zen-scrap-dropdown-item",
+  });
+  statusItem.addEventListener("click", async () => {
+    scrap.status = scrap.status === "open" ? "closed" : "open";
+    scrap.updated = new Date().toISOString();
+    await repo.save(scrap);
+    eventBus.emit(EVENTS.SCRAP_CHANGED);
+    await render();
+  });
+
+  const pinItem = actionMenu.createDiv({
+    text: scrap.pinned ? "ピン解除" : "ピン留め",
+    cls: "zen-scrap-dropdown-item",
+  });
+  pinItem.addEventListener("click", async () => {
+    scrap.pinned = !scrap.pinned;
+    scrap.updated = new Date().toISOString();
+    await repo.save(scrap);
+    eventBus.emit(EVENTS.SCRAP_CHANGED);
+    await render();
+  });
+
+  const jsonItem = actionMenu.createDiv({
+    text: "JSONをコピー",
+    cls: "zen-scrap-dropdown-item",
+  });
+  jsonItem.addEventListener("click", () => {
+    const json = JSON.stringify(scrap, null, 2);
+    navigator.clipboard.writeText(json);
+    actionMenu.classList.remove("is-open");
+  });
+
+  const openFileItem = actionMenu.createDiv({
+    text: "ファイルを開く",
+    cls: "zen-scrap-dropdown-item",
+  });
+  openFileItem.addEventListener("click", () => {
+    openFile(scrap.filePath);
+    actionMenu.classList.remove("is-open");
+  });
+
+  const deleteItem = actionMenu.createDiv({
+    text: "削除",
+    cls: "zen-scrap-dropdown-item zen-scrap-dropdown-item-danger",
+  });
+  deleteItem.addEventListener("click", async () => {
+    if (!confirm(`「${scrap.title}」を削除しますか？`)) return;
+    await repo.delete(scrap);
+    eventBus.emit(EVENTS.SCRAP_CHANGED);
+    eventBus.emit(EVENTS.NAV_BACK_TO_LIST);
+  });
+
+  actionBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    actionMenu.classList.toggle("is-open");
+  });
+
+  const closeMenu = () => { actionMenu.classList.remove("is-open"); };
+  addDocumentClickHandler(closeMenu);
 
   // タグ行
   const tagRow = header.createDiv({ cls: "zen-scrap-tag-row" });

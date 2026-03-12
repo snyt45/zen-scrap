@@ -15,6 +15,12 @@ export function renderListItem(parent: HTMLElement, scrap: Scrap, deps: ListItem
   const { repo, eventBus } = deps;
   const item = parent.createDiv({ cls: "zen-scrap-list-item" });
 
+  item.addEventListener("click", (e) => {
+    const target = e.target as HTMLElement;
+    if (target.closest(".zen-scrap-item-menu") || target.closest(".zen-scrap-tag")) return;
+    eventBus.emit(EVENTS.SCRAP_SELECT, scrap);
+  });
+
   // 1行目: タイトル + メニューボタン
   const titleRow = item.createDiv({ cls: "zen-scrap-item-title-row" });
   if (scrap.pinned) {
@@ -22,14 +28,11 @@ export function renderListItem(parent: HTMLElement, scrap: Scrap, deps: ListItem
     pinIcon.innerHTML = PIN_ICON;
   }
   titleRow.createSpan({ text: scrap.title, cls: "zen-scrap-item-title" });
-  titleRow.addEventListener("click", () => eventBus.emit(EVENTS.SCRAP_SELECT, scrap));
-
   const menuWrapper = titleRow.createDiv({ cls: "zen-scrap-item-menu" });
   const menuBtn = menuWrapper.createEl("button", { cls: "zen-scrap-item-menu-btn" });
   menuBtn.innerHTML = chevronDownIcon(20, 2.5);
 
   const menu = menuWrapper.createDiv({ cls: "zen-scrap-item-menu-dropdown" });
-  menu.style.display = "none";
 
   const pinLabel = scrap.pinned ? "ピン解除" : "ピン留め";
   const pinItem = menu.createDiv({ cls: "zen-scrap-dropdown-item", text: pinLabel });
@@ -60,17 +63,15 @@ export function renderListItem(parent: HTMLElement, scrap: Scrap, deps: ListItem
 
   menuBtn.addEventListener("click", (e) => {
     e.stopPropagation();
-    const isOpen = menu.style.display !== "none";
-    // 他のメニューを閉じる
+    const isOpen = menu.classList.contains("is-open");
     parent.querySelectorAll<HTMLElement>(".zen-scrap-item-menu-dropdown").forEach((m) => {
-      m.style.display = "none";
+      m.classList.remove("is-open");
     });
-    menu.style.display = isOpen ? "none" : "";
+    if (!isOpen) menu.classList.add("is-open");
   });
 
   // 2行目: ステータス + 日付情報
   const metaRow = item.createDiv({ cls: "zen-scrap-item-meta" });
-  metaRow.addEventListener("click", () => eventBus.emit(EVENTS.SCRAP_SELECT, scrap));
   const labelCls = scrap.archived ? "zen-scrap-label-archived" : scrap.status === "open" ? "zen-scrap-label-open" : "zen-scrap-label-closed";
   const labelText = scrap.archived ? "Archived" : scrap.status === "open" ? "Open" : "Closed";
   metaRow.createSpan({ text: labelText, cls: labelCls });

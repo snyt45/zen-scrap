@@ -176,7 +176,7 @@ export class ScrapListView extends ItemView {
     // 外側クリックでメニュー閉じる
     const closeMenus = () => {
       list.querySelectorAll<HTMLElement>(".zen-scrap-item-menu-dropdown").forEach((m) => {
-        m.style.display = "none";
+        m.classList.remove("is-open");
       });
     };
     this.cleanupManager.registerDocumentClick(closeMenus);

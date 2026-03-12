@@ -140,18 +140,17 @@ export async function renderTimeline(container: HTMLElement, deps: TimelineDeps)
     menuBtn.innerHTML = chevronDownIcon(18);
 
     const menu = menuWrapper.createDiv({ cls: "zen-scrap-entry-menu-dropdown" });
-    menu.style.display = "none";
 
     const editItem = menu.createDiv({ cls: "zen-scrap-dropdown-item", text: "編集" });
     const deleteItem = menu.createDiv({ cls: "zen-scrap-dropdown-item zen-scrap-dropdown-item-danger", text: "削除" });
 
     menuBtn.addEventListener("click", (e) => {
       e.stopPropagation();
-      const isOpen = menu.style.display !== "none";
+      const isOpen = menu.classList.contains("is-open");
       timeline.querySelectorAll<HTMLElement>(".zen-scrap-entry-menu-dropdown").forEach((m) => {
-        m.style.display = "none";
+        m.classList.remove("is-open");
       });
-      menu.style.display = isOpen ? "none" : "";
+      if (!isOpen) menu.classList.add("is-open");
     });
 
     const entryBody = entryEl.createDiv({ cls: "zen-scrap-entry-body znc" });
@@ -161,13 +160,13 @@ export async function renderTimeline(container: HTMLElement, deps: TimelineDeps)
 
     editItem.addEventListener("click", (e) => {
       e.stopPropagation();
-      menu.style.display = "none";
+      menu.classList.remove("is-open");
       renderEntryEditor({ ...deps.entryEditorDeps, entryEl, entryBody, index: i });
     });
 
     deleteItem.addEventListener("click", async (e) => {
       e.stopPropagation();
-      menu.style.display = "none";
+      menu.classList.remove("is-open");
       scrap.entries.splice(i, 1);
       scrap.updated = new Date().toISOString();
       await repo.save(scrap);
@@ -177,7 +176,7 @@ export async function renderTimeline(container: HTMLElement, deps: TimelineDeps)
 
   const closeEntryMenus = () => {
     timeline.querySelectorAll<HTMLElement>(".zen-scrap-entry-menu-dropdown").forEach((m) => {
-      m.style.display = "none";
+      m.classList.remove("is-open");
     });
   };
   addDocumentClickHandler(closeEntryMenus);
