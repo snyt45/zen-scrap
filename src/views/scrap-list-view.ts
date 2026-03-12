@@ -145,8 +145,9 @@ export class ScrapListView extends ItemView {
       });
     }
 
-    // 並び替え
+    // 並び替え（ピン留めを上部に表示）
     filtered.sort((a, b) => {
+      if (a.pinned !== b.pinned) return a.pinned ? -1 : 1;
       if (this.sort === "created") {
         return new Date(b.created).getTime() - new Date(a.created).getTime();
       }

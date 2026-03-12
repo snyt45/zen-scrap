@@ -67,6 +67,18 @@ export function renderHeader(container: HTMLElement, deps: HeaderDeps): void {
     await render();
   });
 
+  const pinItem = actionMenu.createDiv({
+    text: scrap.pinned ? "ピン解除" : "ピン留め",
+    cls: "zen-scrap-dropdown-item",
+  });
+  pinItem.addEventListener("click", async () => {
+    scrap.pinned = !scrap.pinned;
+    scrap.updated = new Date().toISOString();
+    await repo.save(scrap);
+    eventBus.emit(EVENTS.SCRAP_CHANGED);
+    await render();
+  });
+
   const jsonItem = actionMenu.createDiv({
     text: "JSONをコピー",
     cls: "zen-scrap-dropdown-item",

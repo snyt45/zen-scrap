@@ -10,6 +10,7 @@ export interface Scrap {
   created: string; // ISO 8601
   updated: string; // ISO 8601
   archived: boolean;
+  pinned: boolean;
   entries: ScrapEntry[];
   filePath: string; // vault内のパス
 }

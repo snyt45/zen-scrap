@@ -47,6 +47,7 @@ export function parseScrapMarkdown(content: string, filePath: string): Scrap {
     created: frontmatter["created"] || "",
     updated: frontmatter["updated"] || "",
     archived: frontmatter["archived"] === "true",
+    pinned: frontmatter["pinned"] === "true",
     entries,
     filePath,
   };
@@ -61,6 +62,7 @@ export function serializeScrap(scrap: Scrap): string {
   lines.push(`created: ${scrap.created}`);
   lines.push(`updated: ${scrap.updated}`);
   lines.push(`archived: ${scrap.archived}`);
+  lines.push(`pinned: ${scrap.pinned}`);
   lines.push("---");
   lines.push("");
 

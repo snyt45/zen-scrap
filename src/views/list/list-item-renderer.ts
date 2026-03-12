@@ -3,7 +3,7 @@ import { ScrapRepository } from "../../data/scrap-repository";
 import { EventBus } from "../../events/event-bus";
 import { EVENTS } from "../../events/constants";
 import { formatDate } from "../../utils";
-import { chevronDownIcon } from "../../icons";
+import { chevronDownIcon, PIN_ICON } from "../../icons";
 
 export interface ListItemDeps {
   repo: ScrapRepository;
@@ -17,6 +17,10 @@ export function renderListItem(parent: HTMLElement, scrap: Scrap, deps: ListItem
 
   // 1行目: タイトル + メニューボタン
   const titleRow = item.createDiv({ cls: "zen-scrap-item-title-row" });
+  if (scrap.pinned) {
+    const pinIcon = titleRow.createSpan({ cls: "zen-scrap-pin-icon" });
+    pinIcon.innerHTML = PIN_ICON;
+  }
   titleRow.createSpan({ text: scrap.title, cls: "zen-scrap-item-title" });
   titleRow.addEventListener("click", () => eventBus.emit(EVENTS.SCRAP_SELECT, scrap));
 
@@ -26,6 +30,16 @@ export function renderListItem(parent: HTMLElement, scrap: Scrap, deps: ListItem
 
   const menu = menuWrapper.createDiv({ cls: "zen-scrap-item-menu-dropdown" });
   menu.style.display = "none";
+
+  const pinLabel = scrap.pinned ? "ピン解除" : "ピン留め";
+  const pinItem = menu.createDiv({ cls: "zen-scrap-dropdown-item", text: pinLabel });
+  pinItem.addEventListener("click", async (e) => {
+    e.stopPropagation();
+    scrap.pinned = !scrap.pinned;
+    scrap.updated = new Date().toISOString();
+    await repo.save(scrap);
+    eventBus.emit(EVENTS.SCRAP_CHANGED);
+  });
 
   const archiveLabel = scrap.archived ? "オープンに戻す" : "アーカイブする";
   const archiveItem = menu.createDiv({ cls: "zen-scrap-dropdown-item", text: archiveLabel });

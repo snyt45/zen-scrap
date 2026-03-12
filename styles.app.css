@@ -56,6 +56,14 @@
   margin-bottom: 6px;
 }
 
+.zen-scrap-pin-icon {
+  color: var(--text-accent);
+  margin-right: 4px;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+}
+
 .zen-scrap-item-title {
   font-weight: 700;
   font-size: 1.1em;

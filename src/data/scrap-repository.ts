@@ -52,6 +52,7 @@ export class ScrapRepository {
       created: now,
       updated: now,
       archived: false,
+      pinned: false,
       entries: [],
       filePath: normalizePath(`${this.folder}/${title}.md`),
     };
