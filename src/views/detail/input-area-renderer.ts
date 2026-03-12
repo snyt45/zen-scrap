@@ -41,6 +41,7 @@ export function renderInputArea(container: HTMLElement, deps: InputAreaDeps): vo
     cls: "zen-scrap-textarea",
   });
   setupAutoGrow(textarea);
+  setupImageDrop(textarea, deps);
 
   const preview = inputArea.createDiv({ cls: "zen-scrap-preview znc" });
   preview.style.display = "none";
@@ -108,6 +109,7 @@ export function renderEntryEditor(deps: EntryEditorDeps): void {
   });
   textarea.value = entry.body;
   setupAutoGrow(textarea);
+  setupImageDrop(textarea, deps);
   requestAnimationFrame(() => {
     textarea.style.height = "auto";
     textarea.style.height = textarea.scrollHeight + "px";
@@ -173,6 +175,27 @@ export function renderEntryEditor(deps: EntryEditorDeps): void {
   textarea.focus();
 }
 
+async function uploadAndInsert(file: File, textarea: HTMLTextAreaElement, deps: InputAreaDeps): Promise<void> {
+  const buffer = await file.arrayBuffer();
+  const fileName = `${Date.now()}-${file.name}`;
+  const folderPath = deps.settings.imagesFolder;
+
+  if (!deps.app.vault.getAbstractFileByPath(folderPath)) {
+    await deps.app.vault.createFolder(folderPath);
+  }
+
+  const filePath = `${folderPath}/${fileName}`;
+  await deps.app.vault.createBinary(filePath, buffer);
+
+  const syntax = `![](${filePath})`;
+  const pos = textarea.selectionStart;
+  const before = textarea.value.substring(0, pos);
+  const after = textarea.value.substring(pos);
+  textarea.value = before + syntax + "\n" + after;
+  textarea.focus();
+  textarea.selectionStart = textarea.selectionEnd = pos + syntax.length + 1;
+}
+
 function handleImageUpload(textarea: HTMLTextAreaElement, deps: InputAreaDeps): void {
   const input = document.createElement("input");
   input.type = "file";
@@ -180,27 +203,31 @@ function handleImageUpload(textarea: HTMLTextAreaElement, deps: InputAreaDeps): 
   input.addEventListener("change", async () => {
     const file = input.files?.[0];
     if (!file) return;
-
-    const buffer = await file.arrayBuffer();
-    const fileName = `${Date.now()}-${file.name}`;
-    const folderPath = deps.settings.imagesFolder;
-
-    if (!deps.app.vault.getAbstractFileByPath(folderPath)) {
-      await deps.app.vault.createFolder(folderPath);
-    }
-
-    const filePath = `${folderPath}/${fileName}`;
-    await deps.app.vault.createBinary(filePath, buffer);
-
-    const syntax = `![](${filePath})`;
-    const pos = textarea.selectionStart;
-    const before = textarea.value.substring(0, pos);
-    const after = textarea.value.substring(pos);
-    textarea.value = before + syntax + "\n" + after;
-    textarea.focus();
-    textarea.selectionStart = textarea.selectionEnd = pos + syntax.length + 1;
+    await uploadAndInsert(file, textarea, deps);
   });
   input.click();
+}
+
+function setupImageDrop(textarea: HTMLTextAreaElement, deps: InputAreaDeps): void {
+  textarea.addEventListener("dragover", (e) => {
+    e.preventDefault();
+    textarea.addClass("zen-scrap-textarea-dragover");
+  });
+
+  textarea.addEventListener("dragleave", () => {
+    textarea.removeClass("zen-scrap-textarea-dragover");
+  });
+
+  textarea.addEventListener("drop", async (e) => {
+    e.preventDefault();
+    textarea.removeClass("zen-scrap-textarea-dragover");
+    const files = e.dataTransfer?.files;
+    if (!files) return;
+    for (let i = 0; i < files.length; i++) {
+      if (!files[i].type.startsWith("image/")) continue;
+      await uploadAndInsert(files[i], textarea, deps);
+    }
+  });
 }
 
 function renderEmbedButton(parent: HTMLElement, textarea: HTMLTextAreaElement, deps: InputAreaDeps): void {

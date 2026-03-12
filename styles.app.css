@@ -559,6 +559,11 @@
   border-color: var(--interactive-accent);
 }
 
+.zen-scrap-textarea-dragover {
+  border-color: var(--interactive-accent) !important;
+  background: var(--background-secondary);
+}
+
 .zen-scrap-pill-tabs {
   display: flex;
   gap: 8px;
