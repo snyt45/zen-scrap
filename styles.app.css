@@ -308,7 +308,7 @@
   border-radius: 6px;
   color: var(--text-muted);
   cursor: pointer;
-  padding: 4px 8px;
+  padding: 6px 10px;
   display: inline-flex;
   align-items: center;
 }
@@ -443,6 +443,28 @@
   padding: 8px 12px;
   background: var(--background-secondary);
   border-bottom: 1px solid var(--background-modifier-border);
+}
+
+.zen-scrap-reorder-btns {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.zen-scrap-reorder-btn {
+  background: none;
+  border: none;
+  color: var(--text-faint);
+  cursor: pointer;
+  padding: 2px;
+  display: inline-flex;
+  align-items: center;
+  border-radius: 4px;
+}
+
+.zen-scrap-reorder-btn:hover {
+  color: var(--text-normal);
+  background: var(--background-modifier-hover);
 }
 
 .zen-scrap-entry-menu {

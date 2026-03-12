@@ -29,11 +29,9 @@ export function renderHeader(container: HTMLElement, deps: HeaderDeps): void {
 
   const fullWidthBtn = navRow.createEl("button", { cls: "zen-scrap-fullwidth-toggle" });
   fullWidthBtn.innerHTML = deps.isFullWidth ? SHRINK_ICON : EXPAND_ICON;
-  fullWidthBtn.addEventListener("click", () => {
-    const next = !deps.isFullWidth;
-    deps.setFullWidth(next);
-    deps.containerEl.toggleClass("zen-scrap-fullwidth", next);
-    fullWidthBtn.innerHTML = next ? SHRINK_ICON : EXPAND_ICON;
+  fullWidthBtn.addEventListener("click", async () => {
+    deps.setFullWidth(!deps.isFullWidth);
+    await deps.render();
   });
 
   const metaRow = header.createDiv({ cls: "zen-scrap-detail-meta" });

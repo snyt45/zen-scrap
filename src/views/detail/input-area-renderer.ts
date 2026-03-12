@@ -222,6 +222,7 @@ function setupImageDrop(textarea: HTMLTextAreaElement, deps: InputAreaDeps): voi
 
   textarea.addEventListener("drop", async (e) => {
     e.preventDefault();
+    e.stopPropagation();
     textarea.removeClass("zen-scrap-textarea-dragover");
     const files = e.dataTransfer?.files;
     if (!files) return;

@@ -6,6 +6,10 @@ export function chevronDownIcon(size: number, strokeWidth = 2) {
   return `<svg ${stroke(size, strokeWidth)}><polyline points="6 9 12 15 18 9"></polyline></svg>`;
 }
 
+export function chevronUpIcon(size: number, strokeWidth = 2) {
+  return `<svg ${stroke(size, strokeWidth)}><polyline points="18 15 12 9 6 15"></polyline></svg>`;
+}
+
 export function chevronLeftIcon(size: number) {
   return `<svg ${stroke(size)}><polyline points="15 18 9 12 15 6"></polyline></svg>`;
 }

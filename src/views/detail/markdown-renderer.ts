@@ -63,13 +63,19 @@ export class MarkdownRenderer {
       const link = target.closest("a");
       if (!link) return;
       const href = link.getAttribute("href");
-      if (href?.startsWith("obsidian://open?")) {
-        e.preventDefault();
+      if (!href) return;
+
+      e.preventDefault();
+      e.stopPropagation();
+
+      if (href.startsWith("obsidian://open?")) {
         const params = new URLSearchParams(href.replace("obsidian://open?", ""));
         const file = params.get("file");
         if (file) {
           this.app.workspace.openLinkText(file, "", false);
         }
+      } else if (href.startsWith("http://") || href.startsWith("https://")) {
+        window.open(href, "_blank");
       }
     });
   }

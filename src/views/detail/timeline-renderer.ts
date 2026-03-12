@@ -1,7 +1,7 @@
 import { Scrap } from "../../data/types";
 import { ScrapRepository } from "../../data/scrap-repository";
 import { formatDate } from "../../utils";
-import { chevronDownIcon } from "../../icons";
+import { chevronDownIcon, chevronUpIcon } from "../../icons";
 import { MarkdownRenderer } from "./markdown-renderer";
 import { renderEntryEditor, EntryEditorDeps } from "./input-area-renderer";
 
@@ -41,36 +41,41 @@ export async function renderTimeline(container: HTMLElement, deps: TimelineDeps)
     const entryHeader = entryEl.createDiv({ cls: "zen-scrap-entry-header" });
     entryHeader.createSpan({ text: entry.timestamp, cls: "zen-scrap-entry-time" });
 
+    // 並べ替えボタン（エントリが2件以上のときのみ表示）
+    if (scrap.entries.length > 1) {
+      const reorderBtns = entryHeader.createDiv({ cls: "zen-scrap-reorder-btns" });
+
+      if (i > 0) {
+        const upBtn = reorderBtns.createEl("button", { cls: "zen-scrap-reorder-btn" });
+        upBtn.innerHTML = chevronUpIcon(14, 2.5);
+        upBtn.addEventListener("click", async (e) => {
+          e.stopPropagation();
+          [scrap.entries[i - 1], scrap.entries[i]] = [scrap.entries[i], scrap.entries[i - 1]];
+          scrap.updated = new Date().toISOString();
+          await repo.save(scrap);
+          await render();
+        });
+      }
+
+      if (i < scrap.entries.length - 1) {
+        const downBtn = reorderBtns.createEl("button", { cls: "zen-scrap-reorder-btn" });
+        downBtn.innerHTML = chevronDownIcon(14, 2.5);
+        downBtn.addEventListener("click", async (e) => {
+          e.stopPropagation();
+          [scrap.entries[i], scrap.entries[i + 1]] = [scrap.entries[i + 1], scrap.entries[i]];
+          scrap.updated = new Date().toISOString();
+          await repo.save(scrap);
+          await render();
+        });
+      }
+    }
+
     const menuWrapper = entryHeader.createDiv({ cls: "zen-scrap-entry-menu" });
     const menuBtn = menuWrapper.createEl("button", { cls: "zen-scrap-entry-menu-btn" });
     menuBtn.innerHTML = chevronDownIcon(18);
 
     const menu = menuWrapper.createDiv({ cls: "zen-scrap-entry-menu-dropdown" });
     menu.style.display = "none";
-
-    if (i > 0) {
-      const moveUpItem = menu.createDiv({ cls: "zen-scrap-dropdown-item", text: "上へ移動" });
-      moveUpItem.addEventListener("click", async (e) => {
-        e.stopPropagation();
-        menu.style.display = "none";
-        [scrap.entries[i - 1], scrap.entries[i]] = [scrap.entries[i], scrap.entries[i - 1]];
-        scrap.updated = new Date().toISOString();
-        await repo.save(scrap);
-        await render();
-      });
-    }
-
-    if (i < scrap.entries.length - 1) {
-      const moveDownItem = menu.createDiv({ cls: "zen-scrap-dropdown-item", text: "下へ移動" });
-      moveDownItem.addEventListener("click", async (e) => {
-        e.stopPropagation();
-        menu.style.display = "none";
-        [scrap.entries[i], scrap.entries[i + 1]] = [scrap.entries[i + 1], scrap.entries[i]];
-        scrap.updated = new Date().toISOString();
-        await repo.save(scrap);
-        await render();
-      });
-    }
 
     const editItem = menu.createDiv({ cls: "zen-scrap-dropdown-item", text: "編集" });
     const deleteItem = menu.createDiv({ cls: "zen-scrap-dropdown-item zen-scrap-dropdown-item-danger", text: "削除" });
