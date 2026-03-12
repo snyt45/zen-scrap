@@ -1070,3 +1070,7 @@ pre:hover .zen-scrap-code-copy-btn {
 .zen-scrap-preview .zen-scrap-github-code-wrapper {
   background: var(--background-primary);
 }
+
+.zen-scrap-tag-input {
+  margin-top: 8px;
+}

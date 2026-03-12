@@ -16,9 +16,9 @@ export function registerScrapHandlers(
   });
 
   eventBus.on(EVENTS.SCRAP_CREATE_REQUEST, () => {
-    new TitlePromptModal(app, async (title) => {
+    new TitlePromptModal(app, async (title, tags) => {
       if (!title) return;
-      const scrap = await repo.create(title, []);
+      const scrap = await repo.create(title, tags);
       openScrap(scrap);
       eventBus.emit(EVENTS.SCRAP_CHANGED);
     }).open();
