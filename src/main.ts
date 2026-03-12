@@ -6,13 +6,17 @@ import { Scrap } from "./data/types";
 import { EventBus } from "./events/event-bus";
 import { registerScrapHandlers } from "./events/scrap-handlers";
 import { registerNavHandlers } from "./events/nav-handlers";
+import { ZenScrapSettings, DEFAULT_SETTINGS, ZenScrapSettingTab } from "./settings";
 
 export default class ZenScrapPlugin extends Plugin {
   private repo!: ScrapRepository;
   private eventBus!: EventBus;
+  settings!: ZenScrapSettings;
 
   async onload() {
-    this.repo = new ScrapRepository(this.app);
+    await this.loadSettings();
+
+    this.repo = new ScrapRepository(this.app, this.settings);
     this.eventBus = new EventBus();
 
     this.registerView(VIEW_TYPE_SCRAP_LIST, (leaf) =>
@@ -20,7 +24,7 @@ export default class ZenScrapPlugin extends Plugin {
     );
 
     this.registerView(VIEW_TYPE_SCRAP_DETAIL, (leaf) =>
-      new ScrapDetailView(leaf, this.repo, this.eventBus)
+      new ScrapDetailView(leaf, this.repo, this.eventBus, this.settings)
     );
 
     registerScrapHandlers(this.eventBus, this.app, this.repo, (scrap) => this.openScrap(scrap));
@@ -36,6 +40,15 @@ export default class ZenScrapPlugin extends Plugin {
       callback: () => this.activateListView(),
     });
 
+    this.addSettingTab(new ZenScrapSettingTab(this.app, this));
+  }
+
+  async loadSettings() {
+    this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
+  }
+
+  async saveSettings() {
+    await this.saveData(this.settings);
   }
 
   async activateListView() {

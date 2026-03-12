@@ -1,22 +1,25 @@
 import { App, TFile, TFolder, normalizePath } from "obsidian";
 import { Scrap } from "./types";
 import { parseScrapMarkdown, serializeScrap } from "./scrap-parser";
-
-const SCRAPS_FOLDER = "Scraps";
+import type { ZenScrapSettings } from "../settings";
 
 export class ScrapRepository {
-  constructor(private app: App) {}
+  constructor(private app: App, private settings: ZenScrapSettings) {}
+
+  private get folder(): string {
+    return this.settings.scrapsFolder;
+  }
 
   async ensureFolder(): Promise<void> {
-    const folder = this.app.vault.getAbstractFileByPath(SCRAPS_FOLDER);
+    const folder = this.app.vault.getAbstractFileByPath(this.folder);
     if (!folder) {
-      await this.app.vault.createFolder(SCRAPS_FOLDER);
+      await this.app.vault.createFolder(this.folder);
     }
   }
 
   async listAll(): Promise<Scrap[]> {
     await this.ensureFolder();
-    const folder = this.app.vault.getAbstractFileByPath(SCRAPS_FOLDER);
+    const folder = this.app.vault.getAbstractFileByPath(this.folder);
     if (!(folder instanceof TFolder)) return [];
 
     const scraps: Scrap[] = [];
@@ -50,7 +53,7 @@ export class ScrapRepository {
       updated: now,
       archived: false,
       entries: [],
-      filePath: normalizePath(`${SCRAPS_FOLDER}/${title}.md`),
+      filePath: normalizePath(`${this.folder}/${title}.md`),
     };
     await this.app.vault.create(scrap.filePath, serializeScrap(scrap));
     return scrap;
