@@ -514,6 +514,23 @@
   cursor: text;
 }
 
+.zen-scrap-closed-banner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 24px 0;
+}
+
+.zen-scrap-closed-icon {
+  color: var(--text-muted);
+}
+
+.zen-scrap-closed-text {
+  color: var(--text-muted);
+  font-size: 0.9em;
+}
+
 /* ==========================================================================
    4. App UI - Editor (Input Area, Tabs, Action Bar)
    ========================================================================== */
