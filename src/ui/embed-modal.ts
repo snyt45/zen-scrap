@@ -1,4 +1,5 @@
 import { App, Modal } from "obsidian";
+import { buildEmbedSyntax } from "./url-detector";
 
 export type EmbedType = "tweet" | "youtube" | "card" | "github";
 
@@ -37,7 +38,7 @@ export class EmbedModal extends Modal {
     const doInsert = () => {
       const url = input.value.trim();
       if (!url) return;
-      const syntax = this.buildSyntax(url);
+      const syntax = buildEmbedSyntax(url, this.embedType);
       this.onSubmit(syntax);
       this.close();
     };
@@ -50,27 +51,6 @@ export class EmbedModal extends Modal {
       if (e.key === "Escape") { this.close(); }
     });
     input.focus();
-  }
-
-  private buildSyntax(url: string): string {
-    if (this.embedType === "youtube") {
-      const id = this.extractYouTubeId(url);
-      return `@[youtube](${id})`;
-    }
-    return `@[${this.embedType}](${url})`;
-  }
-
-  private extractYouTubeId(url: string): string {
-    const patterns = [
-      /youtu\.be\/([^?&]+)/,
-      /youtube\.com\/watch\?v=([^&]+)/,
-      /youtube\.com\/embed\/([^?&]+)/,
-    ];
-    for (const p of patterns) {
-      const m = url.match(p);
-      if (m) return m[1];
-    }
-    return url;
   }
 
   onClose() {
