@@ -398,7 +398,8 @@
 .zen-scrap-dropdown-menu,
 .zen-scrap-item-menu-dropdown,
 .zen-scrap-entry-menu-dropdown,
-.zen-scrap-embed-menu {
+.zen-scrap-embed-menu,
+.zen-scrap-outline-menu {
   opacity: 0;
   transform: translateY(-4px);
   pointer-events: none;
@@ -408,7 +409,8 @@
 .zen-scrap-dropdown-menu.is-open,
 .zen-scrap-item-menu-dropdown.is-open,
 .zen-scrap-entry-menu-dropdown.is-open,
-.zen-scrap-embed-menu.is-open {
+.zen-scrap-embed-menu.is-open,
+.zen-scrap-outline-menu.is-open {
   opacity: 1;
   transform: translateY(0);
   pointer-events: auto;
@@ -500,7 +502,8 @@
 }
 
 .zen-scrap-fullwidth-toggle,
-.zen-scrap-help-btn {
+.zen-scrap-help-btn,
+.zen-scrap-outline-btn {
   background: none;
   border: 1px solid var(--background-modifier-border);
   border-radius: 6px;
@@ -512,7 +515,8 @@
 }
 
 .zen-scrap-fullwidth-toggle:hover,
-.zen-scrap-help-btn:hover {
+.zen-scrap-help-btn:hover,
+.zen-scrap-outline-btn:hover {
   color: var(--text-normal);
   background: var(--background-secondary);
 }
@@ -1562,4 +1566,109 @@ pre:hover .zen-scrap-code-copy-btn {
   }
 }
 
+/* ==========================================================================
+   9. Outline
+   ========================================================================== */
 
+.zen-scrap-outline-wrapper {
+  position: relative;
+}
+
+.zen-scrap-outline-btn {
+  gap: 4px;
+}
+
+.zen-scrap-outline-badge {
+  font-size: 0.75em;
+  min-width: 18px;
+  height: 18px;
+  line-height: 18px;
+  text-align: center;
+  background: var(--background-modifier-border);
+  border-radius: 9px;
+  padding: 0 5px;
+  color: var(--text-muted);
+}
+
+.zen-scrap-outline-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 4px;
+  width: 280px;
+  background: var(--background-primary);
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 20;
+  display: none;
+  opacity: 0;
+  transform: translateY(-4px);
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+.zen-scrap-outline-menu.is-open {
+  display: block;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.zen-scrap-outline-header {
+  padding: 8px 12px;
+  font-size: 0.8em;
+  font-weight: 600;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--background-modifier-border);
+}
+
+.zen-scrap-outline-list {
+  max-height: 360px;
+  overflow-y: auto;
+}
+
+.zen-scrap-outline-item {
+  padding: 8px 12px;
+  cursor: pointer;
+  border-bottom: 1px solid var(--background-modifier-border-hover, rgba(0,0,0,0.05));
+}
+
+.zen-scrap-outline-item:last-child {
+  border-bottom: none;
+}
+
+.zen-scrap-outline-item:hover {
+  background: var(--background-secondary);
+}
+
+.zen-scrap-outline-item.is-active {
+  background: var(--background-secondary);
+  border-left: 3px solid var(--interactive-accent);
+  padding-left: 9px;
+}
+
+.zen-scrap-outline-item-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8em;
+}
+
+.zen-scrap-outline-item-number {
+  color: var(--text-muted);
+  font-weight: 600;
+  min-width: 20px;
+}
+
+.zen-scrap-outline-item-time {
+  color: var(--text-muted);
+}
+
+.zen-scrap-outline-item-preview {
+  font-size: 0.8em;
+  color: var(--text-faint);
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding-left: 28px;
+}
