@@ -55,6 +55,7 @@ export function renderHeader(container: HTMLElement, deps: HeaderDeps): void {
     outlineHeader.setText("アウトライン");
 
     const outlineList = outlineMenu.createDiv({ cls: "zen-scrap-outline-list" });
+    const tooltip = outlineMenu.createDiv({ cls: "zen-scrap-outline-tooltip" });
 
     scrap.entries.forEach((entry, i) => {
       const item = outlineList.createDiv({ cls: "zen-scrap-outline-item" });
@@ -62,14 +63,26 @@ export function renderHeader(container: HTMLElement, deps: HeaderDeps): void {
       meta.createSpan({ text: `${i + 1}`, cls: "zen-scrap-outline-item-number" });
       meta.createSpan({ text: entry.timestamp, cls: "zen-scrap-outline-item-time" });
 
-      const preview = entry.body
+      const stripped = entry.body
         .replace(/[#*`>\-\[\]()!]/g, "")
         .replace(/\n/g, " ")
-        .trim()
-        .slice(0, 40);
+        .trim();
+      const preview = stripped.slice(0, 40);
       if (preview) {
         item.createDiv({ text: preview, cls: "zen-scrap-outline-item-preview" });
       }
+
+      const tooltipText = entry.body.trim().slice(0, 200);
+      item.addEventListener("mouseenter", () => {
+        tooltip.setText(tooltipText);
+        tooltip.style.display = "block";
+        const menuRect = outlineMenu.getBoundingClientRect();
+        const itemRect = item.getBoundingClientRect();
+        tooltip.style.top = (itemRect.top - menuRect.top) + "px";
+      });
+      item.addEventListener("mouseleave", () => {
+        tooltip.style.display = "none";
+      });
 
       item.addEventListener("click", () => {
         outlineMenu.classList.remove("is-open");
@@ -79,28 +92,7 @@ export function renderHeader(container: HTMLElement, deps: HeaderDeps): void {
 
     outlineBtn.addEventListener("click", (e) => {
       e.stopPropagation();
-      const isOpen = outlineMenu.classList.toggle("is-open");
-      if (isOpen) {
-        // 現在表示中のエントリをハイライト
-        const entries = deps.containerEl.querySelectorAll<HTMLElement>(".zen-scrap-entry");
-        const scrollContainer = deps.containerEl;
-        const containerTop = scrollContainer.getBoundingClientRect().top;
-        let activeIndex = 0;
-        entries.forEach((el, i) => {
-          const rect = el.getBoundingClientRect();
-          if (rect.top <= containerTop + 100) {
-            activeIndex = i;
-          }
-        });
-        outlineList.querySelectorAll(".zen-scrap-outline-item").forEach((el, i) => {
-          el.classList.toggle("is-active", i === activeIndex);
-        });
-        // アクティブ項目をドロップダウン内でスクロールして見えるようにする
-        const activeItem = outlineList.querySelector(".zen-scrap-outline-item.is-active") as HTMLElement | null;
-        if (activeItem) {
-          activeItem.scrollIntoView({ block: "nearest" });
-        }
-      }
+      outlineMenu.classList.toggle("is-open");
     });
 
     const closeOutline = () => { outlineMenu.classList.remove("is-open"); };

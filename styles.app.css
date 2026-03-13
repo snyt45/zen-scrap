@@ -1118,6 +1118,13 @@ pre:hover .zen-scrap-code-copy-btn {
   text-decoration: underline;
 }
 
+.zen-scrap-article-title {
+  font-size: 1.1em;
+  font-weight: 600;
+  line-height: 1.4;
+  margin-bottom: 8px;
+}
+
 /* --- OGP Card --- */
 
 .znc a.zen-scrap-ogp-card {
@@ -1601,16 +1608,6 @@ pre:hover .zen-scrap-code-copy-btn {
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   z-index: 20;
-  display: none;
-  opacity: 0;
-  transform: translateY(-4px);
-  transition: opacity 0.15s ease, transform 0.15s ease;
-}
-
-.zen-scrap-outline-menu.is-open {
-  display: block;
-  opacity: 1;
-  transform: translateY(0);
 }
 
 .zen-scrap-outline-header {
@@ -1640,12 +1637,6 @@ pre:hover .zen-scrap-code-copy-btn {
   background: var(--background-secondary);
 }
 
-.zen-scrap-outline-item.is-active {
-  background: var(--background-secondary);
-  border-left: 3px solid var(--interactive-accent);
-  padding-left: 9px;
-}
-
 .zen-scrap-outline-item-meta {
   display: flex;
   align-items: center;
@@ -1671,4 +1662,22 @@ pre:hover .zen-scrap-code-copy-btn {
   overflow: hidden;
   text-overflow: ellipsis;
   padding-left: 28px;
+}
+
+.zen-scrap-outline-tooltip {
+  display: none;
+  position: absolute;
+  right: calc(100% + 8px);
+  width: 260px;
+  padding: 10px 12px;
+  background: var(--background-primary);
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  font-size: 0.8em;
+  line-height: 1.5;
+  color: var(--text-normal);
+  white-space: normal;
+  word-break: break-word;
+  z-index: 30;
 }

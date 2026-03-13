@@ -37,6 +37,11 @@ async function renderTweet(url: string): Promise<string> {
   const tweet = res.json?.tweet;
   if (!tweet) return fallbackCard(url, "X");
 
+  // 記事の場合は専用レンダリング
+  if (tweet.article) {
+    return renderXArticle(url, tweet);
+  }
+
   const avatarHtml = tweet.author?.avatar_url
     ? `<img src="${esc(tweet.author.avatar_url)}" class="zen-scrap-tweet-avatar" />`
     : "";
@@ -66,6 +71,51 @@ async function renderTweet(url: string): Promise<string> {
     mediaHtml,
     date ? `<div class="zen-scrap-tweet-date">${esc(date)}</div>` : "",
     `<a href="${esc(url)}" target="_blank" class="zen-scrap-tweet-link">ポストを表示</a>`,
+    `</div>`,
+  ];
+  return parts.join("");
+}
+
+function renderXArticle(url: string, tweet: any): string {
+  const article = tweet.article;
+  const name = tweet.author?.name || "";
+  const handle = tweet.author?.screen_name || "";
+  const avatarHtml = tweet.author?.avatar_url
+    ? `<img src="${esc(tweet.author.avatar_url)}" class="zen-scrap-tweet-avatar" />`
+    : "";
+
+  // アイキャッチ画像
+  let coverHtml = "";
+  const coverUrl = article.cover_media?.media_info?.original_img_url;
+  if (coverUrl) {
+    coverHtml = `<img src="${esc(coverUrl)}" class="zen-scrap-tweet-media" />`;
+  }
+
+  // 記事の冒頭テキストを抽出（最初の unstyled ブロックから）
+  let previewText = "";
+  if (Array.isArray(article.content)) {
+    for (const block of article.content) {
+      if (block.type === "unstyled" && block.text) {
+        previewText = truncate(block.text, 200);
+        break;
+      }
+    }
+  }
+
+  const parts = [
+    `<div class="zen-scrap-tweet-card">`,
+    `<div class="zen-scrap-tweet-header">`,
+    avatarHtml,
+    `<div class="zen-scrap-tweet-author">`,
+    `<span class="zen-scrap-tweet-name">${esc(name)}</span>`,
+    `<span class="zen-scrap-tweet-handle">@${esc(handle)}</span>`,
+    `</div>`,
+    X_LOGO_SVG,
+    `</div>`,
+    `<div class="zen-scrap-article-title">${esc(article.title || "")}</div>`,
+    previewText ? `<div class="zen-scrap-tweet-text">${esc(previewText)}</div>` : "",
+    coverHtml,
+    `<a href="${esc(url)}" target="_blank" class="zen-scrap-tweet-link">記事を表示</a>`,
     `</div>`,
   ];
   return parts.join("");
