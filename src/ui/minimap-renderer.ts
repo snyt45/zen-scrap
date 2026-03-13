@@ -22,6 +22,7 @@ interface MinimapState {
   isDragging: boolean;
   contentHeight: number;
   resizeObserver: ResizeObserver | null;
+  abortController: AbortController;
 }
 
 export function createMinimap(
@@ -42,6 +43,7 @@ export function createMinimap(
     isDragging: false,
     contentHeight: 0,
     resizeObserver: null,
+    abortController: new AbortController(),
   };
 
   setupMinimapInteraction(state);
@@ -78,6 +80,7 @@ export function toggleMinimap(state: MinimapState): void {
 
 export function destroyMinimap(state: MinimapState): void {
   hideMinimap(state);
+  state.abortController.abort();
   state.wrapper.remove();
 }
 
@@ -92,12 +95,17 @@ function drawMinimap(state: MinimapState): void {
   if (!ctx) return;
 
   const timelineHeight = timeline.scrollHeight;
+  if (timelineHeight === 0) return;
+
   const containerHeight = scrollContainer.clientHeight;
   const canvasDisplayHeight = Math.min(containerHeight, 600);
 
-  canvas.height = canvasDisplayHeight;
-  canvas.style.height = canvasDisplayHeight + "px";
-  ctx.clearRect(0, 0, MINIMAP_WIDTH, canvasDisplayHeight);
+  if (canvas.height !== canvasDisplayHeight) {
+    canvas.height = canvasDisplayHeight;
+    canvas.style.height = canvasDisplayHeight + "px";
+  } else {
+    ctx.clearRect(0, 0, MINIMAP_WIDTH, canvasDisplayHeight);
+  }
 
   const scaleY = canvasDisplayHeight / timelineHeight;
   state.contentHeight = timelineHeight;
@@ -139,6 +147,7 @@ function drawBodyContent(
   _entryTop: number,
   scaleY: number,
 ): void {
+  const entryEl = body.closest(".zen-scrap-entry") as HTMLElement;
   const walker = document.createTreeWalker(body, NodeFilter.SHOW_ELEMENT);
   let node: Node | null = walker.currentNode;
 
@@ -148,7 +157,6 @@ function drawBodyContent(
     const embedMatch = detectEmbedElement(el);
     if (embedMatch) {
       const rect = el.getBoundingClientRect();
-      const entryEl = body.closest(".zen-scrap-entry") as HTMLElement;
       const top = (el.offsetTop + body.offsetTop - timelineOffsetTop + entryEl.offsetTop) * scaleY;
       const height = Math.max(4, rect.height * scaleY);
       ctx.fillStyle = EMBED_COLORS[embedMatch] || EMBED_COLORS.card;
@@ -158,10 +166,9 @@ function drawBodyContent(
     }
 
     if (isTextBlock(el)) {
-      const entryEl = body.closest(".zen-scrap-entry") as HTMLElement;
       const top = (el.offsetTop + body.offsetTop - timelineOffsetTop + entryEl.offsetTop) * scaleY;
       const height = Math.max(MIN_LINE_HEIGHT, el.offsetHeight * scaleY);
-      const indent = getIndentLevel(el) * 4;
+      const indent = getIndentLevel(el, body) * 4;
       const width = Math.min(MINIMAP_WIDTH - 4 - indent, el.scrollWidth * SCALE_X);
 
       ctx.fillStyle = el.tagName.match(/^H[1-6]$/) ? HEADING_COLOR : TEXT_COLOR;
@@ -173,7 +180,9 @@ function drawBodyContent(
 }
 
 function detectEmbedElement(el: HTMLElement): string | null {
-  const cls = el.className || "";
+  const cls = el.className;
+  if (typeof cls !== "string") return null;
+  if (!cls && !el.dataset.embedType && el.tagName !== "IFRAME") return null;
   if (cls.includes("embed-youtube") || (el.tagName === "IFRAME" && el.getAttribute("src")?.includes("youtube"))) return "youtube";
   if (cls.includes("embed-tweet") || el.dataset.embedType === "tweet") return "tweet";
   if (cls.includes("embed-card") || el.dataset.embedType === "card") return "card";
@@ -185,10 +194,10 @@ function isTextBlock(el: HTMLElement): boolean {
   return /^(P|LI|H[1-6]|TD|TH|BLOCKQUOTE|PRE)$/.test(el.tagName);
 }
 
-function getIndentLevel(el: HTMLElement): number {
+function getIndentLevel(el: HTMLElement, boundary: HTMLElement): number {
   let level = 0;
   let parent = el.parentElement;
-  while (parent) {
+  while (parent && parent !== boundary) {
     if (parent.tagName === "UL" || parent.tagName === "OL" || parent.tagName === "BLOCKQUOTE") level++;
     parent = parent.parentElement;
   }
@@ -197,6 +206,7 @@ function getIndentLevel(el: HTMLElement): number {
 
 function setupMinimapInteraction(state: MinimapState): void {
   const { canvas, scrollContainer } = state;
+  const signal = state.abortController.signal;
 
   const scrollToPosition = (clientY: number) => {
     const rect = canvas.getBoundingClientRect();
@@ -209,17 +219,17 @@ function setupMinimapInteraction(state: MinimapState): void {
     e.preventDefault();
     state.isDragging = true;
     scrollToPosition(e.clientY);
-  });
+  }, { signal });
 
   document.addEventListener("mousemove", (e: MouseEvent) => {
     if (!state.isDragging) return;
     e.preventDefault();
     scrollToPosition(e.clientY);
-  });
+  }, { signal });
 
   document.addEventListener("mouseup", () => {
     state.isDragging = false;
-  });
+  }, { signal });
 }
 
 function setupScrollSync(state: MinimapState): void {
@@ -231,7 +241,7 @@ function setupScrollSync(state: MinimapState): void {
       drawMinimap(state);
       ticking = false;
     });
-  });
+  }, { signal: state.abortController.signal });
 }
 
 function setupResizeObserver(state: MinimapState): void {
