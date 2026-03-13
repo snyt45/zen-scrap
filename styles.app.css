@@ -500,8 +500,7 @@
 }
 
 .zen-scrap-fullwidth-toggle,
-.zen-scrap-help-btn,
-.zen-scrap-minimap-toggle {
+.zen-scrap-help-btn {
   background: none;
   border: 1px solid var(--background-modifier-border);
   border-radius: 6px;
@@ -513,8 +512,7 @@
 }
 
 .zen-scrap-fullwidth-toggle:hover,
-.zen-scrap-help-btn:hover,
-.zen-scrap-minimap-toggle:hover {
+.zen-scrap-help-btn:hover {
   color: var(--text-normal);
   background: var(--background-secondary);
 }
@@ -1564,27 +1562,4 @@ pre:hover .zen-scrap-code-copy-btn {
   }
 }
 
-/* ==========================================================================
-   9. Minimap
-   ========================================================================== */
-
-/* ミニマップ */
-.zen-scrap-minimap-wrapper {
-  position: absolute;
-  top: 0;
-  right: 0;
-  width: 90px;
-  height: 100%;
-  display: none;
-  z-index: 10;
-  border-left: 1px solid var(--background-modifier-border);
-  background: var(--background-primary);
-}
-
-.zen-scrap-minimap-canvas {
-  cursor: pointer;
-  width: 90px;
-  position: sticky;
-  top: 0;
-}
 

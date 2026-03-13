@@ -9,7 +9,7 @@ import { renderTimeline, renderClosedBanner, TimelineDeps } from "./detail/timel
 import { renderInputArea, InputAreaDeps } from "./detail/input-area-renderer";
 import type { ZenScrapSettings } from "../settings";
 import { CleanupManager } from "../ui/cleanup-manager";
-import { createMinimap, toggleMinimap, showMinimap, destroyMinimap } from "../ui/minimap-renderer";
+
 
 export const VIEW_TYPE_SCRAP_DETAIL = "zen-scrap-detail";
 
@@ -22,15 +22,6 @@ export class ScrapDetailView extends ItemView {
   private ignoreChangeCount = 0;
   private cleanupManager = new CleanupManager();
   private markdownRenderer: MarkdownRenderer;
-  private minimapState: ReturnType<typeof createMinimap> | null = null;
-  private isMinimapVisible = false;
-  private minimapKeyHandler = (e: KeyboardEvent) => {
-    if ((e.metaKey || e.ctrlKey) && e.key === "m") {
-      e.preventDefault();
-      this.isMinimapVisible = !this.isMinimapVisible;
-      if (this.minimapState) toggleMinimap(this.minimapState);
-    }
-  };
   private onScrapChangedHandler: () => void;
 
   constructor(leaf: WorkspaceLeaf, repo: ScrapRepository, eventBus: EventBus, settings: ZenScrapSettings) {
@@ -82,14 +73,11 @@ export class ScrapDetailView extends ItemView {
 
   async onOpen(): Promise<void> {
     this.eventBus.on(EVENTS.SCRAP_CHANGED, this.onScrapChangedHandler);
-    this.containerEl.addEventListener("keydown", this.minimapKeyHandler);
     await this.render();
   }
 
   async onClose(): Promise<void> {
     this.eventBus.off(EVENTS.SCRAP_CHANGED, this.onScrapChangedHandler);
-    this.containerEl.removeEventListener("keydown", this.minimapKeyHandler);
-    if (this.minimapState) destroyMinimap(this.minimapState);
     this.cleanupManager.cleanup();
   }
 
@@ -119,10 +107,6 @@ export class ScrapDetailView extends ItemView {
       render,
       openFile: (path) => this.app.workspace.openLinkText(path, "", true),
       addDocumentClickHandler: (h) => this.cleanupManager.registerDocumentClick(h),
-      onToggleMinimap: () => {
-        this.isMinimapVisible = !this.isMinimapVisible;
-        if (this.minimapState) toggleMinimap(this.minimapState);
-      },
     };
     renderHeader(container, headerDeps);
 
@@ -147,15 +131,6 @@ export class ScrapDetailView extends ItemView {
       entryEditorDeps: inputAreaDeps,
     };
     await renderTimeline(container, timelineDeps);
-
-    const timelineEl = container.querySelector<HTMLElement>(".zen-scrap-timeline");
-    if (timelineEl) {
-      if (this.minimapState) destroyMinimap(this.minimapState);
-      this.minimapState = createMinimap(container, timelineEl, container);
-      if (this.isMinimapVisible) {
-        showMinimap(this.minimapState);
-      }
-    }
 
     if (scrap.status === "closed" || scrap.archived) {
       renderClosedBanner(container, scrap);
