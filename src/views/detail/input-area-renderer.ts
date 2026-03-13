@@ -6,6 +6,7 @@ import { MarkdownRenderer } from "./markdown-renderer";
 import markdownGuideRaw from "../../../docs/markdown-guide.md";
 import sampleImageUrl from "../../../assets/sample.png";
 import type { ZenScrapSettings } from "../../settings";
+import { detectEmbedType, buildEmbedSyntax } from "../../ui/url-detector";
 
 const EMPTY_PREVIEW_HTML = '<p style="color: var(--text-muted)">プレビューする内容がありません</p>';
 
@@ -41,6 +42,7 @@ export function renderInputArea(container: HTMLElement, deps: InputAreaDeps): vo
     cls: "zen-scrap-textarea",
   });
   setupAutoGrow(textarea);
+  setupAutoEmbed(textarea, deps.settings);
 
   const preview = inputArea.createDiv({ cls: "zen-scrap-preview znc" });
   preview.style.display = "none";
@@ -123,6 +125,7 @@ export function renderEntryEditor(deps: EntryEditorDeps): void {
   });
   textarea.value = entry.body;
   setupAutoGrow(textarea);
+  setupAutoEmbed(textarea, deps.settings);
   requestAnimationFrame(() => {
     textarea.style.height = "auto";
     textarea.style.height = textarea.scrollHeight + "px";
@@ -323,4 +326,26 @@ function setupAutoGrow(textarea: HTMLTextAreaElement): void {
     textarea.style.height = textarea.scrollHeight + "px";
   };
   textarea.addEventListener("input", adjust);
+}
+
+function setupAutoEmbed(textarea: HTMLTextAreaElement, settings: ZenScrapSettings): void {
+  textarea.addEventListener("paste", (e: ClipboardEvent) => {
+    if (!settings.autoEmbed) return;
+
+    const text = e.clipboardData?.getData("text/plain")?.trim();
+    if (!text) return;
+
+    // 複数行や、URLの前後にテキストがある場合はスキップ
+    if (text.includes("\n")) return;
+
+    // 既に埋め込み記法の場合はスキップ
+    if (text.startsWith("@[")) return;
+
+    const type = detectEmbedType(text);
+    if (!type) return;
+
+    e.preventDefault();
+    const syntax = buildEmbedSyntax(text, type);
+    insertTextAtCursor(textarea, syntax);
+  });
 }
