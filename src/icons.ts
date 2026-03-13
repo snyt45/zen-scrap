@@ -26,3 +26,5 @@ export const PIN_ICON = '<svg xmlns="http://www.w3.org/2000/svg" width="14" heig
 export const MORE_ICON = `<svg ${stroke(18)}><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>`;
 
 export const HELP_ICON = `<svg ${stroke(16)}><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>`;
+
+export const MINIMAP_ICON = `<svg ${stroke(16)}><rect x="3" y="3" width="7" height="18" rx="1"/><rect x="14" y="3" width="7" height="4" rx="1"/><rect x="14" y="10" width="7" height="4" rx="1"/><rect x="14" y="17" width="7" height="4" rx="1"/></svg>`;

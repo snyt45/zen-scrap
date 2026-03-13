@@ -4,7 +4,7 @@ import { ScrapRepository } from "../../data/scrap-repository";
 import { EventBus } from "../../events/event-bus";
 import { EVENTS } from "../../events/constants";
 import { formatDate } from "../../utils";
-import { chevronLeftIcon, EXPAND_ICON, SHRINK_ICON, TRIANGLE_DOWN_ICON, EDIT_ICON, MORE_ICON, HELP_ICON } from "../../icons";
+import { chevronLeftIcon, EXPAND_ICON, SHRINK_ICON, TRIANGLE_DOWN_ICON, EDIT_ICON, MORE_ICON, HELP_ICON, MINIMAP_ICON } from "../../icons";
 import { MarkdownRenderer } from "./markdown-renderer";
 import shortcutGuideRaw from "../../../docs/shortcut-guide.md";
 
@@ -20,6 +20,7 @@ export interface HeaderDeps {
   render: () => Promise<void>;
   openFile: (path: string) => void;
   addDocumentClickHandler: (handler: () => void) => void;
+  onToggleMinimap: () => void;
 }
 
 export function renderHeader(container: HTMLElement, deps: HeaderDeps): void {
@@ -40,6 +41,11 @@ export function renderHeader(container: HTMLElement, deps: HeaderDeps): void {
     deps.setFullWidth(!deps.isFullWidth);
     await deps.render();
   });
+
+  const minimapBtn = navRight.createEl("button", { cls: "zen-scrap-minimap-toggle" });
+  minimapBtn.innerHTML = MINIMAP_ICON;
+  minimapBtn.setAttribute("aria-label", "ミニマップ");
+  minimapBtn.addEventListener("click", () => deps.onToggleMinimap());
 
   const helpBtn = navRight.createEl("button", { cls: "zen-scrap-help-btn" });
   helpBtn.innerHTML = HELP_ICON;
