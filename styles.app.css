@@ -500,7 +500,8 @@
 }
 
 .zen-scrap-fullwidth-toggle,
-.zen-scrap-help-btn {
+.zen-scrap-help-btn,
+.zen-scrap-minimap-toggle {
   background: none;
   border: 1px solid var(--background-modifier-border);
   border-radius: 6px;
@@ -512,7 +513,8 @@
 }
 
 .zen-scrap-fullwidth-toggle:hover,
-.zen-scrap-help-btn:hover {
+.zen-scrap-help-btn:hover,
+.zen-scrap-minimap-toggle:hover {
   color: var(--text-normal);
   background: var(--background-secondary);
 }
@@ -1586,18 +1588,3 @@ pre:hover .zen-scrap-code-copy-btn {
   top: 0;
 }
 
-.zen-scrap-minimap-toggle {
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: var(--text-muted);
-  padding: 4px;
-  border-radius: 4px;
-  display: flex;
-  align-items: center;
-}
-
-.zen-scrap-minimap-toggle:hover {
-  color: var(--text-normal);
-  background: var(--background-modifier-hover);
-}
