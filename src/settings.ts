@@ -4,11 +4,13 @@ import type ZenScrapPlugin from "./main";
 export interface ZenScrapSettings {
   scrapsFolder: string;
   imagesFolder: string;
+  autoEmbed: boolean;
 }
 
 export const DEFAULT_SETTINGS: ZenScrapSettings = {
   scrapsFolder: "Scraps",
   imagesFolder: "Scraps/images",
+  autoEmbed: true,
 };
 
 export class ZenScrapSettingTab extends PluginSettingTab {
@@ -45,6 +47,18 @@ export class ZenScrapSettingTab extends PluginSettingTab {
           .setValue(this.plugin.settings.imagesFolder)
           .onChange(async (value) => {
             this.plugin.settings.imagesFolder = value;
+            await this.plugin.saveSettings();
+          })
+      );
+
+    new Setting(containerEl)
+      .setName("URLの自動埋め込み")
+      .setDesc("URLをペーストしたとき自動で埋め込み記法に変換する")
+      .addToggle((toggle) =>
+        toggle
+          .setValue(this.plugin.settings.autoEmbed)
+          .onChange(async (value) => {
+            this.plugin.settings.autoEmbed = value;
             await this.plugin.saveSettings();
           })
       );
