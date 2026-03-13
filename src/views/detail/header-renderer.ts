@@ -4,7 +4,7 @@ import { ScrapRepository } from "../../data/scrap-repository";
 import { EventBus } from "../../events/event-bus";
 import { EVENTS } from "../../events/constants";
 import { formatDate } from "../../utils";
-import { chevronLeftIcon, EXPAND_ICON, SHRINK_ICON, TRIANGLE_DOWN_ICON, EDIT_ICON, MORE_ICON, HELP_ICON } from "../../icons";
+import { chevronLeftIcon, EXPAND_ICON, SHRINK_ICON, TRIANGLE_DOWN_ICON, EDIT_ICON, MORE_ICON, HELP_ICON, OUTLINE_ICON } from "../../icons";
 import { MarkdownRenderer } from "./markdown-renderer";
 import shortcutGuideRaw from "../../../docs/shortcut-guide.md";
 
@@ -20,6 +20,7 @@ export interface HeaderDeps {
   render: () => Promise<void>;
   openFile: (path: string) => void;
   addDocumentClickHandler: (handler: () => void) => void;
+  scrollToEntry: (index: number) => void;
 }
 
 export function renderHeader(container: HTMLElement, deps: HeaderDeps): void {
@@ -40,6 +41,71 @@ export function renderHeader(container: HTMLElement, deps: HeaderDeps): void {
     deps.setFullWidth(!deps.isFullWidth);
     await deps.render();
   });
+
+  // アウトラインドロップダウン
+  if (scrap.entries.length > 0) {
+    const outlineWrapper = navRight.createDiv({ cls: "zen-scrap-outline-wrapper" });
+    const outlineBtn = outlineWrapper.createEl("button", { cls: "zen-scrap-outline-btn" });
+    outlineBtn.innerHTML = `${OUTLINE_ICON}<span class="zen-scrap-outline-badge">${scrap.entries.length}</span>`;
+    outlineBtn.setAttribute("aria-label", "アウトライン");
+
+    const outlineMenu = outlineWrapper.createDiv({ cls: "zen-scrap-outline-menu" });
+
+    const outlineHeader = outlineMenu.createDiv({ cls: "zen-scrap-outline-header" });
+    outlineHeader.setText("アウトライン");
+
+    const outlineList = outlineMenu.createDiv({ cls: "zen-scrap-outline-list" });
+
+    scrap.entries.forEach((entry, i) => {
+      const item = outlineList.createDiv({ cls: "zen-scrap-outline-item" });
+      const meta = item.createDiv({ cls: "zen-scrap-outline-item-meta" });
+      meta.createSpan({ text: `${i + 1}`, cls: "zen-scrap-outline-item-number" });
+      meta.createSpan({ text: entry.timestamp, cls: "zen-scrap-outline-item-time" });
+
+      const preview = entry.body
+        .replace(/[#*`>\-\[\]()!]/g, "")
+        .replace(/\n/g, " ")
+        .trim()
+        .slice(0, 40);
+      if (preview) {
+        item.createDiv({ text: preview, cls: "zen-scrap-outline-item-preview" });
+      }
+
+      item.addEventListener("click", () => {
+        outlineMenu.classList.remove("is-open");
+        deps.scrollToEntry(i);
+      });
+    });
+
+    outlineBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const isOpen = outlineMenu.classList.toggle("is-open");
+      if (isOpen) {
+        // 現在表示中のエントリをハイライト
+        const entries = deps.containerEl.querySelectorAll<HTMLElement>(".zen-scrap-entry");
+        const scrollContainer = deps.containerEl;
+        const containerTop = scrollContainer.getBoundingClientRect().top;
+        let activeIndex = 0;
+        entries.forEach((el, i) => {
+          const rect = el.getBoundingClientRect();
+          if (rect.top <= containerTop + 100) {
+            activeIndex = i;
+          }
+        });
+        outlineList.querySelectorAll(".zen-scrap-outline-item").forEach((el, i) => {
+          el.classList.toggle("is-active", i === activeIndex);
+        });
+        // アクティブ項目をドロップダウン内でスクロールして見えるようにする
+        const activeItem = outlineList.querySelector(".zen-scrap-outline-item.is-active") as HTMLElement | null;
+        if (activeItem) {
+          activeItem.scrollIntoView({ block: "nearest" });
+        }
+      }
+    });
+
+    const closeOutline = () => { outlineMenu.classList.remove("is-open"); };
+    addDocumentClickHandler(closeOutline);
+  }
 
   const helpBtn = navRight.createEl("button", { cls: "zen-scrap-help-btn" });
   helpBtn.innerHTML = HELP_ICON;

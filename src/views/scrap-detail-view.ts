@@ -107,6 +107,12 @@ export class ScrapDetailView extends ItemView {
       render,
       openFile: (path) => this.app.workspace.openLinkText(path, "", true),
       addDocumentClickHandler: (h) => this.cleanupManager.registerDocumentClick(h),
+      scrollToEntry: (index) => {
+        const entries = container.querySelectorAll<HTMLElement>(".zen-scrap-entry");
+        if (entries[index]) {
+          entries[index].scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+      },
     };
     renderHeader(container, headerDeps);
 
