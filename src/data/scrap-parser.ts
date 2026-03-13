@@ -15,13 +15,29 @@ export function parseScrapMarkdown(content: string, filePath: string): Scrap {
     }
   }
 
-  // tags解析: "[react, frontend]" → ["react", "frontend"]
-  const tagsStr = frontmatter["tags"] || "[]";
-  const tags = tagsStr
-    .replace(/[\[\]]/g, "")
-    .split(",")
-    .map((t) => t.trim())
-    .filter((t) => t.length > 0);
+  // tags解析: inline "[react, frontend]" またはYAMLブロック形式に対応
+  let tags: string[] = [];
+  const tagsValue = frontmatter["tags"] || "";
+  if (tagsValue.startsWith("[")) {
+    // inline形式: tags: [react, frontend]
+    tags = tagsValue
+      .replace(/[\[\]]/g, "")
+      .split(",")
+      .map((t) => t.trim())
+      .filter((t) => t.length > 0);
+  } else if (fmMatch) {
+    // Obsidianが書き換えるYAMLブロック形式: tags:\n  - react\n  - frontend
+    const fmLines = fmMatch[1].split("\n");
+    const tagsIdx = fmLines.findIndex((l) => /^tags:\s*$/.test(l));
+    if (tagsIdx >= 0) {
+      for (let i = tagsIdx + 1; i < fmLines.length; i++) {
+        const itemMatch = fmLines[i].match(/^\s+-\s+(.*)/);
+        if (!itemMatch) break;
+        const val = itemMatch[1].trim().replace(/^["']|["']$/g, "");
+        if (val) tags.push(val);
+      }
+    }
+  }
 
   // エントリ解析
   const bodyStart = fmMatch ? fmMatch[0].length : 0;

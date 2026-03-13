@@ -72,9 +72,9 @@ export function renderHeader(container: HTMLElement, deps: HeaderDeps): void {
       if (newTitle && newTitle !== scrap.title) {
         scrap.title = newTitle;
         await repo.save(scrap);
-        eventBus.emit(EVENTS.SCRAP_CHANGED);
       }
       await render();
+      eventBus.emit(EVENTS.SCRAP_CHANGED);
     };
 
     saveBtn.addEventListener("click", doSave);
@@ -120,8 +120,8 @@ export function renderHeader(container: HTMLElement, deps: HeaderDeps): void {
       }
       scrap.updated = new Date().toISOString();
       await repo.save(scrap);
-      eventBus.emit(EVENTS.SCRAP_CHANGED);
       await render();
+      eventBus.emit(EVENTS.SCRAP_CHANGED);
     });
   }
 
@@ -222,8 +222,8 @@ export function renderHeader(container: HTMLElement, deps: HeaderDeps): void {
       scrap.tags = newTags;
       scrap.updated = new Date().toISOString();
       await repo.save(scrap);
-      eventBus.emit(EVENTS.SCRAP_CHANGED);
       await render();
+      eventBus.emit(EVENTS.SCRAP_CHANGED);
     };
 
     saveBtn.addEventListener("click", doSave);
