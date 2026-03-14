@@ -78,10 +78,10 @@ export function renderHeader(container: HTMLElement, deps: HeaderDeps): void {
     const outlineList = outlineMenu.createDiv({ cls: "zen-scrap-outline-list" });
     const tooltip = outlineMenu.createDiv({ cls: "zen-scrap-outline-tooltip" });
 
-    outlineEntries.forEach(({ entry, index: i }) => {
+    outlineEntries.forEach(({ entry, index: originalIndex }, displayIndex) => {
       const item = outlineList.createDiv({ cls: "zen-scrap-outline-item" });
       const meta = item.createDiv({ cls: "zen-scrap-outline-item-meta" });
-      meta.createSpan({ text: `${i + 1}`, cls: "zen-scrap-outline-item-number" });
+      meta.createSpan({ text: `${originalIndex + 1}`, cls: "zen-scrap-outline-item-number" });
       meta.createSpan({ text: entry.timestamp, cls: "zen-scrap-outline-item-time" });
 
       const stripped = entry.body
@@ -107,7 +107,7 @@ export function renderHeader(container: HTMLElement, deps: HeaderDeps): void {
 
       item.addEventListener("click", () => {
         outlineMenu.classList.remove("is-open");
-        deps.scrollToEntry(i);
+        deps.scrollToEntry(displayIndex);
       });
     });
 
