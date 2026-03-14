@@ -2,8 +2,8 @@ import { ItemView, WorkspaceLeaf } from "obsidian";
 import { ScrapRepository } from "../data/scrap-repository";
 import { EventBus } from "../events/event-bus";
 import { EVENTS } from "../events/constants";
-import { BOOKMARK_FILLED_ICON } from "../icons";
 import { renderDropdown } from "./list/toolbar-renderer";
+import { renderTabNav } from "./shared/tab-nav-renderer";
 import { renderListItem } from "./list/list-item-renderer";
 import { CleanupManager } from "../ui/cleanup-manager";
 
@@ -62,18 +62,11 @@ export class ScrapListView extends ItemView {
   }
 
   private renderHeader(container: HTMLElement): void {
-    const header = container.createDiv({ cls: "zen-scrap-list-header" });
-    header.createEl("h2", { text: "Zen Scrap" });
-
-    const headerRight = header.createDiv({ cls: "zen-scrap-list-header-right" });
-
-    const markedBtn = headerRight.createEl("button", { cls: "zen-scrap-marked-list-btn" });
-    markedBtn.innerHTML = BOOKMARK_FILLED_ICON;
-    markedBtn.setAttribute("aria-label", "マーク一覧");
-    markedBtn.addEventListener("click", () => this.eventBus.emit(EVENTS.NAV_TO_MARKED_LIST));
-
-    const newBtn = headerRight.createEl("button", { text: "+ 新規作成", cls: "zen-scrap-new-btn" });
-    newBtn.addEventListener("click", () => this.eventBus.emit(EVENTS.SCRAP_CREATE_REQUEST));
+    renderTabNav(container, {
+      eventBus: this.eventBus,
+      activeTab: "list",
+      onNewScrap: () => this.eventBus.emit(EVENTS.SCRAP_CREATE_REQUEST),
+    });
   }
 
   private renderSearch(container: HTMLElement): void {

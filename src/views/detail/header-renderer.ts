@@ -4,7 +4,8 @@ import { ScrapRepository } from "../../data/scrap-repository";
 import { EventBus } from "../../events/event-bus";
 import { EVENTS } from "../../events/constants";
 import { formatDate } from "../../utils";
-import { chevronLeftIcon, EXPAND_ICON, SHRINK_ICON, TRIANGLE_DOWN_ICON, EDIT_ICON, MORE_ICON, HELP_ICON, OUTLINE_ICON, BOOKMARK_FILLED_ICON } from "../../icons";
+import { EXPAND_ICON, SHRINK_ICON, TRIANGLE_DOWN_ICON, EDIT_ICON, MORE_ICON, HELP_ICON, OUTLINE_ICON, BOOKMARK_FILLED_ICON } from "../../icons";
+import { renderTabNav } from "../shared/tab-nav-renderer";
 import { MarkdownRenderer } from "./markdown-renderer";
 import shortcutGuideRaw from "../../../docs/shortcut-guide.md";
 
@@ -29,13 +30,12 @@ export function renderHeader(container: HTMLElement, deps: HeaderDeps): void {
   const { scrap, repo, eventBus, render, openFile, addDocumentClickHandler } = deps;
   const header = container.createDiv({ cls: "zen-scrap-detail-header" });
 
-  const navRow = header.createDiv({ cls: "zen-scrap-detail-nav" });
+  renderTabNav(header, {
+    eventBus,
+    activeTab: "none",
+  });
 
-  const backBtn = navRow.createEl("button", { cls: "zen-scrap-back-btn" });
-  backBtn.innerHTML = `${chevronLeftIcon(14)} 一覧へ戻る`;
-  backBtn.addEventListener("click", () => eventBus.emit(EVENTS.NAV_BACK_TO_LIST));
-
-  const navRight = navRow.createDiv({ cls: "zen-scrap-detail-nav-right" });
+  const navRight = header.createDiv({ cls: "zen-scrap-detail-nav-right" });
 
   const fullWidthBtn = navRight.createEl("button", { cls: "zen-scrap-fullwidth-toggle" });
   fullWidthBtn.innerHTML = deps.isFullWidth ? SHRINK_ICON : EXPAND_ICON;

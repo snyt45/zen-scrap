@@ -1772,11 +1772,6 @@ pre:hover .zen-scrap-code-copy-btn {
   height: 100%;
 }
 
-.zen-scrap-marked-list-header h2 {
-  margin: 8px 0 16px;
-  font-size: 1.2em;
-}
-
 .zen-scrap-marked-toolbar {
   margin-bottom: 12px;
 }
@@ -1864,25 +1859,53 @@ pre:hover .zen-scrap-code-copy-btn {
   color: var(--text-normal);
 }
 
-/* List Header Right */
-.zen-scrap-list-header-right {
+/* ==========================================================================
+   Tab Navigation
+   ========================================================================== */
+
+.zen-scrap-tab-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--background-modifier-border);
+  padding: 0 12px;
+  margin-bottom: 12px;
+}
+
+.zen-scrap-tab-nav-tabs {
+  display: flex;
+  gap: 0;
+}
+
+.zen-scrap-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 16px;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  color: var(--text-muted);
+  font-size: 0.9em;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.zen-scrap-tab:hover {
+  color: var(--text-normal);
+}
+
+.zen-scrap-tab.is-active {
+  color: var(--interactive-accent);
+  border-bottom-color: var(--interactive-accent);
+}
+
+.zen-scrap-tab svg {
+  flex-shrink: 0;
+}
+
+.zen-scrap-tab-nav-right {
   display: flex;
   align-items: center;
   gap: 8px;
-}
-
-.zen-scrap-marked-list-btn {
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: var(--text-muted);
-  padding: 4px;
-  border-radius: 4px;
-  display: flex;
-  align-items: center;
-}
-
-.zen-scrap-marked-list-btn:hover {
-  background: var(--background-modifier-hover);
-  color: var(--interactive-accent);
 }

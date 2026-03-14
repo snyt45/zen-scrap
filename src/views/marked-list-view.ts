@@ -3,7 +3,8 @@ import { ScrapRepository } from "../data/scrap-repository";
 import { EventBus } from "../events/event-bus";
 import { EVENTS } from "../events/constants";
 import { Scrap, ScrapEntry } from "../data/types";
-import { chevronLeftIcon, BOOKMARK_FILLED_ICON, COPY_ICON } from "../icons";
+import { COPY_ICON } from "../icons";
+import { renderTabNav } from "./shared/tab-nav-renderer";
 import { CleanupManager } from "../ui/cleanup-manager";
 
 export const VIEW_TYPE_MARKED_LIST = "zen-scrap-marked-list";
@@ -70,14 +71,10 @@ export class MarkedListView extends ItemView {
     container.empty();
     container.addClass("zen-scrap-marked-list-container");
 
-    const header = container.createDiv({ cls: "zen-scrap-marked-list-header" });
-    const navRow = header.createDiv({ cls: "zen-scrap-detail-nav" });
-
-    const backBtn = navRow.createEl("button", { cls: "zen-scrap-back-btn" });
-    backBtn.innerHTML = `${chevronLeftIcon(14)} 一覧へ戻る`;
-    backBtn.addEventListener("click", () => this.eventBus.emit(EVENTS.NAV_BACK_TO_LIST));
-
-    header.createEl("h2", { text: "マーク一覧" });
+    renderTabNav(container, {
+      eventBus: this.eventBus,
+      activeTab: "marked",
+    });
 
     const sections = await this.collectMarkedSections();
 
