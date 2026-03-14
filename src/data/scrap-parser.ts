@@ -45,14 +45,15 @@ export function parseScrapMarkdown(content: string, filePath: string): Scrap {
   const entries: ScrapEntry[] = [];
 
   // タイムスタンプ形式（YYYY-MM-DD HH:MM）の見出しのみをエントリ区切りとする
-  const entryRegex = /### (\d{4}-\d{2}-\d{2} \d{2}:\d{2})\n([\s\S]*?)(?=\n---\n\n### \d{4}-\d{2}-\d{2} \d{2}:\d{2}|$)/g;
+  const entryRegex = /### (\d{4}-\d{2}-\d{2} \d{2}:\d{2})( \[marked\])?\n([\s\S]*?)(?=\n---\n\n### \d{4}-\d{2}-\d{2} \d{2}:\d{2}|$)/g;
   let match;
   while ((match = entryRegex.exec(body)) !== null) {
     // 末尾の区切り線 "---" を除去
-    const entryBody = match[2].replace(/\n---\s*$/, "").trim();
+    const entryBody = match[3].replace(/\n---\s*$/, "").trim();
     entries.push({
       timestamp: match[1].trim(),
       body: entryBody,
+      marked: !!match[2],
     });
   }
 
@@ -83,7 +84,7 @@ export function serializeScrap(scrap: Scrap): string {
   lines.push("");
 
   for (const entry of scrap.entries) {
-    lines.push(`### ${entry.timestamp}`);
+    lines.push(`### ${entry.timestamp}${entry.marked ? " [marked]" : ""}`);
     lines.push("");
     lines.push(entry.body);
     lines.push("");
