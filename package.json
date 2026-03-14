@@ -1,6 +1,6 @@
 {
   "name": "zen-scrap",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Zenn-scrap-like threaded notes for Obsidian",
   "main": "main.js",
   "scripts": {
