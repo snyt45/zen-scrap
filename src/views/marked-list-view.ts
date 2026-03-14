@@ -21,6 +21,7 @@ export class MarkedListView extends ItemView {
   private onScrapChangedHandler: () => void;
   private cleanupManager = new CleanupManager();
   private selectedIndices = new Set<number>();
+  private lastClickedIndex = -1;
   private searchQuery = "";
 
   constructor(leaf: WorkspaceLeaf, repo: ScrapRepository, eventBus: EventBus) {
@@ -156,19 +157,16 @@ export class MarkedListView extends ItemView {
 
     const list = container.createDiv({ cls: "zen-scrap-marked-list" });
 
-    sections.forEach((section, sectionIdx) => {
-      const item = list.createDiv({ cls: "zen-scrap-marked-item" });
+    const updateItemStyles = () => {
+      const items = list.querySelectorAll<HTMLElement>(".zen-scrap-marked-item");
+      items.forEach((el, idx) => {
+        el.toggleClass("is-selected", this.selectedIndices.has(idx));
+      });
+    };
 
-      const checkbox = item.createEl("input", { type: "checkbox" });
-      checkbox.addClass("zen-scrap-marked-checkbox");
-      checkbox.checked = this.selectedIndices.has(sectionIdx);
-      checkbox.addEventListener("change", () => {
-        if (checkbox.checked) {
-          this.selectedIndices.add(sectionIdx);
-        } else {
-          this.selectedIndices.delete(sectionIdx);
-        }
-        updateBulkBtn();
+    sections.forEach((section, sectionIdx) => {
+      const item = list.createDiv({
+        cls: `zen-scrap-marked-item${this.selectedIndices.has(sectionIdx) ? " is-selected" : ""}`,
       });
 
       const content = item.createDiv({ cls: "zen-scrap-marked-content" });
@@ -198,7 +196,7 @@ export class MarkedListView extends ItemView {
       const actions = item.createDiv({ cls: "zen-scrap-marked-actions" });
 
       const unmarkBtn = actions.createEl("button", { cls: "zen-scrap-marked-unmark-btn" });
-      unmarkBtn.innerHTML = BOOKMARK_FILLED_ICON;
+      unmarkBtn.innerHTML = `<span class="zen-scrap-unmark-x">×</span>`;
       unmarkBtn.setAttribute("aria-label", "マーク解除");
       unmarkBtn.addEventListener("click", async (e) => {
         e.stopPropagation();
@@ -218,8 +216,37 @@ export class MarkedListView extends ItemView {
         new Notice("セクションをコピーしました");
       });
 
-      content.addEventListener("click", () => {
-        this.eventBus.emit(EVENTS.SCRAP_SELECT, section.scrap, section.entryIndex);
+      // クリックで選択 / Cmd+Click でトグル / Shift+Click で範囲選択
+      item.addEventListener("click", (e) => {
+        // アクションボタンからのクリックは無視
+        if ((e.target as HTMLElement).closest(".zen-scrap-marked-actions")) return;
+
+        const metaKey = e.metaKey || e.ctrlKey;
+
+        if (e.shiftKey && this.lastClickedIndex >= 0) {
+          // Shift+Click: 範囲選択
+          const from = Math.min(this.lastClickedIndex, sectionIdx);
+          const to = Math.max(this.lastClickedIndex, sectionIdx);
+          if (!metaKey) this.selectedIndices.clear();
+          for (let j = from; j <= to; j++) {
+            this.selectedIndices.add(j);
+          }
+        } else if (metaKey) {
+          // Cmd/Ctrl+Click: トグル
+          if (this.selectedIndices.has(sectionIdx)) {
+            this.selectedIndices.delete(sectionIdx);
+          } else {
+            this.selectedIndices.add(sectionIdx);
+          }
+          this.lastClickedIndex = sectionIdx;
+        } else {
+          // 通常クリック: セクションに遷移
+          this.eventBus.emit(EVENTS.SCRAP_SELECT, section.scrap, section.entryIndex);
+          return;
+        }
+
+        updateItemStyles();
+        updateBulkBtn();
       });
     });
   }

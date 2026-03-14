@@ -460,6 +460,7 @@
 .zen-scrap-detail-nav-right {
   display: flex;
   align-items: center;
+  justify-content: flex-end;
   gap: 8px;
 }
 
@@ -1719,8 +1720,10 @@ pre:hover .zen-scrap-code-copy-btn {
 
 /* Entry Highlight Animation */
 @keyframes zen-scrap-highlight-fade {
-  0% { background: var(--interactive-accent); opacity: 0.15; }
-  100% { background: transparent; opacity: 0; }
+  0% { opacity: 0; }
+  20% { opacity: 0.18; }
+  50% { opacity: 0.18; }
+  100% { opacity: 0; }
 }
 
 .zen-scrap-entry-highlight {
@@ -1733,7 +1736,8 @@ pre:hover .zen-scrap-code-copy-btn {
   inset: 0;
   border-radius: 8px;
   pointer-events: none;
-  animation: zen-scrap-highlight-fade 1.5s ease-out forwards;
+  background: var(--interactive-accent);
+  animation: zen-scrap-highlight-fade 2s ease-in-out forwards;
 }
 
 /* ==========================================================================
@@ -1810,9 +1814,9 @@ pre:hover .zen-scrap-code-copy-btn {
   background: var(--background-secondary);
 }
 
-.zen-scrap-marked-checkbox {
-  margin-top: 4px;
-  cursor: pointer;
+.zen-scrap-marked-item.is-selected {
+  background: var(--background-secondary);
+  border-color: var(--interactive-accent);
 }
 
 .zen-scrap-marked-content {
@@ -1861,16 +1865,27 @@ pre:hover .zen-scrap-code-copy-btn {
 
 .zen-scrap-marked-unmark-btn {
   background: none;
-  border: none;
+  border: 1px solid var(--background-modifier-border);
   cursor: pointer;
-  color: var(--interactive-accent);
-  padding: 4px;
+  color: var(--text-muted);
+  padding: 2px 8px;
   border-radius: 4px;
+  font-size: 0.75em;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.zen-scrap-unmark-x {
+  font-size: 1.2em;
+  line-height: 1;
 }
 
 .zen-scrap-marked-unmark-btn:hover {
   background: var(--background-modifier-hover);
-  color: var(--text-muted);
+  color: var(--text-error);
+  border-color: var(--text-error);
 }
 
 /* Marked list tooltip */

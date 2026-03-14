@@ -68,7 +68,7 @@ export class ScrapDetailView extends ItemView {
             setTimeout(() => {
               target.scrollIntoView({ behavior: "smooth", block: "start" });
               target.addClass("zen-scrap-entry-highlight");
-              setTimeout(() => target.removeClass("zen-scrap-entry-highlight"), 1500);
+              setTimeout(() => target.removeClass("zen-scrap-entry-highlight"), 2000);
             }, 100);
           }
         }
