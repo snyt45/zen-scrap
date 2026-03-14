@@ -1697,6 +1697,7 @@ pre:hover .zen-scrap-code-copy-btn {
   align-items: center;
   opacity: 0.4;
   transition: opacity 0.15s, color 0.15s;
+  margin-left: auto;
 }
 
 .zen-scrap-mark-btn:hover {

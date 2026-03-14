@@ -46,7 +46,7 @@ export function renderHeader(container: HTMLElement, deps: HeaderDeps): void {
 
   // マーク絞り込みトグル
   const hasMarked = scrap.entries.some(e => e.marked);
-  if (hasMarked) {
+  if (hasMarked || deps.filterMarked) {
     const filterMarkBtn = navRight.createEl("button", {
       cls: `zen-scrap-filter-mark-btn${deps.filterMarked ? " is-active" : ""}`,
     });

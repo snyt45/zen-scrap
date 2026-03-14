@@ -139,6 +139,7 @@ export class ScrapDetailView extends ItemView {
       addDocumentClickHandler: (h) => this.cleanupManager.registerDocumentClick(h),
       entryEditorDeps: inputAreaDeps,
       filterMarked: this.filterMarked,
+      setFilterMarked: (v: boolean) => { this.filterMarked = v; },
     };
     await renderTimeline(container, timelineDeps);
 

@@ -14,6 +14,7 @@ export interface TimelineDeps {
   addDocumentClickHandler: (handler: () => void) => void;
   entryEditorDeps: Omit<EntryEditorDeps, "entryEl" | "entryBody" | "index">;
   filterMarked?: boolean;
+  setFilterMarked?: (v: boolean) => void;
 }
 
 export function renderClosedBanner(container: HTMLElement, scrap: Scrap): void {
@@ -67,9 +68,12 @@ export async function renderTimeline(container: HTMLElement, deps: TimelineDeps)
     : scrap.entries.map((e, i) => ({ entry: e, originalIndex: i }));
 
   if (deps.filterMarked && entriesToRender.length === 0) {
-    const emptyCard = timeline.createDiv({ cls: "zen-scrap-empty-state" });
-    emptyCard.setText("マーク済みのセクションがありません");
-    return;
+    // マーク済みが0件になったら自動的に絞り込み解除
+    if (deps.setFilterMarked) {
+      deps.setFilterMarked(false);
+      await render();
+      return;
+    }
   }
 
   for (const { entry, originalIndex: i } of entriesToRender) {
