@@ -114,6 +114,8 @@ export function renderHeader(container: HTMLElement, deps: HeaderDeps): void {
           const timeEl = el.querySelector(".zen-scrap-entry-time");
           if (timeEl && timeEl.textContent === entry.timestamp) {
             el.scrollIntoView({ behavior: "smooth", block: "start" });
+            el.addClass("zen-scrap-entry-highlight");
+            setTimeout(() => el.removeClass("zen-scrap-entry-highlight"), 2000);
             break;
           }
         }
