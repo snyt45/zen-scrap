@@ -107,7 +107,16 @@ export function renderHeader(container: HTMLElement, deps: HeaderDeps): void {
 
       item.addEventListener("click", () => {
         outlineMenu.classList.remove("is-open");
-        deps.scrollToEntry(displayIndex);
+        // タイムスタンプでDOM上のエントリを特定してスクロール
+        const container = deps.containerEl;
+        const entryEls = Array.from(container.querySelectorAll<HTMLElement>(".zen-scrap-entry"));
+        for (const el of entryEls) {
+          const timeEl = el.querySelector(".zen-scrap-entry-time");
+          if (timeEl && timeEl.textContent === entry.timestamp) {
+            el.scrollIntoView({ behavior: "smooth", block: "start" });
+            break;
+          }
+        }
       });
     });
 
