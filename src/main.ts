@@ -2,6 +2,7 @@ import { Plugin, TFile } from "obsidian";
 import { ScrapRepository } from "./data/scrap-repository";
 import { ScrapListView, VIEW_TYPE_SCRAP_LIST } from "./views/scrap-list-view";
 import { ScrapDetailView, VIEW_TYPE_SCRAP_DETAIL } from "./views/scrap-detail-view";
+import { MarkedListView, VIEW_TYPE_MARKED_LIST } from "./views/marked-list-view";
 import { Scrap } from "./data/types";
 import { EventBus } from "./events/event-bus";
 import { registerScrapHandlers } from "./events/scrap-handlers";
@@ -28,8 +29,12 @@ export default class ZenScrapPlugin extends Plugin {
       new ScrapDetailView(leaf, this.repo, this.eventBus, this.settings)
     );
 
+    this.registerView(VIEW_TYPE_MARKED_LIST, (leaf) =>
+      new MarkedListView(leaf, this.repo, this.eventBus)
+    );
+
     registerScrapHandlers(this.eventBus, this.app, this.repo, (scrap) => this.openScrap(scrap));
-    registerNavHandlers(this.eventBus, () => this.activateListView());
+    registerNavHandlers(this.eventBus, () => this.activateListView(), () => this.openMarkedList());
 
     this.addRibbonIcon("message-square", "Zen Scrap", () => {
       this.activateListView();
@@ -91,6 +96,19 @@ export default class ZenScrapPlugin extends Plugin {
       type: VIEW_TYPE_SCRAP_DETAIL,
       active: true,
       state: { filePath: scrap.filePath },
+    });
+    workspace.revealLeaf(leaf);
+  }
+
+  async openMarkedList() {
+    const { workspace } = this.app;
+    let leaf = workspace.getLeavesOfType(VIEW_TYPE_MARKED_LIST)[0];
+    if (!leaf) {
+      leaf = workspace.getLeaf(true)!;
+    }
+    await leaf.setViewState({
+      type: VIEW_TYPE_MARKED_LIST,
+      active: true,
     });
     workspace.revealLeaf(leaf);
   }
