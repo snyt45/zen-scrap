@@ -3,7 +3,7 @@ import { ScrapRepository } from "../data/scrap-repository";
 import { EventBus } from "../events/event-bus";
 import { EVENTS } from "../events/constants";
 import { Scrap, ScrapEntry } from "../data/types";
-import { COPY_ICON } from "../icons";
+import { COPY_ICON, BOOKMARK_FILLED_ICON } from "../icons";
 import { renderTabNav } from "./shared/tab-nav-renderer";
 import { CleanupManager } from "../ui/cleanup-manager";
 
@@ -21,6 +21,7 @@ export class MarkedListView extends ItemView {
   private onScrapChangedHandler: () => void;
   private cleanupManager = new CleanupManager();
   private selectedIndices = new Set<number>();
+  private searchQuery = "";
 
   constructor(leaf: WorkspaceLeaf, repo: ScrapRepository, eventBus: EventBus) {
     super(leaf);
@@ -76,7 +77,51 @@ export class MarkedListView extends ItemView {
       activeTab: "marked",
     });
 
-    const sections = await this.collectMarkedSections();
+    // 検索バー
+    const searchInput = container.createEl("input", {
+      cls: "zen-scrap-search",
+      type: "text",
+      placeholder: "マーク済みセクションを検索...",
+    });
+    searchInput.value = this.searchQuery;
+    let composing = false;
+    searchInput.addEventListener("compositionstart", () => { composing = true; });
+    searchInput.addEventListener("compositionend", () => {
+      composing = false;
+      this.searchQuery = searchInput.value;
+      this.rerenderList();
+    });
+    searchInput.addEventListener("input", () => {
+      if (composing) return;
+      this.searchQuery = searchInput.value;
+      this.rerenderList();
+    });
+
+    await this.renderListContent(container);
+  }
+
+  private async rerenderList(): Promise<void> {
+    const existing = this.containerEl.querySelector(".zen-scrap-marked-list");
+    const existingToolbar = this.containerEl.querySelector(".zen-scrap-marked-toolbar");
+    const existingEmpty = this.containerEl.querySelector(".zen-scrap-empty");
+    if (existing) existing.remove();
+    if (existingToolbar) existingToolbar.remove();
+    if (existingEmpty) existingEmpty.remove();
+    const container = this.containerEl.children[1] as HTMLElement;
+    await this.renderListContent(container);
+  }
+
+  private async renderListContent(container: HTMLElement): Promise<void> {
+    let sections = await this.collectMarkedSections();
+
+    // 検索フィルタ
+    if (this.searchQuery) {
+      const q = this.searchQuery.toLowerCase();
+      sections = sections.filter(s =>
+        s.entry.body.toLowerCase().includes(q) ||
+        s.scrap.title.toLowerCase().includes(q)
+      );
+    }
 
     if (sections.length === 0) {
       container.createDiv({ cls: "zen-scrap-empty", text: "マークされたセクションがありません" });
@@ -139,7 +184,30 @@ export class MarkedListView extends ItemView {
       const preview = stripped.slice(0, 120) + (stripped.length > 120 ? "..." : "");
       content.createDiv({ text: preview, cls: "zen-scrap-marked-preview" });
 
+      // ツールチップ
+      const tooltipText = section.entry.body.trim().slice(0, 300);
+      const tooltip = item.createDiv({ cls: "zen-scrap-marked-tooltip" });
+      tooltip.setText(tooltipText);
+      content.addEventListener("mouseenter", () => {
+        tooltip.style.display = "block";
+      });
+      content.addEventListener("mouseleave", () => {
+        tooltip.style.display = "none";
+      });
+
       const actions = item.createDiv({ cls: "zen-scrap-marked-actions" });
+
+      const unmarkBtn = actions.createEl("button", { cls: "zen-scrap-marked-unmark-btn" });
+      unmarkBtn.innerHTML = BOOKMARK_FILLED_ICON;
+      unmarkBtn.setAttribute("aria-label", "マーク解除");
+      unmarkBtn.addEventListener("click", async (e) => {
+        e.stopPropagation();
+        section.entry.marked = false;
+        section.scrap.updated = new Date().toISOString();
+        await this.repo.save(section.scrap);
+        this.selectedIndices.clear();
+        await this.render();
+      });
 
       const copyBtn = actions.createEl("button", { cls: "zen-scrap-marked-copy-btn" });
       copyBtn.innerHTML = COPY_ICON;

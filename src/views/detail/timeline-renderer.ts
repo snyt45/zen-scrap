@@ -76,6 +76,20 @@ export async function renderTimeline(container: HTMLElement, deps: TimelineDeps)
     }
   }
 
+  // マーク絞り込み時のまとめてコピーボタン
+  if (deps.filterMarked && entriesToRender.length > 0) {
+    const bulkBar = timeline.createDiv({ cls: "zen-scrap-marked-bulk-bar" });
+    const bulkCopyBtn = bulkBar.createEl("button", {
+      text: `マーク済み${entriesToRender.length}件をまとめてコピー`,
+      cls: "zen-scrap-bulk-copy-btn",
+    });
+    bulkCopyBtn.addEventListener("click", async () => {
+      const bodies = entriesToRender.map(({ entry }) => entry.body).join("\n\n---\n\n");
+      await navigator.clipboard.writeText(bodies);
+      new Notice(`${entriesToRender.length}件のセクションをコピーしました`);
+    });
+  }
+
   for (const { entry, originalIndex: i } of entriesToRender) {
     const entryEl = timeline.createDiv({ cls: "zen-scrap-entry" });
 

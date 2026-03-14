@@ -1859,6 +1859,49 @@ pre:hover .zen-scrap-code-copy-btn {
   color: var(--text-normal);
 }
 
+.zen-scrap-marked-unmark-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--interactive-accent);
+  padding: 4px;
+  border-radius: 4px;
+}
+
+.zen-scrap-marked-unmark-btn:hover {
+  background: var(--background-modifier-hover);
+  color: var(--text-muted);
+}
+
+/* Marked list tooltip */
+.zen-scrap-marked-item {
+  position: relative;
+}
+
+.zen-scrap-marked-tooltip {
+  display: none;
+  position: absolute;
+  left: 40px;
+  top: 100%;
+  z-index: 20;
+  max-width: 400px;
+  padding: 10px 12px;
+  background: var(--background-primary);
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  font-size: 0.8em;
+  line-height: 1.5;
+  color: var(--text-normal);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.zen-scrap-marked-bulk-bar {
+  padding: 8px 12px;
+  margin-bottom: 8px;
+}
+
 /* ==========================================================================
    Tab Navigation
    ========================================================================== */
