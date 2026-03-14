@@ -13,6 +13,14 @@ export class MarkdownRenderer {
       return `[${display}](#zen-scrap-link:${encodeURIComponent(target)})`;
     });
 
+    // 0.5. ローカル画像パスのスペースをエンコード（zenn-markdown-htmlはスペース入りパスを変換しないため）
+    body = body.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, (match, alt, src) => {
+      if (/^https?:\/\//.test(src)) return match;
+      const encoded = src.split("/").map((s: string) => encodeURIComponent(s)).join("/");
+      if (encoded === src) return match;
+      return `![${alt}](${encoded})`;
+    });
+
     // 1. 埋め込み記法を抽出してプレースホルダーに置換（youtubeはzenn-markdown-htmlが処理するので除外）
     const embeds: { id: string; type: string; url: string }[] = [];
     const processed = body.replace(/@\[(tweet|card|github)\]\(([^)]+)\)/g, (_, type, url) => {
@@ -47,8 +55,9 @@ export class MarkdownRenderer {
       if (src.startsWith("http://") || src.startsWith("https://") || src.startsWith("app://") || src.startsWith("data:")) {
         return match;
       }
-      // vault内パスをリソースURLに変換
-      const file = this.app.vault.getAbstractFileByPath(src);
+      // vault内パスをリソースURLに変換（エンコード済みパスをデコードして検索）
+      const decodedSrc = decodeURIComponent(src);
+      const file = this.app.vault.getAbstractFileByPath(decodedSrc);
       if (file instanceof TFile) {
         const resourcePath = this.app.vault.getResourcePath(file);
         return `<img${before}src="${resourcePath}"${after}>`;

@@ -42,6 +42,7 @@ export function renderInputArea(container: HTMLElement, deps: InputAreaDeps): vo
     cls: "zen-scrap-textarea",
   });
   setupAutoGrow(textarea);
+  setupImagePaste(textarea, deps);
   setupAutoEmbed(textarea, deps.settings);
 
   const preview = inputArea.createDiv({ cls: "zen-scrap-preview znc" });
@@ -125,6 +126,7 @@ export function renderEntryEditor(deps: EntryEditorDeps): void {
   });
   textarea.value = entry.body;
   setupAutoGrow(textarea);
+  setupImagePaste(textarea, deps);
   setupAutoEmbed(textarea, deps.settings);
   requestAnimationFrame(() => {
     textarea.style.height = "auto";
@@ -326,6 +328,17 @@ function setupAutoGrow(textarea: HTMLTextAreaElement): void {
     textarea.style.height = textarea.scrollHeight + "px";
   };
   textarea.addEventListener("input", adjust);
+}
+
+function setupImagePaste(textarea: HTMLTextAreaElement, deps: InputAreaDeps): void {
+  textarea.addEventListener("paste", (e: ClipboardEvent) => {
+    const files = e.clipboardData?.files;
+    if (!files || files.length === 0) return;
+    const file = files[0];
+    if (!file.type.startsWith("image/")) return;
+    e.preventDefault();
+    uploadAndInsert(file, textarea, deps);
+  });
 }
 
 function setupAutoEmbed(textarea: HTMLTextAreaElement, settings: ZenScrapSettings): void {
