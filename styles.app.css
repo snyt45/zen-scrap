@@ -1739,3 +1739,128 @@ pre:hover .zen-scrap-code-copy-btn {
   color: var(--interactive-accent);
   background: var(--background-modifier-hover);
 }
+
+/* ==========================================================================
+   Marked List Page
+   ========================================================================== */
+
+.zen-scrap-marked-list-container {
+  padding: 16px;
+  overflow-y: auto;
+  height: 100%;
+}
+
+.zen-scrap-marked-list-header h2 {
+  margin: 8px 0 16px;
+  font-size: 1.2em;
+}
+
+.zen-scrap-marked-toolbar {
+  margin-bottom: 12px;
+}
+
+.zen-scrap-bulk-copy-btn {
+  font-size: 0.85em;
+  padding: 4px 12px;
+  border-radius: 4px;
+  background: var(--interactive-accent);
+  color: var(--text-on-accent);
+  border: none;
+  cursor: pointer;
+}
+
+.zen-scrap-bulk-copy-btn:hover {
+  opacity: 0.9;
+}
+
+.zen-scrap-marked-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.zen-scrap-marked-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 8px;
+  background: var(--background-primary);
+}
+
+.zen-scrap-marked-item:hover {
+  background: var(--background-secondary);
+}
+
+.zen-scrap-marked-checkbox {
+  margin-top: 4px;
+  cursor: pointer;
+}
+
+.zen-scrap-marked-content {
+  flex: 1;
+  min-width: 0;
+  cursor: pointer;
+}
+
+.zen-scrap-marked-meta {
+  display: flex;
+  gap: 8px;
+  font-size: 0.8em;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+
+.zen-scrap-marked-source {
+  font-weight: 600;
+  color: var(--text-normal);
+}
+
+.zen-scrap-marked-preview {
+  font-size: 0.9em;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+.zen-scrap-marked-actions {
+  display: flex;
+  align-items: center;
+}
+
+.zen-scrap-marked-copy-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-muted);
+  padding: 4px;
+  border-radius: 4px;
+}
+
+.zen-scrap-marked-copy-btn:hover {
+  background: var(--background-modifier-hover);
+  color: var(--text-normal);
+}
+
+/* List Header Right */
+.zen-scrap-list-header-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.zen-scrap-marked-list-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-muted);
+  padding: 4px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+}
+
+.zen-scrap-marked-list-btn:hover {
+  background: var(--background-modifier-hover);
+  color: var(--interactive-accent);
+}
