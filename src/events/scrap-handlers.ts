@@ -9,10 +9,10 @@ export function registerScrapHandlers(
   eventBus: EventBus,
   app: App,
   repo: ScrapRepository,
-  openScrap: (scrap: Scrap) => void
+  openScrap: (scrap: Scrap, scrollToEntryIndex?: number) => void
 ): void {
-  eventBus.on(EVENTS.SCRAP_SELECT, (scrap: Scrap) => {
-    openScrap(scrap);
+  eventBus.on(EVENTS.SCRAP_SELECT, (scrap: Scrap, scrollToEntryIndex?: number) => {
+    openScrap(scrap, scrollToEntryIndex);
   });
 
   eventBus.on(EVENTS.SCRAP_CREATE_REQUEST, () => {

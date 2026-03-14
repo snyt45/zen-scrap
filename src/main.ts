@@ -33,7 +33,7 @@ export default class ZenScrapPlugin extends Plugin {
       new MarkedListView(leaf, this.repo, this.eventBus)
     );
 
-    registerScrapHandlers(this.eventBus, this.app, this.repo, (scrap) => this.openScrap(scrap));
+    registerScrapHandlers(this.eventBus, this.app, this.repo, (scrap, scrollToEntryIndex) => this.openScrap(scrap, scrollToEntryIndex));
     registerNavHandlers(this.eventBus, () => this.activateListView(), () => this.openMarkedList());
 
     this.addRibbonIcon("message-square", "Zen Scrap", () => {
@@ -86,7 +86,7 @@ export default class ZenScrapPlugin extends Plugin {
     }
   }
 
-  async openScrap(scrap: Scrap) {
+  async openScrap(scrap: Scrap, scrollToEntryIndex?: number) {
     const { workspace } = this.app;
     let leaf = workspace.getLeavesOfType(VIEW_TYPE_SCRAP_DETAIL)[0];
     if (!leaf) {
@@ -95,7 +95,7 @@ export default class ZenScrapPlugin extends Plugin {
     await leaf.setViewState({
       type: VIEW_TYPE_SCRAP_DETAIL,
       active: true,
-      state: { filePath: scrap.filePath },
+      state: { filePath: scrap.filePath, scrollToEntryIndex },
     });
     workspace.revealLeaf(leaf);
   }

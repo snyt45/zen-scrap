@@ -154,7 +154,7 @@ export class MarkedListView extends ItemView {
       });
 
       content.addEventListener("click", () => {
-        this.eventBus.emit(EVENTS.SCRAP_SELECT, section.scrap);
+        this.eventBus.emit(EVENTS.SCRAP_SELECT, section.scrap, section.entryIndex);
       });
     });
   }

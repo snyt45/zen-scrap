@@ -673,8 +673,8 @@
 
 .zen-scrap-entry-header {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  gap: 8px;
   padding: 10px 12px;
   background: var(--background-secondary);
   border-bottom: 1px solid var(--background-modifier-border);
@@ -1717,6 +1717,25 @@ pre:hover .zen-scrap-code-copy-btn {
   opacity: 1;
 }
 
+/* Entry Highlight Animation */
+@keyframes zen-scrap-highlight-fade {
+  0% { background: var(--interactive-accent); opacity: 0.15; }
+  100% { background: transparent; opacity: 0; }
+}
+
+.zen-scrap-entry-highlight {
+  position: relative;
+}
+
+.zen-scrap-entry-highlight::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 8px;
+  pointer-events: none;
+  animation: zen-scrap-highlight-fade 1.5s ease-out forwards;
+}
+
 /* ==========================================================================
    Filter Mark Button
    ========================================================================== */
@@ -1746,6 +1765,8 @@ pre:hover .zen-scrap-code-copy-btn {
    ========================================================================== */
 
 .zen-scrap-marked-list-container {
+  max-width: 840px;
+  margin: 0 auto;
   padding: 16px;
   overflow-y: auto;
   height: 100%;

@@ -53,12 +53,25 @@ export class ScrapDetailView extends ItemView {
     return this.scrap?.title || "Zen Scrap";
   }
 
-  async setState(state: { filePath?: string }, result: any): Promise<void> {
+  async setState(state: { filePath?: string; scrollToEntryIndex?: number }, result: any): Promise<void> {
     if (state.filePath) {
       const found = await this.repo.getByPath(state.filePath);
       if (found) {
         this.scrap = found;
         await this.render();
+
+        if (state.scrollToEntryIndex != null) {
+          const container = this.containerEl.children[1] as HTMLElement;
+          const entries = container.querySelectorAll<HTMLElement>(".zen-scrap-entry");
+          const target = entries[state.scrollToEntryIndex];
+          if (target) {
+            setTimeout(() => {
+              target.scrollIntoView({ behavior: "smooth", block: "start" });
+              target.addClass("zen-scrap-entry-highlight");
+              setTimeout(() => target.removeClass("zen-scrap-entry-highlight"), 1500);
+            }, 100);
+          }
+        }
       }
     }
     await super.setState(state, result);
