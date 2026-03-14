@@ -61,20 +61,30 @@ export class ScrapDetailView extends ItemView {
         await this.render();
 
         if (state.scrollToEntryIndex != null) {
-          const container = this.containerEl.children[1] as HTMLElement;
-          const entries = container.querySelectorAll<HTMLElement>(".zen-scrap-entry");
-          const target = entries[state.scrollToEntryIndex];
-          if (target) {
-            setTimeout(() => {
-              target.scrollIntoView({ behavior: "smooth", block: "start" });
-              target.addClass("zen-scrap-entry-highlight");
-              setTimeout(() => target.removeClass("zen-scrap-entry-highlight"), 2000);
-            }, 100);
+          const entry = found.entries[state.scrollToEntryIndex];
+          if (entry) {
+            const container = this.containerEl.children[1] as HTMLElement;
+            this.scrollToEntryByTimestamp(container, entry.timestamp);
           }
         }
       }
     }
     await super.setState(state, result);
+  }
+
+  private scrollToEntryByTimestamp(container: HTMLElement, timestamp: string): void {
+    setTimeout(() => {
+      const entryEls = Array.from(container.querySelectorAll<HTMLElement>(".zen-scrap-entry"));
+      for (const el of entryEls) {
+        const timeEl = el.querySelector(".zen-scrap-entry-time");
+        if (timeEl && timeEl.textContent === timestamp) {
+          el.scrollIntoView({ behavior: "smooth", block: "start" });
+          el.addClass("zen-scrap-entry-highlight");
+          setTimeout(() => el.removeClass("zen-scrap-entry-highlight"), 2000);
+          break;
+        }
+      }
+    }, 100);
   }
 
   getState(): Record<string, unknown> {

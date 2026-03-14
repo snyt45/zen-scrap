@@ -218,6 +218,7 @@ export async function renderTimeline(container: HTMLElement, deps: TimelineDeps)
     deleteItem.addEventListener("click", async (e) => {
       e.stopPropagation();
       menu.classList.remove("is-open");
+      if (!confirm("このセクションを削除しますか？")) return;
       scrap.entries.splice(i, 1);
       scrap.updated = new Date().toISOString();
       await repo.save(scrap);

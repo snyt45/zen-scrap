@@ -3,7 +3,7 @@ import { ScrapRepository } from "../data/scrap-repository";
 import { EventBus } from "../events/event-bus";
 import { EVENTS } from "../events/constants";
 import { Scrap, ScrapEntry } from "../data/types";
-import { COPY_ICON, BOOKMARK_FILLED_ICON } from "../icons";
+import { COPY_ICON, BOOKMARK_FILLED_ICON, BOOKMARK_OFF_ICON } from "../icons";
 import { renderTabNav } from "./shared/tab-nav-renderer";
 import { CleanupManager } from "../ui/cleanup-manager";
 
@@ -21,7 +21,6 @@ export class MarkedListView extends ItemView {
   private onScrapChangedHandler: () => void;
   private cleanupManager = new CleanupManager();
   private selectedIndices = new Set<number>();
-  private lastClickedIndex = -1;
   private searchQuery = "";
 
   constructor(leaf: WorkspaceLeaf, repo: ScrapRepository, eventBus: EventBus) {
@@ -196,7 +195,7 @@ export class MarkedListView extends ItemView {
       const actions = item.createDiv({ cls: "zen-scrap-marked-actions" });
 
       const unmarkBtn = actions.createEl("button", { cls: "zen-scrap-marked-unmark-btn" });
-      unmarkBtn.innerHTML = `<span class="zen-scrap-unmark-x">×</span>`;
+      unmarkBtn.innerHTML = BOOKMARK_OFF_ICON;
       unmarkBtn.setAttribute("aria-label", "マーク解除");
       unmarkBtn.addEventListener("click", async (e) => {
         e.stopPropagation();
@@ -216,37 +215,22 @@ export class MarkedListView extends ItemView {
         new Notice("セクションをコピーしました");
       });
 
-      // クリックで選択 / Cmd+Click でトグル / Shift+Click で範囲選択
       item.addEventListener("click", (e) => {
-        // アクションボタンからのクリックは無視
         if ((e.target as HTMLElement).closest(".zen-scrap-marked-actions")) return;
 
-        const metaKey = e.metaKey || e.ctrlKey;
-
-        if (e.shiftKey && this.lastClickedIndex >= 0) {
-          // Shift+Click: 範囲選択
-          const from = Math.min(this.lastClickedIndex, sectionIdx);
-          const to = Math.max(this.lastClickedIndex, sectionIdx);
-          if (!metaKey) this.selectedIndices.clear();
-          for (let j = from; j <= to; j++) {
-            this.selectedIndices.add(j);
-          }
-        } else if (metaKey) {
-          // Cmd/Ctrl+Click: トグル
+        if (e.metaKey || e.ctrlKey) {
+          // Cmd/Ctrl+Click: 選択トグル
           if (this.selectedIndices.has(sectionIdx)) {
             this.selectedIndices.delete(sectionIdx);
           } else {
             this.selectedIndices.add(sectionIdx);
           }
-          this.lastClickedIndex = sectionIdx;
+          updateItemStyles();
+          updateBulkBtn();
         } else {
           // 通常クリック: セクションに遷移
           this.eventBus.emit(EVENTS.SCRAP_SELECT, section.scrap, section.entryIndex);
-          return;
         }
-
-        updateItemStyles();
-        updateBulkBtn();
       });
     });
   }
