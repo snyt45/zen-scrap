@@ -1681,3 +1681,37 @@ pre:hover .zen-scrap-code-copy-btn {
   word-break: break-word;
   z-index: 30;
 }
+
+/* ==========================================================================
+   Mark Button
+   ========================================================================== */
+
+.zen-scrap-mark-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-muted);
+  padding: 2px 4px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  opacity: 0.4;
+  transition: opacity 0.15s, color 0.15s;
+}
+
+.zen-scrap-mark-btn:hover {
+  opacity: 1;
+}
+
+.zen-scrap-mark-btn.is-marked {
+  color: var(--interactive-accent);
+  opacity: 1;
+}
+
+.zen-scrap-entry:hover .zen-scrap-mark-btn {
+  opacity: 0.7;
+}
+
+.zen-scrap-entry:hover .zen-scrap-mark-btn.is-marked {
+  opacity: 1;
+}
