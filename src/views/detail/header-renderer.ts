@@ -4,7 +4,7 @@ import { ScrapRepository } from "../../data/scrap-repository";
 import { EventBus } from "../../events/event-bus";
 import { EVENTS } from "../../events/constants";
 import { formatDate } from "../../utils";
-import { chevronLeftIcon, EXPAND_ICON, SHRINK_ICON, TRIANGLE_DOWN_ICON, EDIT_ICON, MORE_ICON, HELP_ICON, OUTLINE_ICON } from "../../icons";
+import { chevronLeftIcon, EXPAND_ICON, SHRINK_ICON, TRIANGLE_DOWN_ICON, EDIT_ICON, MORE_ICON, HELP_ICON, OUTLINE_ICON, BOOKMARK_FILLED_ICON } from "../../icons";
 import { MarkdownRenderer } from "./markdown-renderer";
 import shortcutGuideRaw from "../../../docs/shortcut-guide.md";
 
@@ -21,6 +21,8 @@ export interface HeaderDeps {
   openFile: (path: string) => void;
   addDocumentClickHandler: (handler: () => void) => void;
   scrollToEntry: (index: number) => void;
+  filterMarked: boolean;
+  setFilterMarked: (v: boolean) => void;
 }
 
 export function renderHeader(container: HTMLElement, deps: HeaderDeps): void {
@@ -42,11 +44,30 @@ export function renderHeader(container: HTMLElement, deps: HeaderDeps): void {
     await deps.render();
   });
 
+  // マーク絞り込みトグル
+  const hasMarked = scrap.entries.some(e => e.marked);
+  if (hasMarked) {
+    const filterMarkBtn = navRight.createEl("button", {
+      cls: `zen-scrap-filter-mark-btn${deps.filterMarked ? " is-active" : ""}`,
+    });
+    filterMarkBtn.innerHTML = BOOKMARK_FILLED_ICON;
+    filterMarkBtn.setAttribute("aria-label", deps.filterMarked ? "全て表示" : "マーク済みのみ");
+    filterMarkBtn.addEventListener("click", async () => {
+      deps.setFilterMarked(!deps.filterMarked);
+      await deps.render();
+    });
+  }
+
   // アウトラインドロップダウン
   if (scrap.entries.length > 0) {
     const outlineWrapper = navRight.createDiv({ cls: "zen-scrap-outline-wrapper" });
     const outlineBtn = outlineWrapper.createEl("button", { cls: "zen-scrap-outline-btn" });
-    outlineBtn.innerHTML = `${OUTLINE_ICON}<span class="zen-scrap-outline-badge">${scrap.entries.length}</span>`;
+
+    const outlineEntries = deps.filterMarked
+      ? scrap.entries.map((e, i) => ({ entry: e, index: i })).filter(({ entry }) => entry.marked)
+      : scrap.entries.map((e, i) => ({ entry: e, index: i }));
+
+    outlineBtn.innerHTML = `${OUTLINE_ICON}<span class="zen-scrap-outline-badge">${outlineEntries.length}</span>`;
     outlineBtn.setAttribute("aria-label", "アウトライン");
 
     const outlineMenu = outlineWrapper.createDiv({ cls: "zen-scrap-outline-menu" });
@@ -57,7 +78,7 @@ export function renderHeader(container: HTMLElement, deps: HeaderDeps): void {
     const outlineList = outlineMenu.createDiv({ cls: "zen-scrap-outline-list" });
     const tooltip = outlineMenu.createDiv({ cls: "zen-scrap-outline-tooltip" });
 
-    scrap.entries.forEach((entry, i) => {
+    outlineEntries.forEach(({ entry, index: i }) => {
       const item = outlineList.createDiv({ cls: "zen-scrap-outline-item" });
       const meta = item.createDiv({ cls: "zen-scrap-outline-item-meta" });
       meta.createSpan({ text: `${i + 1}`, cls: "zen-scrap-outline-item-number" });

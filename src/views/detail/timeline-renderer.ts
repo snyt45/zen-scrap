@@ -13,6 +13,7 @@ export interface TimelineDeps {
   markdownRenderer: MarkdownRenderer;
   addDocumentClickHandler: (handler: () => void) => void;
   entryEditorDeps: Omit<EntryEditorDeps, "entryEl" | "entryBody" | "index">;
+  filterMarked?: boolean;
 }
 
 export function renderClosedBanner(container: HTMLElement, scrap: Scrap): void {
@@ -61,8 +62,17 @@ export async function renderTimeline(container: HTMLElement, deps: TimelineDeps)
 
   const stopAutoScroll = () => cancelAnimationFrame(autoScrollRaf);
 
-  for (let i = 0; i < scrap.entries.length; i++) {
-    const entry = scrap.entries[i];
+  const entriesToRender = deps.filterMarked
+    ? scrap.entries.map((e, i) => ({ entry: e, originalIndex: i })).filter(({ entry }) => entry.marked)
+    : scrap.entries.map((e, i) => ({ entry: e, originalIndex: i }));
+
+  if (deps.filterMarked && entriesToRender.length === 0) {
+    const emptyCard = timeline.createDiv({ cls: "zen-scrap-empty-state" });
+    emptyCard.setText("マーク済みのセクションがありません");
+    return;
+  }
+
+  for (const { entry, originalIndex: i } of entriesToRender) {
     const entryEl = timeline.createDiv({ cls: "zen-scrap-entry" });
 
     // ドラッグ&ドロップ並べ替え（ハンドルからのみ）

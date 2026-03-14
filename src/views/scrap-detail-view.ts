@@ -19,6 +19,7 @@ export class ScrapDetailView extends ItemView {
   private settings: ZenScrapSettings;
   private scrap: Scrap | undefined;
   private isFullWidth = false;
+  private filterMarked = false;
   private ignoreChangeCount = 0;
   private cleanupManager = new CleanupManager();
   private markdownRenderer: MarkdownRenderer;
@@ -107,6 +108,8 @@ export class ScrapDetailView extends ItemView {
       render,
       openFile: (path) => this.app.workspace.openLinkText(path, "", true),
       addDocumentClickHandler: (h) => this.cleanupManager.registerDocumentClick(h),
+      filterMarked: this.filterMarked,
+      setFilterMarked: (v: boolean) => { this.filterMarked = v; },
       scrollToEntry: (index) => {
         const entries = container.querySelectorAll<HTMLElement>(".zen-scrap-entry");
         if (entries[index]) {
@@ -135,6 +138,7 @@ export class ScrapDetailView extends ItemView {
       markdownRenderer: this.markdownRenderer,
       addDocumentClickHandler: (h) => this.cleanupManager.registerDocumentClick(h),
       entryEditorDeps: inputAreaDeps,
+      filterMarked: this.filterMarked,
     };
     await renderTimeline(container, timelineDeps);
 
