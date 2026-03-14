@@ -1,7 +1,8 @@
+import { Notice } from "obsidian";
 import { Scrap } from "../../data/types";
 import { ScrapRepository } from "../../data/scrap-repository";
 import { formatDate } from "../../utils";
-import { chevronDownIcon, GRIP_ICON } from "../../icons";
+import { chevronDownIcon, GRIP_ICON, BOOKMARK_ICON, BOOKMARK_FILLED_ICON } from "../../icons";
 import { MarkdownRenderer } from "./markdown-renderer";
 import { renderEntryEditor, EntryEditorDeps } from "./input-area-renderer";
 
@@ -135,11 +136,33 @@ export async function renderTimeline(container: HTMLElement, deps: TimelineDeps)
 
     entryHeader.createSpan({ text: entry.timestamp, cls: "zen-scrap-entry-time" });
 
+    // マークボタン
+    const markBtn = entryHeader.createEl("button", {
+      cls: `zen-scrap-mark-btn${entry.marked ? " is-marked" : ""}`,
+    });
+    markBtn.innerHTML = entry.marked ? BOOKMARK_FILLED_ICON : BOOKMARK_ICON;
+    markBtn.setAttribute("aria-label", entry.marked ? "マーク解除" : "マーク");
+    markBtn.addEventListener("click", async (e) => {
+      e.stopPropagation();
+      entry.marked = !entry.marked;
+      scrap.updated = new Date().toISOString();
+      await repo.save(scrap);
+      await render();
+    });
+
     const menuWrapper = entryHeader.createDiv({ cls: "zen-scrap-entry-menu" });
     const menuBtn = menuWrapper.createEl("button", { cls: "zen-scrap-entry-menu-btn" });
     menuBtn.innerHTML = chevronDownIcon(18);
 
     const menu = menuWrapper.createDiv({ cls: "zen-scrap-entry-menu-dropdown" });
+
+    const copyItem = menu.createDiv({ cls: "zen-scrap-dropdown-item", text: "コピー" });
+    copyItem.addEventListener("click", async (e) => {
+      e.stopPropagation();
+      menu.classList.remove("is-open");
+      await navigator.clipboard.writeText(entry.body);
+      new Notice("セクションをコピーしました");
+    });
 
     const editItem = menu.createDiv({ cls: "zen-scrap-dropdown-item", text: "編集" });
     const deleteItem = menu.createDiv({ cls: "zen-scrap-dropdown-item zen-scrap-dropdown-item-danger", text: "削除" });
