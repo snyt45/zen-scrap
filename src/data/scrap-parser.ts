@@ -44,6 +44,12 @@ export function parseScrapMarkdown(content: string, filePath: string): Scrap {
   const body = content.slice(bodyStart).trim();
   const entries: ScrapEntry[] = [];
 
+  // descriptionの抽出: 最初のエントリ見出し(### YYYY-MM-DD HH:MM)より前のテキスト
+  const firstEntryMatch = body.match(/### \d{4}-\d{2}-\d{2} \d{2}:\d{2}/);
+  const description = firstEntryMatch
+    ? body.slice(0, firstEntryMatch.index).replace(/\n---\s*$/, "").trim()
+    : "";
+
   // タイムスタンプ形式（YYYY-MM-DD HH:MM）の見出しのみをエントリ区切りとする
   const entryRegex = /### (\d{4}-\d{2}-\d{2} \d{2}:\d{2})( \[marked\])?\n([\s\S]*?)(?=\n---\n\n### \d{4}-\d{2}-\d{2} \d{2}:\d{2}|$)/g;
   let match;
@@ -59,6 +65,7 @@ export function parseScrapMarkdown(content: string, filePath: string): Scrap {
 
   return {
     title: frontmatter["title"] || filePath.replace(/\.md$/, "").split("/").pop() || "",
+    description,
     status: (frontmatter["status"] as "open" | "closed") || "open",
     tags,
     created: frontmatter["created"] || "",
@@ -82,6 +89,13 @@ export function serializeScrap(scrap: Scrap): string {
   lines.push(`pinned: ${scrap.pinned}`);
   lines.push("---");
   lines.push("");
+
+  if (scrap.description) {
+    lines.push(scrap.description);
+    lines.push("");
+    lines.push("---");
+    lines.push("");
+  }
 
   for (const entry of scrap.entries) {
     lines.push(`### ${entry.timestamp}${entry.marked ? " [marked]" : ""}`);

@@ -6,6 +6,7 @@ export interface ScrapEntry {
 
 export interface Scrap {
   title: string;
+  description: string;
   status: "open" | "closed";
   tags: string[];
   created: string; // ISO 8601

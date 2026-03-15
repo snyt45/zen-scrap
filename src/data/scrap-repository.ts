@@ -51,6 +51,7 @@ export class ScrapRepository {
     const now = new Date().toISOString();
     const scrap: Scrap = {
       title,
+      description: "",
       status: "open",
       tags,
       created: now,

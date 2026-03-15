@@ -1,4 +1,4 @@
-import { Modal, Notice } from "obsidian";
+import { Modal, Notice, Scope } from "obsidian";
 import { Scrap } from "../../data/types";
 import { ScrapRepository } from "../../data/scrap-repository";
 import { EventBus } from "../../events/event-bus";
@@ -14,6 +14,7 @@ export interface HeaderDeps {
   repo: ScrapRepository;
   eventBus: EventBus;
   app: import("obsidian").App;
+  scope: import("obsidian").Scope | null;
   markdownRenderer: MarkdownRenderer;
   isFullWidth: boolean;
   setFullWidth: (v: boolean) => void;
@@ -327,4 +328,111 @@ export function renderHeader(container: HTMLElement, deps: HeaderDeps): void {
   };
 
   renderTagDisplay();
+
+  // Description
+  const descSection = header.createDiv({ cls: "zen-scrap-description-section" });
+
+  const renderDescDisplay = async () => {
+    descSection.empty();
+    if (scrap.description) {
+      const descBody = descSection.createDiv({ cls: "zen-scrap-description-body znc" });
+      descBody.innerHTML = await deps.markdownRenderer.renderBody(scrap.description);
+      deps.markdownRenderer.addCopyButtons(descBody);
+      deps.markdownRenderer.addLinkHandler(descBody);
+      const editBtn = descSection.createEl("button", { cls: "zen-scrap-description-edit-btn" });
+      editBtn.innerHTML = EDIT_ICON;
+      editBtn.addEventListener("click", () => renderDescEdit());
+    } else {
+      const addLink = descSection.createSpan({ text: "+ 説明を追加", cls: "zen-scrap-description-add-link" });
+      addLink.addEventListener("click", () => renderDescEdit());
+    }
+  };
+
+  const EMPTY_PREVIEW_HTML = '<p style="color: var(--text-muted)">プレビューする内容がありません</p>';
+
+  const renderDescEdit = () => {
+    descSection.empty();
+    const editArea = descSection.createDiv({ cls: "zen-scrap-description-edit" });
+
+    const tabHeader = editArea.createDiv({ cls: "zen-scrap-pill-tabs" });
+    const mdTab = tabHeader.createEl("button", { text: "Markdown", cls: "zen-scrap-pill-tab zen-scrap-pill-tab-active" });
+    const pvTab = tabHeader.createEl("button", { text: "Preview", cls: "zen-scrap-pill-tab" });
+
+    const textarea = editArea.createEl("textarea", { cls: "zen-scrap-textarea" });
+    textarea.value = scrap.description;
+    textarea.placeholder = "説明を追加";
+
+    const adjustHeight = () => {
+      textarea.style.height = "auto";
+      textarea.style.height = textarea.scrollHeight + "px";
+    };
+    textarea.addEventListener("input", adjustHeight);
+    requestAnimationFrame(adjustHeight);
+
+    const preview = editArea.createDiv({ cls: "zen-scrap-preview znc" });
+    preview.style.display = "none";
+    preview.tabIndex = -1;
+
+    mdTab.addEventListener("click", () => {
+      mdTab.addClass("zen-scrap-pill-tab-active");
+      pvTab.removeClass("zen-scrap-pill-tab-active");
+      textarea.style.display = "";
+      preview.style.display = "none";
+      textarea.focus();
+    });
+
+    pvTab.addEventListener("click", async () => {
+      pvTab.addClass("zen-scrap-pill-tab-active");
+      mdTab.removeClass("zen-scrap-pill-tab-active");
+      textarea.style.display = "none";
+      preview.style.display = "";
+      preview.focus();
+      if (textarea.value.trim()) {
+        preview.innerHTML = await deps.markdownRenderer.renderBody(textarea.value);
+        deps.markdownRenderer.addCopyButtons(preview);
+        deps.markdownRenderer.addLinkHandler(preview);
+      } else {
+        preview.innerHTML = EMPTY_PREVIEW_HTML;
+      }
+    });
+
+    const actionBar = editArea.createDiv({ cls: "zen-scrap-action-bar" });
+    const cancelBtn = actionBar.createEl("button", { text: "キャンセル", cls: "zen-scrap-edit-cancel-btn" });
+    const saveBtn = actionBar.createEl("button", { text: "保存する", cls: "zen-scrap-submit-btn-new" });
+
+    const doSave = async () => {
+      scrap.description = textarea.value.trim();
+      scrap.updated = new Date().toISOString();
+      await repo.save(scrap);
+      await renderDescDisplay();
+      eventBus.emit(EVENTS.SCRAP_CHANGED);
+    };
+
+    cancelBtn.addEventListener("click", () => renderDescDisplay());
+    saveBtn.addEventListener("click", doSave);
+
+    const descScope = new Scope(deps.scope ?? undefined);
+    descScope.register(["Mod"], "Enter", (e: KeyboardEvent) => {
+      e.preventDefault();
+      saveBtn.click();
+      return false;
+    });
+    descScope.register(["Mod"], "E", (e: KeyboardEvent) => {
+      e.preventDefault();
+      if (preview.style.display === "none") {
+        pvTab.click();
+      } else {
+        mdTab.click();
+      }
+      return false;
+    });
+    textarea.addEventListener("focus", () => deps.app.keymap.pushScope(descScope));
+    textarea.addEventListener("blur", () => deps.app.keymap.popScope(descScope));
+    preview.addEventListener("focus", () => deps.app.keymap.pushScope(descScope));
+    preview.addEventListener("blur", () => deps.app.keymap.popScope(descScope));
+
+    textarea.focus();
+  };
+
+  renderDescDisplay();
 }

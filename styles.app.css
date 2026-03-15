@@ -1426,6 +1426,69 @@ pre:hover .zen-scrap-code-copy-btn {
   box-shadow: var(--focus-ring);
 }
 
+/* Description */
+.zen-scrap-description-section {
+  position: relative;
+  margin-top: 12px;
+  padding: 12px 16px;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: var(--radius-lg);
+  background: var(--background-secondary);
+}
+
+.zen-scrap-description-body {
+  font-size: var(--font-base);
+  line-height: 1.7;
+}
+
+.zen-scrap-description-body > *:first-child {
+  margin-top: 0;
+}
+
+.zen-scrap-description-body > *:last-child {
+  margin-bottom: 0;
+}
+
+.zen-scrap-description-edit-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 4px;
+  opacity: 0;
+  transition: opacity var(--transition-base);
+}
+
+.zen-scrap-description-section:hover .zen-scrap-description-edit-btn {
+  opacity: 1;
+}
+
+.zen-scrap-description-edit-btn:hover {
+  color: var(--text-accent);
+  background: var(--background-modifier-hover);
+}
+
+.zen-scrap-description-add-link {
+  color: var(--text-muted);
+  font-size: var(--font-md);
+  cursor: pointer;
+}
+
+.zen-scrap-description-add-link:hover {
+  color: var(--text-accent);
+}
+
+.zen-scrap-description-edit .zen-scrap-textarea {
+  min-height: 120px;
+}
+
 .zen-scrap-fullwidth-toggle:active,
 .zen-scrap-help-btn:active,
 .zen-scrap-title-cancel-btn:active,

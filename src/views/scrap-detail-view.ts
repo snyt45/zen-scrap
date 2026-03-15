@@ -131,6 +131,7 @@ export class ScrapDetailView extends ItemView {
       repo: this.repo,
       eventBus: this.eventBus,
       app: this.app,
+      scope: this.scope,
       markdownRenderer: this.markdownRenderer,
       isFullWidth: this.isFullWidth,
       setFullWidth: (v) => { this.isFullWidth = v; },
