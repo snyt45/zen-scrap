@@ -5,12 +5,14 @@ export interface ZenScrapSettings {
   scrapsFolder: string;
   imagesFolder: string;
   autoEmbed: boolean;
+  staleDays: number;
 }
 
 export const DEFAULT_SETTINGS: ZenScrapSettings = {
   scrapsFolder: "Scraps",
   imagesFolder: "Scraps/images",
   autoEmbed: true,
+  staleDays: 7,
 };
 
 export class ZenScrapSettingTab extends PluginSettingTab {
@@ -60,6 +62,22 @@ export class ZenScrapSettingTab extends PluginSettingTab {
           .onChange(async (value) => {
             this.plugin.settings.autoEmbed = value;
             await this.plugin.saveSettings();
+          })
+      );
+
+    new Setting(containerEl)
+      .setName("放置中と判定する日数")
+      .setDesc("更新からこの日数が経過したOpenスクラップに「放置中」ラベルを表示する（0で無効）")
+      .addText((text) =>
+        text
+          .setPlaceholder("7")
+          .setValue(String(this.plugin.settings.staleDays))
+          .onChange(async (value) => {
+            const num = parseInt(value, 10);
+            if (!isNaN(num) && num >= 0) {
+              this.plugin.settings.staleDays = num;
+              await this.plugin.saveSettings();
+            }
           })
       );
   }

@@ -90,6 +90,9 @@ export async function renderTimeline(container: HTMLElement, deps: TimelineDeps)
     });
   }
 
+  // Phase 1: 全エントリのDOM骨格を同期的に作成（スクロール遷移が即座に動くようにする）
+  const renderTasks: (() => Promise<void>)[] = [];
+
   for (const { entry, originalIndex: i } of entriesToRender) {
     const entryEl = timeline.createDiv({ cls: "zen-scrap-entry" });
 
@@ -204,10 +207,8 @@ export async function renderTimeline(container: HTMLElement, deps: TimelineDeps)
       if (!isOpen) menu.classList.add("is-open");
     });
 
+    // 本文エリアを空で作成（後から非同期で埋める）
     const entryBody = entryEl.createDiv({ cls: "zen-scrap-entry-body znc" });
-    entryBody.innerHTML = await markdownRenderer.renderBody(entry.body);
-    markdownRenderer.addCopyButtons(entryBody);
-    markdownRenderer.addLinkHandler(entryBody);
 
     editItem.addEventListener("click", (e) => {
       e.stopPropagation();
@@ -224,6 +225,13 @@ export async function renderTimeline(container: HTMLElement, deps: TimelineDeps)
       await repo.save(scrap);
       await render();
     });
+
+    // Phase 2用: 本文レンダリングタスクを蓄積
+    renderTasks.push(async () => {
+      entryBody.innerHTML = await markdownRenderer.renderBody(entry.body);
+      markdownRenderer.addCopyButtons(entryBody);
+      markdownRenderer.addLinkHandler(entryBody);
+    });
   }
 
   const closeEntryMenus = () => {
@@ -232,4 +240,7 @@ export async function renderTimeline(container: HTMLElement, deps: TimelineDeps)
     });
   };
   addDocumentClickHandler(closeEntryMenus);
+
+  // Phase 2: 本文を並列レンダリング（DOM骨格は既に揃っている）
+  await Promise.all(renderTasks.map((task) => task()));
 }

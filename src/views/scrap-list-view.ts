@@ -2,6 +2,7 @@ import { ItemView, WorkspaceLeaf } from "obsidian";
 import { ScrapRepository } from "../data/scrap-repository";
 import { EventBus } from "../events/event-bus";
 import { EVENTS } from "../events/constants";
+import { ZenScrapSettings } from "../settings";
 import { renderDropdown } from "./list/toolbar-renderer";
 import { renderTabNav } from "./shared/tab-nav-renderer";
 import { renderListItem } from "./list/list-item-renderer";
@@ -12,6 +13,7 @@ export const VIEW_TYPE_SCRAP_LIST = "zen-scrap-list";
 export class ScrapListView extends ItemView {
   private repo: ScrapRepository;
   private eventBus: EventBus;
+  private settings: ZenScrapSettings;
   private filter: "all" | "open" | "closed" | "archived" = "open";
   private sort: "created" | "updated" = "created";
   private searchQuery = "";
@@ -19,10 +21,11 @@ export class ScrapListView extends ItemView {
   private onScrapChangedHandler: () => void;
   private cleanupManager = new CleanupManager();
 
-  constructor(leaf: WorkspaceLeaf, repo: ScrapRepository, eventBus: EventBus) {
+  constructor(leaf: WorkspaceLeaf, repo: ScrapRepository, eventBus: EventBus, settings: ZenScrapSettings) {
     super(leaf);
     this.repo = repo;
     this.eventBus = eventBus;
+    this.settings = settings;
     this.onScrapChangedHandler = () => this.render();
   }
 
@@ -165,6 +168,7 @@ export class ScrapListView extends ItemView {
     const deps = {
       repo: this.repo,
       eventBus: this.eventBus,
+      staleDays: this.settings.staleDays,
       onTagClick: (tag: string) => {
         this.filterTag = tag;
         this.render();

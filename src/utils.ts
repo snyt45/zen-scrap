@@ -6,9 +6,6 @@ export function formatDate(isoString: string): string {
   return `${y}/${m}/${day}`;
 }
 
-export function daysAgo(isoString: string): string {
-  const diff = Math.floor((Date.now() - new Date(isoString).getTime()) / (1000 * 60 * 60 * 24));
-  if (diff === 0) return "今日";
-  if (diff === 1) return "昨日";
-  return `${diff}日前`;
+export function daysAgoCount(isoString: string): number {
+  return Math.floor((Date.now() - new Date(isoString).getTime()) / (1000 * 60 * 60 * 24));
 }

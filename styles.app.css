@@ -216,10 +216,20 @@
   color: var(--text-muted);
 }
 
-.zen-scrap-item-ago {
-  color: var(--text-faint);
-  font-size: var(--font-smallest);
+.zen-scrap-label-stale {
+  font-size: var(--font-xs);
+  font-weight: var(--weight-semibold);
+  color: #b45309;
+  background: #fef3c7;
+  padding: 1px 8px;
+  border-radius: var(--radius-pill);
   margin-left: auto;
+  flex-shrink: 0;
+}
+
+.theme-dark .zen-scrap-label-stale {
+  color: #fbbf24;
+  background: rgba(251, 191, 36, 0.15);
 }
 
 .zen-scrap-empty {
