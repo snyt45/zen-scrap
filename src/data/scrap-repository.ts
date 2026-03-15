@@ -27,7 +27,6 @@ export class ScrapRepository {
       if (child instanceof TFile && child.extension === "md") {
         const content = await this.app.vault.read(child);
         const scrap = parseScrapMarkdown(content, child.path);
-        console.log("[ZenScrap] listAll:", child.path, "tags:", scrap.tags);
         scraps.push(scrap);
       }
     }
@@ -42,7 +41,6 @@ export class ScrapRepository {
     if (!(file instanceof TFile)) return null;
     const content = await this.app.vault.read(file);
     const scrap = parseScrapMarkdown(content, file.path);
-    console.log("[ZenScrap] getByPath:", filePath, "tags:", scrap.tags);
     return scrap;
   }
 
@@ -77,12 +75,9 @@ export class ScrapRepository {
 
   async save(scrap: Scrap): Promise<void> {
     const file = this.app.vault.getAbstractFileByPath(scrap.filePath);
-    console.log("[ZenScrap] save called", { filePath: scrap.filePath, fileFound: file instanceof TFile, tags: scrap.tags });
     if (file instanceof TFile) {
       const content = serializeScrap(scrap);
-      console.log("[ZenScrap] saving content (first 300 chars):", content.substring(0, 300));
       await this.app.vault.modify(file, content);
-      console.log("[ZenScrap] vault.modify completed");
     }
   }
 
