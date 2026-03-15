@@ -129,6 +129,16 @@
   background: var(--background-secondary);
 }
 
+.zen-scrap-list-item.is-pinned {
+  border-left: 3px solid var(--text-accent);
+  padding-left: 9px;
+  background: rgba(var(--interactive-accent-rgb, 72, 138, 242), 0.04);
+}
+
+.zen-scrap-list-item.is-pinned:hover {
+  background: rgba(var(--interactive-accent-rgb, 72, 138, 242), 0.08);
+}
+
 .zen-scrap-item-title-row {
   display: flex;
   justify-content: space-between;

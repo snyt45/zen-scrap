@@ -13,7 +13,8 @@ export interface ListItemDeps {
 
 export function renderListItem(parent: HTMLElement, scrap: Scrap, deps: ListItemDeps): void {
   const { repo, eventBus } = deps;
-  const item = parent.createDiv({ cls: "zen-scrap-list-item" });
+  const itemCls = scrap.pinned ? "zen-scrap-list-item is-pinned" : "zen-scrap-list-item";
+  const item = parent.createDiv({ cls: itemCls });
 
   item.addEventListener("click", (e) => {
     const target = e.target as HTMLElement;
