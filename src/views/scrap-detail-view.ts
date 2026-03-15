@@ -21,6 +21,7 @@ export class ScrapDetailView extends ItemView {
   private isFullWidth = false;
   private filterMarkedMap = new Map<string, boolean>();
   private ignoreChangeCount = 0;
+  private settingState = false;
   private cleanupManager = new CleanupManager();
   private markdownRenderer: MarkdownRenderer;
   private onScrapChangedHandler: () => void;
@@ -32,6 +33,7 @@ export class ScrapDetailView extends ItemView {
     this.settings = settings;
     this.markdownRenderer = new MarkdownRenderer(this.app);
     this.onScrapChangedHandler = async () => {
+      if (this.settingState) return;
       if (this.ignoreChangeCount > 0) {
         this.ignoreChangeCount--;
         return;
@@ -54,22 +56,27 @@ export class ScrapDetailView extends ItemView {
   }
 
   async setState(state: { filePath?: string; scrollToEntryIndex?: number }, result: any): Promise<void> {
-    if (state.filePath) {
-      const found = await this.repo.getByPath(state.filePath);
-      if (found) {
-        this.scrap = found;
-        await this.render();
+    this.settingState = true;
+    try {
+      if (state.filePath) {
+        const found = await this.repo.getByPath(state.filePath);
+        if (found) {
+          this.scrap = found;
+          await this.render();
 
-        if (state.scrollToEntryIndex != null) {
-          const entry = found.entries[state.scrollToEntryIndex];
-          if (entry) {
-            const container = this.containerEl.children[1] as HTMLElement;
-            this.scrollToEntryByTimestamp(container, entry.timestamp);
+          if (state.scrollToEntryIndex != null) {
+            const entry = found.entries[state.scrollToEntryIndex];
+            if (entry) {
+              const container = this.containerEl.children[1] as HTMLElement;
+              this.scrollToEntryByTimestamp(container, entry.timestamp);
+            }
           }
         }
       }
+      await super.setState(state, result);
+    } finally {
+      this.settingState = false;
     }
-    await super.setState(state, result);
   }
 
   private scrollToEntryByTimestamp(container: HTMLElement, timestamp: string): void {
