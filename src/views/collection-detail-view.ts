@@ -7,6 +7,7 @@ import { EVENTS } from "../events/constants";
 import { renderTabNav } from "./shared/tab-nav-renderer";
 import { CleanupManager } from "../ui/cleanup-manager";
 import { chevronLeftIcon } from "../icons";
+import { CollectionAddModal } from "../ui/collection-add-modal";
 
 export const VIEW_TYPE_COLLECTION_DETAIL = "zen-scrap-collection-detail";
 
@@ -150,7 +151,15 @@ export class CollectionDetailView extends ItemView {
       cls: "zen-scrap-collection-add-btn",
     });
     addBtn.addEventListener("click", () => {
-      new Notice("検索モーダルは未実装");
+      const modal = new CollectionAddModal(this.app, this.repo, async (item) => {
+        await this.collectionRepo.addItem(collection.id, {
+          type: item.type,
+          scrapPath: item.scrapPath,
+          entryTimestamp: item.entryTimestamp,
+        });
+        this.eventBus.emit(EVENTS.COLLECTION_CHANGED);
+      });
+      modal.open();
     });
 
     const copyBtn = actionBar.createEl("button", {
