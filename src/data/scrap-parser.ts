@@ -46,9 +46,10 @@ export function parseScrapMarkdown(content: string, filePath: string): Scrap {
 
   // descriptionの抽出: 最初のエントリ見出し(### YYYY-MM-DD HH:MM)より前のテキスト
   const firstEntryMatch = body.match(/### \d{4}-\d{2}-\d{2} \d{2}:\d{2}/);
-  const description = firstEntryMatch
-    ? body.slice(0, firstEntryMatch.index).replace(/\n---\s*$/, "").trim()
-    : "";
+  const descRaw = firstEntryMatch
+    ? body.slice(0, firstEntryMatch.index)
+    : body;
+  const description = descRaw.replace(/\n---\s*$/, "").trim();
 
   // タイムスタンプ形式（YYYY-MM-DD HH:MM）の見出しのみをエントリ区切りとする
   const entryRegex = /### (\d{4}-\d{2}-\d{2} \d{2}:\d{2})( \[marked\])?\n([\s\S]*?)(?=\n---\n\n### \d{4}-\d{2}-\d{2} \d{2}:\d{2}|$)/g;
