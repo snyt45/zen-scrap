@@ -6,7 +6,7 @@ import { EventBus } from "../events/event-bus";
 import { EVENTS } from "../events/constants";
 import { renderTabNav } from "./shared/tab-nav-renderer";
 import { CleanupManager } from "../ui/cleanup-manager";
-import { chevronLeftIcon } from "../icons";
+import { chevronLeftIcon, GRIP_ICON } from "../icons";
 import { CollectionAddModal } from "../ui/collection-add-modal";
 
 export const VIEW_TYPE_COLLECTION_DETAIL = "zen-scrap-collection-detail";
@@ -178,9 +178,103 @@ export class CollectionDetailView extends ItemView {
 
     const list = container.createDiv({ cls: "zen-scrap-collection-item-list" });
 
+    // 自動スクロール用: スクロールコンテナを取得
+    const scrollContainer = list.closest(".zen-scrap-collection-detail-container") as HTMLElement | null;
+    let autoScrollRaf = 0;
+
+    const startAutoScroll = (clientY: number) => {
+      cancelAnimationFrame(autoScrollRaf);
+      if (!scrollContainer) return;
+      const rect = scrollContainer.getBoundingClientRect();
+      const edgeZone = 60;
+      const maxSpeed = 12;
+
+      const tick = () => {
+        const top = clientY - rect.top;
+        const bottom = rect.bottom - clientY;
+        if (top < edgeZone) {
+          scrollContainer.scrollTop -= maxSpeed * (1 - top / edgeZone);
+        } else if (bottom < edgeZone) {
+          scrollContainer.scrollTop += maxSpeed * (1 - bottom / edgeZone);
+        }
+        autoScrollRaf = requestAnimationFrame(tick);
+      };
+      autoScrollRaf = requestAnimationFrame(tick);
+    };
+
+    const stopAutoScroll = () => cancelAnimationFrame(autoScrollRaf);
+
     for (let i = 0; i < sortedItems.length; i++) {
       const item = sortedItems[i];
       const itemEl = list.createDiv({ cls: "zen-scrap-collection-item" });
+
+      // ドラッグ&ドロップ並べ替え
+      if (sortedItems.length > 1) {
+        itemEl.dataset.itemIndex = String(i);
+
+        itemEl.addEventListener("dragstart", (e) => {
+          const target = e.target as HTMLElement;
+          if (!target.closest(".zen-scrap-drag-handle")) {
+            e.preventDefault();
+            return;
+          }
+          itemEl.addClass("zen-scrap-collection-item-dragging");
+          e.dataTransfer!.effectAllowed = "move";
+          e.dataTransfer!.setData("text/plain", String(i));
+        });
+
+        itemEl.addEventListener("dragend", () => {
+          itemEl.removeClass("zen-scrap-collection-item-dragging");
+          stopAutoScroll();
+          list.querySelectorAll(".zen-scrap-collection-item-dragover").forEach((el) => {
+            el.removeClass("zen-scrap-collection-item-dragover");
+          });
+        });
+
+        itemEl.addEventListener("dragover", (e) => {
+          e.preventDefault();
+          e.dataTransfer!.dropEffect = "move";
+          startAutoScroll(e.clientY);
+          if (!itemEl.hasClass("zen-scrap-collection-item-dragging")) {
+            itemEl.addClass("zen-scrap-collection-item-dragover");
+          }
+        });
+
+        itemEl.addEventListener("dragleave", () => {
+          itemEl.removeClass("zen-scrap-collection-item-dragover");
+        });
+
+        itemEl.addEventListener("drop", async (e) => {
+          e.preventDefault();
+          stopAutoScroll();
+          itemEl.removeClass("zen-scrap-collection-item-dragover");
+          const fromIndex = Number(e.dataTransfer!.getData("text/plain"));
+          const toIndex = i;
+          if (fromIndex === toIndex) return;
+
+          // sortedItemsの並びを変更してorderを振り直す
+          const reordered = [...sortedItems];
+          const [moved] = reordered.splice(fromIndex, 1);
+          reordered.splice(toIndex, 0, moved);
+          reordered.forEach((it, idx) => { it.order = idx; });
+
+          await this.collectionRepo.reorderItems(collection.id, reordered);
+          this.eventBus.emit(EVENTS.COLLECTION_CHANGED);
+        });
+      }
+
+      // ドラッグハンドル
+      if (sortedItems.length > 1) {
+        const handle = itemEl.createEl("button", { cls: "zen-scrap-drag-handle" });
+        handle.innerHTML = GRIP_ICON;
+        handle.setAttribute("draggable", "true");
+        handle.addEventListener("dragstart", (e) => {
+          itemEl.dispatchEvent(new DragEvent("dragstart", {
+            dataTransfer: e.dataTransfer,
+            bubbles: true,
+          }));
+        });
+      }
 
       const content = itemEl.createDiv({ cls: "zen-scrap-collection-item-content" });
 
