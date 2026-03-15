@@ -3,7 +3,7 @@ import { Scrap } from "../../data/types";
 import { ScrapRepository } from "../../data/scrap-repository";
 import { EventBus } from "../../events/event-bus";
 import { EVENTS } from "../../events/constants";
-import { formatDate } from "../../utils";
+import { formatDate, stripMarkdown } from "../../utils";
 import { EXPAND_ICON, SHRINK_ICON, TRIANGLE_DOWN_ICON, EDIT_ICON, MORE_ICON, HELP_ICON, OUTLINE_ICON, BOOKMARK_FILLED_ICON } from "../../icons";
 import { renderTabNav } from "../shared/tab-nav-renderer";
 import { MarkdownRenderer } from "./markdown-renderer";
@@ -85,11 +85,7 @@ export function renderHeader(container: HTMLElement, deps: HeaderDeps): void {
       meta.createSpan({ text: `${originalIndex + 1}`, cls: "zen-scrap-outline-item-number" });
       meta.createSpan({ text: entry.timestamp, cls: "zen-scrap-outline-item-time" });
 
-      const stripped = entry.body
-        .replace(/[#*`>\-\[\]()!]/g, "")
-        .replace(/\n/g, " ")
-        .trim();
-      const preview = stripped.slice(0, 40);
+      const preview = stripMarkdown(entry.body, 40);
       if (preview) {
         item.createDiv({ text: preview, cls: "zen-scrap-outline-item-preview" });
       }
@@ -155,8 +151,8 @@ export function renderHeader(container: HTMLElement, deps: HeaderDeps): void {
       cls: "zen-scrap-title-edit-input",
     });
 
-    const saveBtn = titleRow.createEl("button", { text: "保存", cls: "zen-scrap-title-save-btn" });
-    const cancelBtn = titleRow.createEl("button", { text: "キャンセル", cls: "zen-scrap-title-cancel-btn" });
+    const saveBtn = titleRow.createEl("button", { text: "保存", cls: "zen-scrap-btn-primary zen-scrap-title-save-btn" });
+    const cancelBtn = titleRow.createEl("button", { text: "キャンセル", cls: "zen-scrap-btn-secondary zen-scrap-title-cancel-btn" });
 
     const doSave = async () => {
       const newTitle = input.value.trim();
@@ -302,8 +298,8 @@ export function renderHeader(container: HTMLElement, deps: HeaderDeps): void {
       placeholder: "タグをカンマ区切りで入力",
     });
 
-    const saveBtn = tagRow.createEl("button", { text: "保存", cls: "zen-scrap-title-save-btn" });
-    const cancelBtn = tagRow.createEl("button", { text: "キャンセル", cls: "zen-scrap-title-cancel-btn" });
+    const saveBtn = tagRow.createEl("button", { text: "保存", cls: "zen-scrap-btn-primary zen-scrap-title-save-btn" });
+    const cancelBtn = tagRow.createEl("button", { text: "キャンセル", cls: "zen-scrap-btn-secondary zen-scrap-title-cancel-btn" });
 
     const doSave = async () => {
       const newTags = input.value
@@ -397,8 +393,8 @@ export function renderHeader(container: HTMLElement, deps: HeaderDeps): void {
     });
 
     const actionBar = editArea.createDiv({ cls: "zen-scrap-action-bar" });
-    const cancelBtn = actionBar.createEl("button", { text: "キャンセル", cls: "zen-scrap-edit-cancel-btn" });
-    const saveBtn = actionBar.createEl("button", { text: "保存する", cls: "zen-scrap-submit-btn-new" });
+    const cancelBtn = actionBar.createEl("button", { text: "キャンセル", cls: "zen-scrap-btn-secondary zen-scrap-edit-cancel-btn" });
+    const saveBtn = actionBar.createEl("button", { text: "保存する", cls: "zen-scrap-btn-primary zen-scrap-submit-btn-new" });
 
     const doSave = async () => {
       scrap.description = textarea.value.trim();

@@ -76,7 +76,9 @@
 .zen-scrap-collection-copy-btn,
 .zen-scrap-collection-item,
 .zen-scrap-collection-add-item,
-.zen-scrap-collection-picker-item {
+.zen-scrap-collection-picker-item,
+.zen-scrap-btn-primary,
+.zen-scrap-btn-secondary {
   transition: background-color var(--transition-base), color var(--transition-base),
              border-color var(--transition-base), box-shadow var(--transition-base),
              opacity var(--transition-base), filter var(--transition-base), transform var(--transition-fast);
@@ -92,6 +94,56 @@
 }
 
 /* ==========================================================================
+   0.5. Shared Button Styles
+   ========================================================================== */
+
+.zen-scrap-btn-primary {
+  border-radius: var(--radius-pill);
+  background: var(--interactive-accent);
+  color: var(--text-on-accent);
+  border: none;
+  cursor: pointer;
+  font-weight: var(--weight-semibold);
+}
+
+.zen-scrap-btn-primary:hover {
+  filter: brightness(1.1);
+}
+
+.zen-scrap-btn-primary:active {
+  filter: brightness(0.95);
+  transform: scale(0.98);
+}
+
+.zen-scrap-btn-secondary {
+  border-radius: var(--radius-pill);
+  background: none;
+  border: 1px solid var(--background-modifier-border);
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.zen-scrap-btn-secondary:hover {
+  color: var(--text-normal);
+  background: var(--background-secondary);
+}
+
+.zen-scrap-btn-secondary:active {
+  transform: scale(0.97);
+  opacity: 0.85;
+}
+
+/* ==========================================================================
+   0.6. Shared Action Row
+   ========================================================================== */
+
+.zen-scrap-action-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 12px;
+}
+
+/* ==========================================================================
    1. App UI - List View
    ========================================================================== */
 
@@ -103,20 +155,6 @@
 
 .zen-scrap-new-btn {
   padding: 6px 16px;
-  border-radius: var(--radius-pill);
-  background: var(--interactive-accent);
-  color: var(--text-on-accent);
-  border: none;
-  cursor: pointer;
-}
-
-.zen-scrap-new-btn:hover {
-  filter: brightness(1.1);
-}
-
-.zen-scrap-new-btn:active {
-  filter: brightness(0.95);
-  transform: scale(0.98);
 }
 
 .zen-scrap-list {
@@ -601,35 +639,10 @@
 
 .zen-scrap-title-save-btn {
   padding: 6px 16px;
-  border-radius: var(--radius-pill);
-  background: var(--interactive-accent);
-  color: var(--text-on-accent);
-  border: none;
-  cursor: pointer;
-  font-weight: var(--weight-semibold);
-}
-
-.zen-scrap-title-save-btn:hover {
-  filter: brightness(1.1);
-}
-
-.zen-scrap-title-save-btn:active {
-  filter: brightness(0.95);
-  transform: scale(0.98);
 }
 
 .zen-scrap-title-cancel-btn {
   padding: 6px 16px;
-  border-radius: var(--radius-pill);
-  background: none;
-  color: var(--text-muted);
-  border: 1px solid var(--background-modifier-border);
-  cursor: pointer;
-}
-
-.zen-scrap-title-cancel-btn:hover {
-  color: var(--text-normal);
-  background: var(--background-secondary);
 }
 
 .zen-scrap-timeline {
@@ -650,7 +663,6 @@
   border: 1px solid var(--background-modifier-border);
   border-radius: var(--radius-md);
   margin-bottom: 36px;
-  overflow: hidden;
 }
 
 .zen-scrap-entry-header {
@@ -660,6 +672,7 @@
   padding: 10px 12px;
   background: var(--background-secondary);
   border-bottom: 1px solid var(--background-modifier-border);
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
 }
 
 .zen-scrap-drag-handle {
@@ -717,13 +730,10 @@
 }
 
 .zen-scrap-entry-menu-dropdown {
-  position: absolute;
-  top: 100%;
-  right: 0;
+  position: fixed;
   z-index: 100;
   min-width: 140px;
   padding: 4px 0;
-  margin-top: 4px;
   background: var(--background-primary);
   border: 1px solid var(--background-modifier-border);
   border-radius: 6px;
@@ -737,16 +747,6 @@
 .zen-scrap-edit-cancel-btn {
   margin-left: auto;
   padding: 6px 16px;
-  border-radius: var(--radius-pill);
-  background: none;
-  color: var(--text-muted);
-  border: 1px solid var(--background-modifier-border);
-  cursor: pointer;
-}
-
-.zen-scrap-edit-cancel-btn:hover {
-  color: var(--text-normal);
-  background: var(--background-secondary);
 }
 
 .zen-scrap-ml-auto {
@@ -875,21 +875,6 @@
 
 .zen-scrap-submit-btn-new {
   padding: 8px 20px;
-  border-radius: var(--radius-pill);
-  background: var(--interactive-accent);
-  color: var(--text-on-accent);
-  border: none;
-  cursor: pointer;
-  font-weight: var(--weight-semibold);
-}
-
-.zen-scrap-submit-btn-new:hover {
-  filter: brightness(1.1);
-}
-
-.zen-scrap-submit-btn-new:active {
-  filter: brightness(0.95);
-  transform: scale(0.98);
 }
 
 .zen-scrap-embed-wrapper {
@@ -1500,8 +1485,6 @@ pre:hover .zen-scrap-code-copy-btn {
 
 .zen-scrap-fullwidth-toggle:active,
 .zen-scrap-help-btn:active,
-.zen-scrap-title-cancel-btn:active,
-.zen-scrap-edit-cancel-btn:active,
 .zen-scrap-img-btn:active,
 .zen-scrap-embed-btn:active,
 .zen-scrap-embed-cancel-btn:active,
@@ -2002,11 +1985,6 @@ pre:hover .zen-scrap-code-copy-btn {
   opacity: 1;
 }
 
-.zen-scrap-tab-nav-right {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
 
 /* ==========================================================================
    Collection
@@ -2024,23 +2002,7 @@ pre:hover .zen-scrap-code-copy-btn {
 
 .zen-scrap-new-collection-btn {
   padding: 6px 16px;
-  border-radius: var(--radius-pill);
-  background: var(--interactive-accent);
-  color: var(--text-on-accent);
-  border: none;
-  cursor: pointer;
   font-size: var(--font-md);
-  font-weight: var(--weight-semibold);
-  margin-bottom: 12px;
-}
-
-.zen-scrap-new-collection-btn:hover {
-  opacity: 0.9;
-}
-
-.zen-scrap-new-collection-btn:active {
-  transform: scale(0.97);
-  opacity: 0.85;
 }
 
 .zen-scrap-collection-list {
@@ -2127,43 +2089,13 @@ pre:hover .zen-scrap-code-copy-btn {
 
 .zen-scrap-collection-add-btn {
   padding: 6px 16px;
-  border-radius: var(--radius-pill);
-  background: var(--interactive-accent);
-  color: var(--text-on-accent);
-  border: none;
-  cursor: pointer;
   font-size: var(--font-md);
-  font-weight: var(--weight-semibold);
-}
-
-.zen-scrap-collection-add-btn:hover {
-  opacity: 0.9;
-}
-
-.zen-scrap-collection-add-btn:active {
-  transform: scale(0.97);
-  opacity: 0.85;
 }
 
 .zen-scrap-collection-copy-btn {
   padding: 6px 16px;
-  border-radius: var(--radius-pill);
-  border: 1px solid var(--background-modifier-border);
-  background: none;
-  color: var(--text-muted);
-  cursor: pointer;
   font-size: var(--font-md);
   font-weight: var(--weight-semibold);
-}
-
-.zen-scrap-collection-copy-btn:hover {
-  color: var(--text-normal);
-  background: var(--background-secondary);
-}
-
-.zen-scrap-collection-copy-btn:active {
-  transform: scale(0.97);
-  opacity: 0.85;
 }
 
 /* --- Collection Detail Items --- */
@@ -2188,6 +2120,29 @@ pre:hover .zen-scrap-code-copy-btn {
 
 .zen-scrap-collection-detail-container .zen-scrap-collection-item:hover {
   background: var(--background-secondary);
+}
+
+.zen-scrap-collection-item-title-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.zen-scrap-collection-item-type-label {
+  font-size: 0.65em;
+  font-weight: var(--weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--status-open);
+  background: rgba(37, 99, 235, 0.08);
+  padding: 1px 6px;
+  border-radius: var(--radius-pill);
+  flex-shrink: 0;
+}
+
+.zen-scrap-collection-item-type-entry {
+  color: var(--status-closed);
+  background: rgba(124, 58, 237, 0.08);
 }
 
 .zen-scrap-collection-item-preview {
@@ -2227,13 +2182,13 @@ pre:hover .zen-scrap-code-copy-btn {
 
 /* --- Drag & Drop --- */
 
-.zen-scrap-collection-item-dragging {
+.zen-scrap-collection-detail-container .zen-scrap-collection-item.zen-scrap-collection-item-dragging {
   opacity: 0.4;
 }
 
-.zen-scrap-collection-item-dragover {
-  border-color: var(--interactive-accent);
-  background: rgba(var(--interactive-accent-rgb, 72, 138, 242), 0.06);
+.zen-scrap-collection-detail-container .zen-scrap-collection-item.zen-scrap-collection-item-dragover {
+  border-top: 3px solid var(--interactive-accent);
+  padding-top: 8px;
 }
 
 /* --- Collection Add Modal --- */
@@ -2243,8 +2198,13 @@ pre:hover .zen-scrap-code-copy-btn {
   max-width: 560px;
 }
 
-.zen-scrap-collection-add-modal .modal-content {
+.zen-scrap-collection-add-modal .modal-content,
+.zen-scrap-collection-add-modal > .modal-content {
   padding: 0 16px 16px;
+}
+
+.zen-scrap-collection-add-modal .zen-scrap-pill-tabs {
+  margin-bottom: 8px;
 }
 
 .zen-scrap-collection-add-search {
@@ -2331,6 +2291,30 @@ pre:hover .zen-scrap-code-copy-btn {
   margin-bottom: 4px;
 }
 
+.zen-scrap-collection-add-entry-wrapper {
+  position: relative;
+}
+
+.zen-scrap-collection-add-tooltip {
+  display: none;
+  position: fixed;
+  width: 300px;
+  padding: 10px 12px;
+  background: var(--background-primary);
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 8px;
+  box-shadow: var(--shadow-dropdown);
+  font-size: var(--font-sm);
+  line-height: 1.5;
+  color: var(--text-normal);
+  white-space: pre-wrap;
+  word-break: break-word;
+  z-index: 1000;
+  max-height: 200px;
+  overflow-y: auto;
+  pointer-events: auto;
+}
+
 /* --- Collection Picker Modal --- */
 
 .zen-scrap-collection-picker-modal {
@@ -2338,7 +2322,8 @@ pre:hover .zen-scrap-code-copy-btn {
   max-width: 440px;
 }
 
-.zen-scrap-collection-picker-modal .modal-content {
+.zen-scrap-collection-picker-modal .modal-content,
+.zen-scrap-collection-picker-modal > .modal-content {
   padding: 0 16px 16px;
 }
 

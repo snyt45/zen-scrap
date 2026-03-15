@@ -1,4 +1,4 @@
-import { ItemView, WorkspaceLeaf } from "obsidian";
+import { ItemView, WorkspaceLeaf, Modal } from "obsidian";
 import { CollectionRepository } from "../data/collection-repository";
 import { EventBus } from "../events/event-bus";
 import { EVENTS } from "../events/constants";
@@ -55,15 +55,43 @@ export class CollectionListView extends ItemView {
       activeTab: "collection",
     });
 
-    const newBtn = container.createEl("button", {
+    const actionRow = container.createDiv({ cls: "zen-scrap-action-row" });
+    const newBtn = actionRow.createEl("button", {
       text: "+ 新しいコレクション",
-      cls: "zen-scrap-new-collection-btn",
+      cls: "zen-scrap-btn-primary zen-scrap-new-collection-btn",
     });
-    newBtn.addEventListener("click", async () => {
-      const title = prompt("コレクションのタイトルを入力してください");
-      if (!title || !title.trim()) return;
-      await this.collectionRepo.create(title.trim());
-      this.eventBus.emit(EVENTS.COLLECTION_CHANGED);
+    newBtn.addEventListener("click", () => {
+      const modal = new Modal(this.app);
+      modal.titleEl.setText("新しいコレクション");
+      const input = modal.contentEl.createEl("input", {
+        type: "text",
+        placeholder: "コレクション名",
+        cls: "zen-scrap-title-edit-input",
+      });
+      input.style.width = "100%";
+      input.style.marginBottom = "12px";
+      const btnRow = modal.contentEl.createDiv({ cls: "zen-scrap-description-btn-row" });
+      const saveBtn = btnRow.createEl("button", { text: "作成", cls: "zen-scrap-btn-primary zen-scrap-title-save-btn" });
+      const cancelBtn = btnRow.createEl("button", { text: "キャンセル", cls: "zen-scrap-btn-secondary zen-scrap-title-cancel-btn" });
+
+      const doCreate = async () => {
+        const title = input.value.trim();
+        if (!title) return;
+        modal.close();
+        await this.collectionRepo.create(title);
+        this.eventBus.emit(EVENTS.COLLECTION_CHANGED);
+      };
+
+      saveBtn.addEventListener("click", doCreate);
+      cancelBtn.addEventListener("click", () => modal.close());
+      input.addEventListener("keydown", (e: KeyboardEvent) => {
+        if (e.isComposing) return;
+        if (e.key === "Enter") { e.preventDefault(); doCreate(); }
+        if (e.key === "Escape") { modal.close(); }
+      });
+
+      modal.open();
+      input.focus();
     });
 
     const collections = await this.collectionRepo.listAll();
@@ -91,10 +119,10 @@ export class CollectionListView extends ItemView {
 
       const menuWrapper = item.createDiv({ cls: "zen-scrap-collection-item-menu" });
       const menuBtn = menuWrapper.createEl("button", { cls: "zen-scrap-item-menu-btn" });
-      menuBtn.innerHTML = chevronDownIcon(14);
+      menuBtn.innerHTML = chevronDownIcon(20, 2.5);
       const dropdown = menuWrapper.createDiv({ cls: "zen-scrap-item-menu-dropdown" });
 
-      const deleteBtn = dropdown.createEl("button", { text: "削除", cls: "zen-scrap-menu-item is-danger" });
+      const deleteBtn = dropdown.createDiv({ cls: "zen-scrap-dropdown-item zen-scrap-dropdown-item-danger", text: "削除する" });
       deleteBtn.addEventListener("click", async (e) => {
         e.stopPropagation();
         const confirmed = confirm(`「${collection.title}」を削除しますか？`);

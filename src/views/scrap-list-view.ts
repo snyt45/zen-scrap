@@ -71,8 +71,11 @@ export class ScrapListView extends ItemView {
     renderTabNav(container, {
       eventBus: this.eventBus,
       activeTab: "list",
-      onNewScrap: () => this.eventBus.emit(EVENTS.SCRAP_CREATE_REQUEST),
     });
+
+    const actionRow = container.createDiv({ cls: "zen-scrap-action-row" });
+    const newBtn = actionRow.createEl("button", { text: "+ 新規作成", cls: "zen-scrap-btn-primary zen-scrap-new-btn" });
+    newBtn.addEventListener("click", () => this.eventBus.emit(EVENTS.SCRAP_CREATE_REQUEST));
   }
 
   private renderSearch(container: HTMLElement): void {

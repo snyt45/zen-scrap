@@ -9,3 +9,9 @@ export function formatDate(isoString: string): string {
 export function daysAgoCount(isoString: string): number {
   return Math.floor((Date.now() - new Date(isoString).getTime()) / (1000 * 60 * 60 * 24));
 }
+
+export function stripMarkdown(text: string, maxLength = 120): string {
+  const stripped = text.replace(/[#*`>\-\[\]()!]/g, "").replace(/\n/g, " ").trim();
+  if (stripped.length <= maxLength) return stripped;
+  return stripped.slice(0, maxLength) + "...";
+}

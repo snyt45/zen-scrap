@@ -7,6 +7,7 @@ import { EVENTS } from "../events/constants";
 import { renderTabNav } from "./shared/tab-nav-renderer";
 import { CleanupManager } from "../ui/cleanup-manager";
 import { chevronLeftIcon, GRIP_ICON } from "../icons";
+import { stripMarkdown } from "../utils";
 import { CollectionAddModal } from "../ui/collection-add-modal";
 
 export const VIEW_TYPE_COLLECTION_DETAIL = "zen-scrap-collection-detail";
@@ -118,8 +119,8 @@ export class CollectionDetailView extends ItemView {
         cls: "zen-scrap-title-edit-input",
       });
 
-      const saveBtn = titleRow.createEl("button", { text: "保存", cls: "zen-scrap-title-save-btn" });
-      const cancelBtn = titleRow.createEl("button", { text: "キャンセル", cls: "zen-scrap-title-cancel-btn" });
+      const saveBtn = titleRow.createEl("button", { text: "保存", cls: "zen-scrap-btn-primary zen-scrap-title-save-btn" });
+      const cancelBtn = titleRow.createEl("button", { text: "キャンセル", cls: "zen-scrap-btn-secondary zen-scrap-title-cancel-btn" });
 
       const doSave = async () => {
         const newTitle = input.value.trim();
@@ -148,7 +149,7 @@ export class CollectionDetailView extends ItemView {
 
     const addBtn = actionBar.createEl("button", {
       text: "+ 追加",
-      cls: "zen-scrap-collection-add-btn",
+      cls: "zen-scrap-btn-primary zen-scrap-collection-add-btn",
     });
     addBtn.addEventListener("click", () => {
       const modal = new CollectionAddModal(this.app, this.repo, async (item) => {
@@ -164,7 +165,7 @@ export class CollectionDetailView extends ItemView {
 
     const copyBtn = actionBar.createEl("button", {
       text: "まとめてコピー",
-      cls: "zen-scrap-collection-copy-btn",
+      cls: "zen-scrap-btn-secondary zen-scrap-collection-copy-btn",
     });
     copyBtn.addEventListener("click", () => this.bulkCopy());
 
@@ -281,14 +282,11 @@ export class CollectionDetailView extends ItemView {
       if (item.type === "scrap") {
         const scrap = await this.repo.getByPath(item.scrapPath);
         if (scrap) {
-          content.createDiv({ text: scrap.title, cls: "zen-scrap-collection-item-title" });
+          const titleRow = content.createDiv({ cls: "zen-scrap-collection-item-title-row" });
+          titleRow.createSpan({ text: "scrap", cls: "zen-scrap-collection-item-type-label" });
+          titleRow.createSpan({ text: scrap.title, cls: "zen-scrap-collection-item-title" });
           if (scrap.description) {
-            const stripped = scrap.description
-              .replace(/[#*`>\-\[\]()!]/g, "")
-              .replace(/\n/g, " ")
-              .trim()
-              .slice(0, 120);
-            const preview = stripped + (scrap.description.length > 120 ? "..." : "");
+            const preview = stripMarkdown(scrap.description, 120);
             content.createDiv({ text: preview, cls: "zen-scrap-collection-item-preview" });
           }
         } else {
@@ -312,16 +310,10 @@ export class CollectionDetailView extends ItemView {
         if (scrap && item.entryTimestamp) {
           const entry = scrap.entries.find((e) => e.timestamp === item.entryTimestamp);
           if (entry) {
-            content.createDiv({
-              text: `${scrap.title} > ${item.entryTimestamp}`,
-              cls: "zen-scrap-collection-item-title",
-            });
-            const stripped = entry.body
-              .replace(/[#*`>\-\[\]()!]/g, "")
-              .replace(/\n/g, " ")
-              .trim()
-              .slice(0, 120);
-            const preview = stripped + (entry.body.length > 120 ? "..." : "");
+            const titleRow = content.createDiv({ cls: "zen-scrap-collection-item-title-row" });
+            titleRow.createSpan({ text: "entry", cls: "zen-scrap-collection-item-type-label zen-scrap-collection-item-type-entry" });
+            titleRow.createSpan({ text: `${scrap.title} > ${item.entryTimestamp}`, cls: "zen-scrap-collection-item-title" });
+            const preview = stripMarkdown(entry.body, 120);
             content.createDiv({ text: preview, cls: "zen-scrap-collection-item-preview" });
           } else {
             content.createDiv({

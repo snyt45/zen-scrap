@@ -1,6 +1,7 @@
 import { App, Modal } from "obsidian";
 import { ScrapRepository } from "../data/scrap-repository";
 import { Scrap } from "../data/types";
+import { stripMarkdown } from "../utils";
 
 export interface CollectionAddItem {
   type: "scrap" | "entry";
@@ -31,6 +32,7 @@ export class CollectionAddModal extends Modal {
 
   onClose() {
     this.contentEl.empty();
+    document.querySelectorAll(".zen-scrap-collection-add-tooltip").forEach((el) => el.remove());
   }
 
   private renderContent() {
@@ -143,17 +145,48 @@ export class CollectionAddModal extends Modal {
       return;
     }
 
+    const entryListWrapper = listEl.createDiv({ cls: "zen-scrap-collection-add-entry-wrapper" });
+    const tooltip = document.body.createDiv({ cls: "zen-scrap-collection-add-tooltip" });
+    let hideTimer: ReturnType<typeof setTimeout> | null = null;
+    let isOverTooltip = false;
+
+    const showTooltip = (text: string, row: HTMLElement) => {
+      if (hideTimer) { clearTimeout(hideTimer); hideTimer = null; }
+      tooltip.setText(text);
+      tooltip.style.display = "block";
+      const rowRect = row.getBoundingClientRect();
+      const modalRect = this.modalEl.getBoundingClientRect();
+      tooltip.style.top = rowRect.top + "px";
+      tooltip.style.left = (modalRect.left - 310) + "px";
+    };
+
+    const hideTooltip = () => {
+      hideTimer = setTimeout(() => {
+        if (!isOverTooltip) {
+          tooltip.style.display = "none";
+        }
+      }, 100);
+    };
+
+    tooltip.addEventListener("mouseenter", () => {
+      isOverTooltip = true;
+      if (hideTimer) { clearTimeout(hideTimer); hideTimer = null; }
+    });
+    tooltip.addEventListener("mouseleave", () => {
+      isOverTooltip = false;
+      hideTooltip();
+    });
+
     for (const entry of scrap.entries) {
-      const row = listEl.createDiv({ cls: "zen-scrap-collection-add-item" });
+      const row = entryListWrapper.createDiv({ cls: "zen-scrap-collection-add-item" });
       row.createDiv({ text: entry.timestamp, cls: "zen-scrap-collection-add-item-timestamp" });
 
-      const stripped = entry.body
-        .replace(/[#*`>\-\[\]()!]/g, "")
-        .replace(/\n/g, " ")
-        .trim()
-        .slice(0, 120);
-      const preview = stripped + (entry.body.length > 120 ? "..." : "");
+      const preview = stripMarkdown(entry.body, 120);
       row.createDiv({ text: preview, cls: "zen-scrap-collection-add-item-preview" });
+
+      const tooltipText = entry.body.trim().slice(0, 300);
+      row.addEventListener("mouseenter", () => showTooltip(tooltipText, row));
+      row.addEventListener("mouseleave", () => hideTooltip());
 
       row.addEventListener("click", () => {
         this.onAdd({ type: "entry", scrapPath: scrap.filePath, entryTimestamp: entry.timestamp });

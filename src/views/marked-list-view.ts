@@ -4,6 +4,7 @@ import { EventBus } from "../events/event-bus";
 import { EVENTS } from "../events/constants";
 import { Scrap, ScrapEntry } from "../data/types";
 import { COPY_ICON, BOOKMARK_FILLED_ICON, BOOKMARK_OFF_ICON } from "../icons";
+import { stripMarkdown } from "../utils";
 import { renderTabNav } from "./shared/tab-nav-renderer";
 import { CleanupManager } from "../ui/cleanup-manager";
 
@@ -174,11 +175,7 @@ export class MarkedListView extends ItemView {
       meta.createSpan({ text: section.scrap.title, cls: "zen-scrap-marked-source" });
       meta.createSpan({ text: section.entry.timestamp, cls: "zen-scrap-marked-time" });
 
-      const stripped = section.entry.body
-        .replace(/[#*`>\-\[\]()!]/g, "")
-        .replace(/\n/g, " ")
-        .trim();
-      const preview = stripped.slice(0, 120) + (stripped.length > 120 ? "..." : "");
+      const preview = stripMarkdown(section.entry.body, 120);
       content.createDiv({ text: preview, cls: "zen-scrap-marked-preview" });
 
       // ツールチップ

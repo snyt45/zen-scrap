@@ -79,7 +79,7 @@ export function renderInputArea(container: HTMLElement, deps: InputAreaDeps): vo
 
   renderEmbedButton(actionBar, textarea, deps);
 
-  const submitBtn = actionBar.createEl("button", { text: "ポストする", cls: "zen-scrap-submit-btn-new zen-scrap-ml-auto" });
+  const submitBtn = actionBar.createEl("button", { text: "ポストする", cls: "zen-scrap-btn-primary zen-scrap-submit-btn-new zen-scrap-ml-auto" });
   submitBtn.addEventListener("click", async () => {
     const body = textarea.value.trim();
     if (!body || !scrap) return;
@@ -167,9 +167,9 @@ export function renderEntryEditor(deps: EntryEditorDeps): void {
 
   renderEmbedButton(actionBar, textarea, deps);
 
-  const cancelBtn = actionBar.createEl("button", { text: "キャンセル", cls: "zen-scrap-edit-cancel-btn" });
+  const cancelBtn = actionBar.createEl("button", { text: "キャンセル", cls: "zen-scrap-btn-secondary zen-scrap-edit-cancel-btn" });
 
-  const updateBtn = actionBar.createEl("button", { text: "更新する", cls: "zen-scrap-submit-btn-new" });
+  const updateBtn = actionBar.createEl("button", { text: "更新する", cls: "zen-scrap-btn-primary zen-scrap-submit-btn-new" });
 
   cancelBtn.addEventListener("click", () => {
     editArea.remove();
