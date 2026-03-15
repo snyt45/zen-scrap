@@ -206,6 +206,12 @@
   color: var(--text-muted);
 }
 
+.zen-scrap-item-ago {
+  color: var(--text-faint);
+  font-size: var(--font-smallest);
+  margin-left: auto;
+}
+
 .zen-scrap-empty {
   text-align: center;
   padding: 40px;

@@ -2,7 +2,7 @@ import { Scrap } from "../../data/types";
 import { ScrapRepository } from "../../data/scrap-repository";
 import { EventBus } from "../../events/event-bus";
 import { EVENTS } from "../../events/constants";
-import { formatDate } from "../../utils";
+import { formatDate, daysAgo } from "../../utils";
 import { chevronDownIcon, PIN_ICON } from "../../icons";
 
 export interface ListItemDeps {
@@ -84,6 +84,7 @@ export function renderListItem(parent: HTMLElement, scrap: Scrap, deps: ListItem
     metaRow.createSpan({ text: " / " + formatDate(scrap.updated) + "にクローズ", cls: "zen-scrap-item-time" });
   }
   metaRow.createSpan({ text: `${scrap.entries.length}件`, cls: "zen-scrap-item-count" });
+  metaRow.createSpan({ text: daysAgo(scrap.updated), cls: "zen-scrap-item-ago" });
 
   // 3行目: タグ
   if (scrap.tags.length > 0) {
