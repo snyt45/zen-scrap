@@ -153,12 +153,16 @@ export class CollectionDetailView extends ItemView {
     });
     addBtn.addEventListener("click", () => {
       const modal = new CollectionAddModal(this.app, this.repo, async (item) => {
-        await this.collectionRepo.addItem(collection.id, {
+        const { added } = await this.collectionRepo.addItem(collection.id, {
           type: item.type,
           scrapPath: item.scrapPath,
           entryTimestamp: item.entryTimestamp,
         });
-        this.eventBus.emit(EVENTS.COLLECTION_CHANGED);
+        if (added) {
+          this.eventBus.emit(EVENTS.COLLECTION_CHANGED);
+        } else {
+          new Notice("すでに追加済みです");
+        }
       });
       modal.open();
     });

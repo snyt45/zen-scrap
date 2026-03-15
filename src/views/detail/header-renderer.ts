@@ -1,6 +1,8 @@
 import { Modal, Notice, Scope } from "obsidian";
 import { Scrap } from "../../data/types";
 import { ScrapRepository } from "../../data/scrap-repository";
+import { CollectionRepository } from "../../data/collection-repository";
+import { CollectionPickerModal } from "../../ui/collection-picker-modal";
 import { EventBus } from "../../events/event-bus";
 import { EVENTS } from "../../events/constants";
 import { formatDate, stripMarkdown } from "../../utils";
@@ -12,6 +14,7 @@ import shortcutGuideRaw from "../../../docs/shortcut-guide.md";
 export interface HeaderDeps {
   scrap: Scrap;
   repo: ScrapRepository;
+  collectionRepo: CollectionRepository;
   eventBus: EventBus;
   app: import("obsidian").App;
   scope: import("obsidian").Scope | null;
@@ -250,6 +253,18 @@ export function renderHeader(container: HTMLElement, deps: HeaderDeps): void {
   openFileItem.addEventListener("click", () => {
     openFile(scrap.filePath);
     actionMenu.classList.remove("is-open");
+  });
+
+  const addToCollectionItem = actionMenu.createDiv({
+    text: "コレクションに追加",
+    cls: "zen-scrap-dropdown-item",
+  });
+  addToCollectionItem.addEventListener("click", () => {
+    actionMenu.classList.remove("is-open");
+    new CollectionPickerModal(deps.app, deps.collectionRepo, async (collectionId) => {
+      const { added } = await deps.collectionRepo.addItem(collectionId, { type: "scrap", scrapPath: scrap.filePath });
+      new Notice(added ? "コレクションに追加しました" : "すでに追加済みです");
+    }).open();
   });
 
   const deleteItem = actionMenu.createDiv({

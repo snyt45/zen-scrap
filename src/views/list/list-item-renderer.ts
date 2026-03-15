@@ -70,8 +70,8 @@ export function renderListItem(parent: HTMLElement, scrap: Scrap, deps: ListItem
     e.stopPropagation();
     menu.classList.remove("is-open");
     new CollectionPickerModal(deps.app, deps.collectionRepo, async (collectionId) => {
-      await deps.collectionRepo.addItem(collectionId, { type: "scrap", scrapPath: scrap.filePath });
-      new Notice("コレクションに追加しました");
+      const { added } = await deps.collectionRepo.addItem(collectionId, { type: "scrap", scrapPath: scrap.filePath });
+      new Notice(added ? "コレクションに追加しました" : "すでに追加済みです");
     }).open();
   });
 

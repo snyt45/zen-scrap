@@ -472,10 +472,14 @@
   color: var(--text-on-accent);
 }
 
+.zen-scrap-entry-menu-portal {
+  position: fixed;
+  font-size: var(--font-ui-small);
+}
+
 /* --- Dropdown animation --- */
 .zen-scrap-dropdown-menu,
 .zen-scrap-item-menu-dropdown,
-.zen-scrap-entry-menu-dropdown,
 .zen-scrap-embed-menu,
 .zen-scrap-outline-menu {
   opacity: 0;
@@ -486,7 +490,6 @@
 
 .zen-scrap-dropdown-menu.is-open,
 .zen-scrap-item-menu-dropdown.is-open,
-.zen-scrap-entry-menu-dropdown.is-open,
 .zen-scrap-embed-menu.is-open,
 .zen-scrap-outline-menu.is-open {
   opacity: 1;
@@ -727,17 +730,6 @@
 .zen-scrap-entry-menu-btn:hover {
   background: var(--background-modifier-hover);
   color: var(--text-normal);
-}
-
-.zen-scrap-entry-menu-dropdown {
-  position: fixed;
-  z-index: 100;
-  min-width: 140px;
-  padding: 4px 0;
-  background: var(--background-primary);
-  border: 1px solid var(--background-modifier-border);
-  border-radius: 6px;
-  box-shadow: var(--shadow-dropdown);
 }
 
 .zen-scrap-entry-edit {

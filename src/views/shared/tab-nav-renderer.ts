@@ -7,7 +7,6 @@ export type ActiveTab = "list" | "marked" | "collection" | "none";
 export interface TabNavDeps {
   eventBus: EventBus;
   activeTab: ActiveTab;
-  onNewScrap?: () => void;
 }
 
 export function renderTabNav(container: HTMLElement, deps: TabNavDeps): void {
@@ -44,10 +43,4 @@ export function renderTabNav(container: HTMLElement, deps: TabNavDeps): void {
       deps.eventBus.emit(EVENTS.NAV_TO_COLLECTION_LIST);
     }
   });
-
-  if (deps.onNewScrap) {
-    const navRight = nav.createDiv({ cls: "zen-scrap-tab-nav-right" });
-    const newBtn = navRight.createEl("button", { text: "+ 新規作成", cls: "zen-scrap-new-btn" });
-    newBtn.addEventListener("click", () => deps.onNewScrap!());
-  }
 }

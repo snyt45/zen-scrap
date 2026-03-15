@@ -189,55 +189,45 @@ export async function renderTimeline(container: HTMLElement, deps: TimelineDeps)
     const menuBtn = menuWrapper.createEl("button", { cls: "zen-scrap-entry-menu-btn" });
     menuBtn.innerHTML = chevronDownIcon(18);
 
-    const menu = menuWrapper.createDiv({ cls: "zen-scrap-entry-menu-dropdown" });
-
-    const copyItem = menu.createDiv({ cls: "zen-scrap-dropdown-item", text: "コピー" });
-    copyItem.addEventListener("click", async (e) => {
-      e.stopPropagation();
-      menu.classList.remove("is-open");
-      await navigator.clipboard.writeText(entry.body);
-      new Notice("セクションをコピーしました");
-    });
-
-    const addToCollectionItem = menu.createDiv({ cls: "zen-scrap-dropdown-item", text: "コレクションに追加" });
-    addToCollectionItem.addEventListener("click", (e) => {
-      e.stopPropagation();
-      menu.classList.remove("is-open");
-      new CollectionPickerModal(deps.app, deps.collectionRepo, async (collectionId) => {
-        await deps.collectionRepo.addItem(collectionId, { type: "entry", scrapPath: scrap.filePath, entryTimestamp: entry.timestamp });
-        new Notice("コレクションに追加しました");
-      }).open();
-    });
-
-    const editItem = menu.createDiv({ cls: "zen-scrap-dropdown-item", text: "編集" });
-    const deleteItem = menu.createDiv({ cls: "zen-scrap-dropdown-item zen-scrap-dropdown-item-danger", text: "削除" });
-
-    menuBtn.addEventListener("click", (e) => {
-      e.stopPropagation();
-      const isOpen = menu.classList.contains("is-open");
-      timeline.querySelectorAll<HTMLElement>(".zen-scrap-entry-menu-dropdown").forEach((m) => {
-        m.classList.remove("is-open");
-      });
-      if (!isOpen) menu.classList.add("is-open");
-    });
-
     // 本文エリアを空で作成（後から非同期で埋める）
     const entryBody = entryEl.createDiv({ cls: "zen-scrap-entry-body znc" });
 
-    editItem.addEventListener("click", (e) => {
+    menuBtn.addEventListener("click", (e) => {
       e.stopPropagation();
-      menu.classList.remove("is-open");
-      renderEntryEditor({ ...deps.entryEditorDeps, entryEl, entryBody, index: i });
-    });
+      // 既存のドロップダウンを閉じる
+      document.querySelectorAll(".zen-scrap-entry-menu-portal").forEach((m) => m.remove());
 
-    deleteItem.addEventListener("click", async (e) => {
-      e.stopPropagation();
-      menu.classList.remove("is-open");
-      if (!confirm("このセクションを削除しますか？")) return;
-      scrap.entries.splice(i, 1);
-      scrap.updated = new Date().toISOString();
-      await repo.save(scrap);
-      await render();
+      const menu = document.createElement("div");
+      menu.className = "zen-scrap-item-menu-dropdown zen-scrap-entry-menu-portal";
+      menu.style.position = "fixed";
+      menu.style.zIndex = "1000";
+
+      const items: { text: string; cls?: string; handler: () => void }[] = [
+        { text: "コピー", handler: async () => { await navigator.clipboard.writeText(entry.body); new Notice("セクションをコピーしました"); } },
+        { text: "コレクションに追加", handler: () => { new CollectionPickerModal(deps.app, deps.collectionRepo, async (collectionId) => { const { added } = await deps.collectionRepo.addItem(collectionId, { type: "entry", scrapPath: scrap.filePath, entryTimestamp: entry.timestamp }); new Notice(added ? "コレクションに追加しました" : "すでに追加済みです"); }).open(); } },
+        { text: "編集", handler: () => { renderEntryEditor({ ...deps.entryEditorDeps, entryEl, entryBody, index: i }); } },
+        { text: "削除", cls: "zen-scrap-dropdown-item-danger", handler: async () => { if (!confirm("このセクションを削除しますか？")) return; scrap.entries.splice(i, 1); scrap.updated = new Date().toISOString(); await repo.save(scrap); await render(); } },
+      ];
+      for (const item of items) {
+        const el = document.createElement("div");
+        el.className = "zen-scrap-dropdown-item" + (item.cls ? ` ${item.cls}` : "");
+        el.textContent = item.text;
+        el.addEventListener("click", (ev) => { ev.stopPropagation(); menu.remove(); item.handler(); });
+        menu.appendChild(el);
+      }
+
+      document.body.appendChild(menu);
+
+      const rect = menuBtn.getBoundingClientRect();
+      menu.style.top = `${rect.bottom + 4}px`;
+      menu.style.right = `${document.documentElement.clientWidth - rect.right}px`;
+
+      // is-openを次フレームで付けてアニメーションさせる
+      requestAnimationFrame(() => menu.classList.add("is-open"));
+
+      // 外側クリックで閉じる
+      const onClickOutside = () => { menu.remove(); document.removeEventListener("click", onClickOutside); };
+      document.addEventListener("click", onClickOutside);
     });
 
     // Phase 2用: 本文レンダリングタスクを蓄積
@@ -247,13 +237,6 @@ export async function renderTimeline(container: HTMLElement, deps: TimelineDeps)
       markdownRenderer.addLinkHandler(entryBody);
     });
   }
-
-  const closeEntryMenus = () => {
-    timeline.querySelectorAll<HTMLElement>(".zen-scrap-entry-menu-dropdown").forEach((m) => {
-      m.classList.remove("is-open");
-    });
-  };
-  addDocumentClickHandler(closeEntryMenus);
 
   // Phase 2: 本文を並列レンダリング（DOM骨格は既に揃っている）
   await Promise.all(renderTasks.map((task) => task()));

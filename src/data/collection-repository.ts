@@ -71,9 +71,17 @@ export class CollectionRepository {
   async addItem(
     collectionId: string,
     item: Omit<CollectionItem, "order">
-  ): Promise<Collection> {
+  ): Promise<{ collection: Collection; added: boolean }> {
     const collection = await this.get(collectionId);
     if (!collection) throw new Error(`Collection not found: ${collectionId}`);
+
+    const duplicate = collection.items.some((i) =>
+      i.type === item.type &&
+      i.scrapPath === item.scrapPath &&
+      i.entryTimestamp === item.entryTimestamp
+    );
+    if (duplicate) return { collection, added: false };
+
     const maxOrder =
       collection.items.length > 0
         ? Math.max(...collection.items.map((i) => i.order))
@@ -81,7 +89,7 @@ export class CollectionRepository {
     collection.items.push({ ...item, order: maxOrder + 1 });
     collection.updated = new Date().toISOString();
     await this.save(collection);
-    return collection;
+    return { collection, added: true };
   }
 
   async removeItem(

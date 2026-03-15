@@ -132,6 +132,7 @@ export class ScrapDetailView extends ItemView {
     const headerDeps: HeaderDeps = {
       scrap,
       repo: this.repo,
+      collectionRepo: this.collectionRepo,
       eventBus: this.eventBus,
       app: this.app,
       scope: this.scope,
