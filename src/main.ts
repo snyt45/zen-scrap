@@ -1,8 +1,11 @@
 import { Plugin, TFile } from "obsidian";
 import { ScrapRepository } from "./data/scrap-repository";
+import { CollectionRepository } from "./data/collection-repository";
 import { ScrapListView, VIEW_TYPE_SCRAP_LIST } from "./views/scrap-list-view";
 import { ScrapDetailView, VIEW_TYPE_SCRAP_DETAIL } from "./views/scrap-detail-view";
 import { MarkedListView, VIEW_TYPE_MARKED_LIST } from "./views/marked-list-view";
+import { CollectionListView, VIEW_TYPE_COLLECTION_LIST } from "./views/collection-list-view";
+import { CollectionDetailView, VIEW_TYPE_COLLECTION_DETAIL } from "./views/collection-detail-view";
 import { Scrap } from "./data/types";
 import { EventBus } from "./events/event-bus";
 import { registerScrapHandlers } from "./events/scrap-handlers";
@@ -12,6 +15,7 @@ import { ZenScrapSettings, DEFAULT_SETTINGS, ZenScrapSettingTab } from "./settin
 
 export default class ZenScrapPlugin extends Plugin {
   private repo!: ScrapRepository;
+  private collectionRepo!: CollectionRepository;
   private eventBus!: EventBus;
   settings!: ZenScrapSettings;
 
@@ -19,6 +23,7 @@ export default class ZenScrapPlugin extends Plugin {
     await this.loadSettings();
 
     this.repo = new ScrapRepository(this.app, this.settings);
+    this.collectionRepo = new CollectionRepository(this.app, this.settings);
     this.eventBus = new EventBus();
 
     this.registerView(VIEW_TYPE_SCRAP_LIST, (leaf) =>
@@ -33,8 +38,22 @@ export default class ZenScrapPlugin extends Plugin {
       new MarkedListView(leaf, this.repo, this.eventBus)
     );
 
+    this.registerView(VIEW_TYPE_COLLECTION_LIST, (leaf) =>
+      new CollectionListView(leaf, this.collectionRepo, this.eventBus)
+    );
+
+    this.registerView(VIEW_TYPE_COLLECTION_DETAIL, (leaf) =>
+      new CollectionDetailView(leaf, this.collectionRepo, this.repo, this.eventBus)
+    );
+
     registerScrapHandlers(this.eventBus, this.app, this.repo, (scrap, scrollToEntryIndex) => this.openScrap(scrap, scrollToEntryIndex));
-    registerNavHandlers(this.eventBus, () => this.activateListView(), () => this.openMarkedList());
+    registerNavHandlers(
+      this.eventBus,
+      () => this.activateListView(),
+      () => this.openMarkedList(),
+      () => this.openCollectionList(),
+      (id: string) => this.openCollectionDetail(id)
+    );
 
     this.addRibbonIcon("message-square", "Zen Scrap", () => {
       this.activateListView();
@@ -110,6 +129,33 @@ export default class ZenScrapPlugin extends Plugin {
     await leaf.setViewState({
       type: VIEW_TYPE_MARKED_LIST,
       active: true,
+    });
+    workspace.revealLeaf(leaf);
+  }
+
+  async openCollectionList() {
+    const { workspace } = this.app;
+    let leaf = workspace.getLeavesOfType(VIEW_TYPE_COLLECTION_LIST)[0];
+    if (!leaf) {
+      leaf = workspace.getLeaf(true)!;
+    }
+    await leaf.setViewState({
+      type: VIEW_TYPE_COLLECTION_LIST,
+      active: true,
+    });
+    workspace.revealLeaf(leaf);
+  }
+
+  async openCollectionDetail(id: string) {
+    const { workspace } = this.app;
+    let leaf = workspace.getLeavesOfType(VIEW_TYPE_COLLECTION_DETAIL)[0];
+    if (!leaf) {
+      leaf = workspace.getLeaf(true)!;
+    }
+    await leaf.setViewState({
+      type: VIEW_TYPE_COLLECTION_DETAIL,
+      active: true,
+      state: { collectionId: id },
     });
     workspace.revealLeaf(leaf);
   }
