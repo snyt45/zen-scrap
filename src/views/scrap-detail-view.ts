@@ -1,6 +1,7 @@
 import { ItemView, WorkspaceLeaf } from "obsidian";
 import { Scrap } from "../data/types";
 import { ScrapRepository } from "../data/scrap-repository";
+import { CollectionRepository } from "../data/collection-repository";
 import { EventBus } from "../events/event-bus";
 import { EVENTS } from "../events/constants";
 import { MarkdownRenderer } from "./detail/markdown-renderer";
@@ -15,6 +16,7 @@ export const VIEW_TYPE_SCRAP_DETAIL = "zen-scrap-detail";
 
 export class ScrapDetailView extends ItemView {
   private repo: ScrapRepository;
+  private collectionRepo: CollectionRepository;
   private eventBus: EventBus;
   private settings: ZenScrapSettings;
   private scrap: Scrap | undefined;
@@ -26,9 +28,10 @@ export class ScrapDetailView extends ItemView {
   private markdownRenderer: MarkdownRenderer;
   private onScrapChangedHandler: () => void;
 
-  constructor(leaf: WorkspaceLeaf, repo: ScrapRepository, eventBus: EventBus, settings: ZenScrapSettings) {
+  constructor(leaf: WorkspaceLeaf, repo: ScrapRepository, collectionRepo: CollectionRepository, eventBus: EventBus, settings: ZenScrapSettings) {
     super(leaf);
     this.repo = repo;
+    this.collectionRepo = collectionRepo;
     this.eventBus = eventBus;
     this.settings = settings;
     this.markdownRenderer = new MarkdownRenderer(this.app);
@@ -165,6 +168,8 @@ export class ScrapDetailView extends ItemView {
     const timelineDeps: TimelineDeps = {
       scrap,
       repo: this.repo,
+      collectionRepo: this.collectionRepo,
+      app: this.app,
       render,
       markdownRenderer: this.markdownRenderer,
       addDocumentClickHandler: (h) => this.cleanupManager.registerDocumentClick(h),

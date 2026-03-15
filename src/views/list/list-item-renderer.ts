@@ -1,12 +1,17 @@
+import { App, Notice } from "obsidian";
 import { Scrap } from "../../data/types";
 import { ScrapRepository } from "../../data/scrap-repository";
+import { CollectionRepository } from "../../data/collection-repository";
 import { EventBus } from "../../events/event-bus";
 import { EVENTS } from "../../events/constants";
 import { formatDate, daysAgoCount } from "../../utils";
 import { chevronDownIcon, PIN_ICON } from "../../icons";
+import { CollectionPickerModal } from "../../ui/collection-picker-modal";
 
 export interface ListItemDeps {
   repo: ScrapRepository;
+  collectionRepo: CollectionRepository;
+  app: App;
   eventBus: EventBus;
   staleDays: number;
   onTagClick?: (tag: string) => void;
@@ -58,6 +63,16 @@ export function renderListItem(parent: HTMLElement, scrap: Scrap, deps: ListItem
     fresh.archived = !fresh.archived;
     await repo.save(fresh);
     eventBus.emit(EVENTS.SCRAP_CHANGED);
+  });
+
+  const addToCollectionItem = menu.createDiv({ cls: "zen-scrap-dropdown-item", text: "コレクションに追加" });
+  addToCollectionItem.addEventListener("click", (e) => {
+    e.stopPropagation();
+    menu.classList.remove("is-open");
+    new CollectionPickerModal(deps.app, deps.collectionRepo, async (collectionId) => {
+      await deps.collectionRepo.addItem(collectionId, { type: "scrap", scrapPath: scrap.filePath });
+      new Notice("コレクションに追加しました");
+    }).open();
   });
 
   const deleteItem = menu.createDiv({ cls: "zen-scrap-dropdown-item zen-scrap-dropdown-item-danger", text: "削除する" });

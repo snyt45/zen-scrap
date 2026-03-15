@@ -1,14 +1,18 @@
-import { Notice } from "obsidian";
+import { App, Notice } from "obsidian";
 import { Scrap } from "../../data/types";
 import { ScrapRepository } from "../../data/scrap-repository";
+import { CollectionRepository } from "../../data/collection-repository";
 import { formatDate } from "../../utils";
 import { chevronDownIcon, GRIP_ICON, BOOKMARK_ICON, BOOKMARK_FILLED_ICON } from "../../icons";
 import { MarkdownRenderer } from "./markdown-renderer";
 import { renderEntryEditor, EntryEditorDeps } from "./input-area-renderer";
+import { CollectionPickerModal } from "../../ui/collection-picker-modal";
 
 export interface TimelineDeps {
   scrap: Scrap;
   repo: ScrapRepository;
+  collectionRepo: CollectionRepository;
+  app: App;
   render: () => Promise<void>;
   markdownRenderer: MarkdownRenderer;
   addDocumentClickHandler: (handler: () => void) => void;
@@ -193,6 +197,16 @@ export async function renderTimeline(container: HTMLElement, deps: TimelineDeps)
       menu.classList.remove("is-open");
       await navigator.clipboard.writeText(entry.body);
       new Notice("セクションをコピーしました");
+    });
+
+    const addToCollectionItem = menu.createDiv({ cls: "zen-scrap-dropdown-item", text: "コレクションに追加" });
+    addToCollectionItem.addEventListener("click", (e) => {
+      e.stopPropagation();
+      menu.classList.remove("is-open");
+      new CollectionPickerModal(deps.app, deps.collectionRepo, async (collectionId) => {
+        await deps.collectionRepo.addItem(collectionId, { type: "entry", scrapPath: scrap.filePath, entryTimestamp: entry.timestamp });
+        new Notice("コレクションに追加しました");
+      }).open();
     });
 
     const editItem = menu.createDiv({ cls: "zen-scrap-dropdown-item", text: "編集" });

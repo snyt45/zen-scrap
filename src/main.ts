@@ -27,11 +27,11 @@ export default class ZenScrapPlugin extends Plugin {
     this.eventBus = new EventBus();
 
     this.registerView(VIEW_TYPE_SCRAP_LIST, (leaf) =>
-      new ScrapListView(leaf, this.repo, this.eventBus, this.settings)
+      new ScrapListView(leaf, this.repo, this.collectionRepo, this.eventBus, this.settings)
     );
 
     this.registerView(VIEW_TYPE_SCRAP_DETAIL, (leaf) =>
-      new ScrapDetailView(leaf, this.repo, this.eventBus, this.settings)
+      new ScrapDetailView(leaf, this.repo, this.collectionRepo, this.eventBus, this.settings)
     );
 
     this.registerView(VIEW_TYPE_MARKED_LIST, (leaf) =>
