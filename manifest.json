@@ -1,7 +1,7 @@
 {
   "id": "zen-scrap",
   "name": "Zen Scrap",
-  "version": "0.1.0",
+  "version": "0.4.0",
   "minAppVersion": "1.0.0",
   "description": "Zennスクラップ風のスレッド形式メモ機能",
   "author": "snyt45",
