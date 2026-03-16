@@ -1,12 +1,13 @@
 import { EventBus } from "../../events/event-bus";
 import { EVENTS } from "../../events/constants";
-import { OUTLINE_ICON, BOOKMARK_FILLED_ICON, COLLECTION_ICON } from "../../icons";
+import { OUTLINE_ICON, INBOX_ICON, COLLECTION_ICON } from "../../icons";
 
-export type ActiveTab = "list" | "marked" | "collection" | "none";
+export type ActiveTab = "list" | "inbox" | "collection" | "none";
 
 export interface TabNavDeps {
   eventBus: EventBus;
   activeTab: ActiveTab;
+  inboxCount?: number;
 }
 
 export function renderTabNav(container: HTMLElement, deps: TabNavDeps): void {
@@ -24,13 +25,16 @@ export function renderTabNav(container: HTMLElement, deps: TabNavDeps): void {
     }
   });
 
-  const markedTab = tabs.createEl("button", {
-    cls: `zen-scrap-tab${deps.activeTab === "marked" ? " is-active" : ""}`,
+  const inboxTab = tabs.createEl("button", {
+    cls: `zen-scrap-tab${deps.activeTab === "inbox" ? " is-active" : ""}`,
   });
-  markedTab.innerHTML = `${BOOKMARK_FILLED_ICON}<span>マーク</span>`;
-  markedTab.addEventListener("click", () => {
-    if (deps.activeTab !== "marked") {
-      deps.eventBus.emit(EVENTS.NAV_TO_MARKED_LIST);
+  const badgeHtml = deps.inboxCount && deps.inboxCount > 0
+    ? `<span class="zen-scrap-inbox-badge">${deps.inboxCount}</span>`
+    : "";
+  inboxTab.innerHTML = `${INBOX_ICON}<span>Inbox</span>${badgeHtml}`;
+  inboxTab.addEventListener("click", () => {
+    if (deps.activeTab !== "inbox") {
+      deps.eventBus.emit(EVENTS.NAV_TO_INBOX_LIST);
     }
   });
 
