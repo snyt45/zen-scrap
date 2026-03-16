@@ -1,7 +1,6 @@
 export interface ScrapEntry {
   timestamp: string; // "2026-03-10 14:30" 形式
   body: string;
-  marked?: boolean;
 }
 
 export interface Scrap {

@@ -60,7 +60,6 @@ export function parseScrapMarkdown(content: string, filePath: string): Scrap {
     entries.push({
       timestamp: match[1].trim(),
       body: entryBody,
-      marked: !!match[2],
     });
   }
 
@@ -99,7 +98,7 @@ export function serializeScrap(scrap: Scrap): string {
   }
 
   for (const entry of scrap.entries) {
-    lines.push(`### ${entry.timestamp}${entry.marked ? " [marked]" : ""}`);
+    lines.push(`### ${entry.timestamp}`);
     lines.push("");
     lines.push(entry.body);
     lines.push("");
