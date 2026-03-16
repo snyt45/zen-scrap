@@ -6,7 +6,7 @@ import { CollectionPickerModal } from "../../ui/collection-picker-modal";
 import { EventBus } from "../../events/event-bus";
 import { EVENTS } from "../../events/constants";
 import { formatDate, stripMarkdown } from "../../utils";
-import { EXPAND_ICON, SHRINK_ICON, TRIANGLE_DOWN_ICON, EDIT_ICON, MORE_ICON, HELP_ICON, OUTLINE_ICON } from "../../icons";
+import { TRIANGLE_DOWN_ICON, EDIT_ICON, MORE_ICON, HELP_ICON, OUTLINE_ICON } from "../../icons";
 import { renderTabNav } from "../shared/tab-nav-renderer";
 import { MarkdownRenderer } from "./markdown-renderer";
 import { InboxRepository } from "../../data/inbox-repository";
@@ -20,8 +20,6 @@ export interface HeaderDeps {
   app: import("obsidian").App;
   scope: import("obsidian").Scope | null;
   markdownRenderer: MarkdownRenderer;
-  isFullWidth: boolean;
-  setFullWidth: (v: boolean) => void;
   containerEl: HTMLElement;
   render: () => Promise<void>;
   openFile: (path: string) => void;
@@ -42,13 +40,6 @@ export function renderHeader(container: HTMLElement, deps: HeaderDeps): void {
   });
 
   const navRight = header.createDiv({ cls: "zen-scrap-detail-nav-right" });
-
-  const fullWidthBtn = navRight.createEl("button", { cls: "zen-scrap-fullwidth-toggle" });
-  fullWidthBtn.innerHTML = deps.isFullWidth ? SHRINK_ICON : EXPAND_ICON;
-  fullWidthBtn.addEventListener("click", async () => {
-    deps.setFullWidth(!deps.isFullWidth);
-    await deps.render();
-  });
 
   // アウトラインドロップダウン
   if (scrap.entries.length > 0) {

@@ -48,7 +48,6 @@
 }
 
 .zen-scrap-new-btn,
-.zen-scrap-fullwidth-toggle,
 .zen-scrap-help-btn,
 .zen-scrap-item-menu-btn,
 .zen-scrap-entry-menu-btn,
@@ -523,10 +522,6 @@
   height: 100%;
 }
 
-.zen-scrap-detail-container.zen-scrap-fullwidth {
-  max-width: 100%;
-}
-
 .zen-scrap-detail-header {
   margin-bottom: 16px;
 }
@@ -554,7 +549,6 @@
   background: var(--background-secondary);
 }
 
-.zen-scrap-fullwidth-toggle,
 .zen-scrap-help-btn,
 .zen-scrap-outline-btn {
   background: none;
@@ -567,7 +561,6 @@
   align-items: center;
 }
 
-.zen-scrap-fullwidth-toggle:hover,
 .zen-scrap-help-btn:hover,
 .zen-scrap-outline-btn:hover {
   color: var(--text-normal);
@@ -1475,7 +1468,6 @@ pre:hover .zen-scrap-code-copy-btn {
   min-height: 120px;
 }
 
-.zen-scrap-fullwidth-toggle:active,
 .zen-scrap-help-btn:active,
 .zen-scrap-img-btn:active,
 .zen-scrap-embed-btn:active,

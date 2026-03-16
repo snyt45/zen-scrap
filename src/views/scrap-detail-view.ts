@@ -22,7 +22,6 @@ export class ScrapDetailView extends ItemView {
   private eventBus: EventBus;
   private settings: ZenScrapSettings;
   private scrap: Scrap | undefined;
-  private isFullWidth = false;
   private ignoreChangeCount = 0;
   private settingState = false;
   private cleanupManager = new CleanupManager();
@@ -123,8 +122,6 @@ export class ScrapDetailView extends ItemView {
     container.empty();
     if (!this.scrap) return;
     container.addClass("zen-scrap-detail-container");
-    container.toggleClass("zen-scrap-fullwidth", this.isFullWidth);
-
     const render = () => {
       this.ignoreChangeCount = 2;
       return this.render();
@@ -140,8 +137,6 @@ export class ScrapDetailView extends ItemView {
       app: this.app,
       scope: this.scope,
       markdownRenderer: this.markdownRenderer,
-      isFullWidth: this.isFullWidth,
-      setFullWidth: (v) => { this.isFullWidth = v; },
       containerEl: container,
       render,
       openFile: (path) => this.app.workspace.openLinkText(path, "", true),
