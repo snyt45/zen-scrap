@@ -1,4 +1,4 @@
-import { ItemView, WorkspaceLeaf, Notice } from "obsidian";
+import { ItemView, WorkspaceLeaf } from "obsidian";
 import { ScrapRepository } from "../data/scrap-repository";
 import { InboxRepository } from "../data/inbox-repository";
 import { InboxItem } from "../data/inbox-types";
@@ -24,7 +24,6 @@ export class InboxListView extends ItemView {
   private eventBus: EventBus;
   private onChangedHandler: () => void;
   private cleanupManager = new CleanupManager();
-  private searchQuery = "";
 
   constructor(
     leaf: WorkspaceLeaf,
@@ -105,51 +104,11 @@ export class InboxListView extends ItemView {
       inboxCount,
     });
 
-    // 検索バー
-    const searchInput = container.createEl("input", {
-      cls: "zen-scrap-search",
-      type: "text",
-      placeholder: "Inboxを検索...",
-    });
-    searchInput.value = this.searchQuery;
-    let composing = false;
-    searchInput.addEventListener("compositionstart", () => {
-      composing = true;
-    });
-    searchInput.addEventListener("compositionend", () => {
-      composing = false;
-      this.searchQuery = searchInput.value;
-      this.rerenderList();
-    });
-    searchInput.addEventListener("input", () => {
-      if (composing) return;
-      this.searchQuery = searchInput.value;
-      this.rerenderList();
-    });
-
-    await this.renderListContent(container);
-  }
-
-  private async rerenderList(): Promise<void> {
-    const existing = this.containerEl.querySelector(".zen-scrap-inbox-list");
-    const existingEmpty = this.containerEl.querySelector(".zen-scrap-empty");
-    if (existing) existing.remove();
-    if (existingEmpty) existingEmpty.remove();
-    const container = this.containerEl.children[1] as HTMLElement;
     await this.renderListContent(container);
   }
 
   private async renderListContent(container: HTMLElement): Promise<void> {
-    let sections = await this.collectSections();
-
-    if (this.searchQuery) {
-      const q = this.searchQuery.toLowerCase();
-      sections = sections.filter(
-        (s) =>
-          s.entry.body.toLowerCase().includes(q) ||
-          s.scrap.title.toLowerCase().includes(q)
-      );
-    }
+    const sections = await this.collectSections();
 
     if (sections.length === 0) {
       container.createDiv({
