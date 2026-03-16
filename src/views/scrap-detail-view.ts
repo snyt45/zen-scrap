@@ -131,6 +131,7 @@ export class ScrapDetailView extends ItemView {
     };
     const scrap = this.scrap;
 
+    const inboxCount = await this.inboxRepo.count();
     const headerDeps: HeaderDeps = {
       scrap,
       repo: this.repo,
@@ -146,6 +147,7 @@ export class ScrapDetailView extends ItemView {
       openFile: (path) => this.app.workspace.openLinkText(path, "", true),
       addDocumentClickHandler: (h) => this.cleanupManager.registerDocumentClick(h),
       inboxRepo: this.inboxRepo,
+      inboxCount,
       scrollToEntry: (index) => {
         const entries = container.querySelectorAll<HTMLElement>(".zen-scrap-entry");
         if (entries[index]) {

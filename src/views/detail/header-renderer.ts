@@ -28,6 +28,7 @@ export interface HeaderDeps {
   addDocumentClickHandler: (handler: () => void) => void;
   scrollToEntry: (index: number) => void;
   inboxRepo: InboxRepository;
+  inboxCount: number;
 }
 
 export function renderHeader(container: HTMLElement, deps: HeaderDeps): void {
@@ -37,6 +38,7 @@ export function renderHeader(container: HTMLElement, deps: HeaderDeps): void {
   renderTabNav(header, {
     eventBus,
     activeTab: "none",
+    inboxCount: deps.inboxCount,
   });
 
   const navRight = header.createDiv({ cls: "zen-scrap-detail-nav-right" });

@@ -30,7 +30,7 @@ export default class ZenScrapPlugin extends Plugin {
     this.eventBus = new EventBus();
 
     this.registerView(VIEW_TYPE_SCRAP_LIST, (leaf) =>
-      new ScrapListView(leaf, this.repo, this.collectionRepo, this.eventBus, this.settings)
+      new ScrapListView(leaf, this.repo, this.collectionRepo, this.inboxRepo, this.eventBus, this.settings)
     );
 
     this.registerView(VIEW_TYPE_SCRAP_DETAIL, (leaf) =>
@@ -42,11 +42,11 @@ export default class ZenScrapPlugin extends Plugin {
     );
 
     this.registerView(VIEW_TYPE_COLLECTION_LIST, (leaf) =>
-      new CollectionListView(leaf, this.collectionRepo, this.eventBus)
+      new CollectionListView(leaf, this.collectionRepo, this.inboxRepo, this.eventBus)
     );
 
     this.registerView(VIEW_TYPE_COLLECTION_DETAIL, (leaf) =>
-      new CollectionDetailView(leaf, this.collectionRepo, this.repo, this.eventBus)
+      new CollectionDetailView(leaf, this.collectionRepo, this.repo, this.inboxRepo, this.eventBus)
     );
 
     registerScrapHandlers(this.eventBus, this.app, this.repo, (scrap, scrollToEntryIndex) => this.openScrap(scrap, scrollToEntryIndex));

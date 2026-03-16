@@ -1,5 +1,6 @@
 import { ItemView, WorkspaceLeaf, Modal } from "obsidian";
 import { CollectionRepository } from "../data/collection-repository";
+import { InboxRepository } from "../data/inbox-repository";
 import { EventBus } from "../events/event-bus";
 import { EVENTS } from "../events/constants";
 import { renderTabNav } from "./shared/tab-nav-renderer";
@@ -11,13 +12,15 @@ export const VIEW_TYPE_COLLECTION_LIST = "zen-scrap-collection-list";
 
 export class CollectionListView extends ItemView {
   private collectionRepo: CollectionRepository;
+  private inboxRepo: InboxRepository;
   private eventBus: EventBus;
   private onCollectionChangedHandler: () => void;
   private cleanupManager = new CleanupManager();
 
-  constructor(leaf: WorkspaceLeaf, collectionRepo: CollectionRepository, eventBus: EventBus) {
+  constructor(leaf: WorkspaceLeaf, collectionRepo: CollectionRepository, inboxRepo: InboxRepository, eventBus: EventBus) {
     super(leaf);
     this.collectionRepo = collectionRepo;
+    this.inboxRepo = inboxRepo;
     this.eventBus = eventBus;
     this.onCollectionChangedHandler = () => this.render();
   }
@@ -50,9 +53,11 @@ export class CollectionListView extends ItemView {
     container.empty();
     container.addClass("zen-scrap-collection-list-container");
 
+    const inboxCount = await this.inboxRepo.count();
     renderTabNav(container, {
       eventBus: this.eventBus,
       activeTab: "collection",
+      inboxCount,
     });
 
     const actionRow = container.createDiv({ cls: "zen-scrap-action-row" });

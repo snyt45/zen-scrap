@@ -2,6 +2,7 @@ import { ItemView, Notice, WorkspaceLeaf } from "obsidian";
 import { Collection } from "../data/collection-types";
 import { CollectionRepository } from "../data/collection-repository";
 import { ScrapRepository } from "../data/scrap-repository";
+import { InboxRepository } from "../data/inbox-repository";
 import { EventBus } from "../events/event-bus";
 import { EVENTS } from "../events/constants";
 import { renderTabNav } from "./shared/tab-nav-renderer";
@@ -15,6 +16,7 @@ export const VIEW_TYPE_COLLECTION_DETAIL = "zen-scrap-collection-detail";
 export class CollectionDetailView extends ItemView {
   private collectionRepo: CollectionRepository;
   private repo: ScrapRepository;
+  private inboxRepo: InboxRepository;
   private eventBus: EventBus;
   private collection: Collection | null = null;
   private cleanupManager = new CleanupManager();
@@ -24,11 +26,13 @@ export class CollectionDetailView extends ItemView {
     leaf: WorkspaceLeaf,
     collectionRepo: CollectionRepository,
     repo: ScrapRepository,
+    inboxRepo: InboxRepository,
     eventBus: EventBus
   ) {
     super(leaf);
     this.collectionRepo = collectionRepo;
     this.repo = repo;
+    this.inboxRepo = inboxRepo;
     this.eventBus = eventBus;
     this.onCollectionChangedHandler = async () => {
       if (!this.collection) return;
@@ -83,9 +87,11 @@ export class CollectionDetailView extends ItemView {
     container.empty();
     container.addClass("zen-scrap-collection-detail-container");
 
+    const inboxCount = await this.inboxRepo.count();
     renderTabNav(container, {
       eventBus: this.eventBus,
       activeTab: "none",
+      inboxCount,
     });
 
     // 戻るリンク

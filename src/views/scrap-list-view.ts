@@ -1,6 +1,7 @@
 import { ItemView, WorkspaceLeaf } from "obsidian";
 import { ScrapRepository } from "../data/scrap-repository";
 import { CollectionRepository } from "../data/collection-repository";
+import { InboxRepository } from "../data/inbox-repository";
 import { EventBus } from "../events/event-bus";
 import { EVENTS } from "../events/constants";
 import { ZenScrapSettings } from "../settings";
@@ -14,6 +15,7 @@ export const VIEW_TYPE_SCRAP_LIST = "zen-scrap-list";
 export class ScrapListView extends ItemView {
   private repo: ScrapRepository;
   private collectionRepo: CollectionRepository;
+  private inboxRepo: InboxRepository;
   private eventBus: EventBus;
   private settings: ZenScrapSettings;
   private filter: "all" | "open" | "closed" | "archived" = "open";
@@ -23,10 +25,11 @@ export class ScrapListView extends ItemView {
   private onScrapChangedHandler: () => void;
   private cleanupManager = new CleanupManager();
 
-  constructor(leaf: WorkspaceLeaf, repo: ScrapRepository, collectionRepo: CollectionRepository, eventBus: EventBus, settings: ZenScrapSettings) {
+  constructor(leaf: WorkspaceLeaf, repo: ScrapRepository, collectionRepo: CollectionRepository, inboxRepo: InboxRepository, eventBus: EventBus, settings: ZenScrapSettings) {
     super(leaf);
     this.repo = repo;
     this.collectionRepo = collectionRepo;
+    this.inboxRepo = inboxRepo;
     this.eventBus = eventBus;
     this.settings = settings;
     this.onScrapChangedHandler = () => this.render();
@@ -60,17 +63,19 @@ export class ScrapListView extends ItemView {
     container.empty();
     container.addClass("zen-scrap-list-container");
 
-    this.renderHeader(container);
+    await this.renderHeader(container);
     this.renderSearch(container);
     this.renderToolbar(container);
     this.renderFilterTag(container);
     await this.renderList(container);
   }
 
-  private renderHeader(container: HTMLElement): void {
+  private async renderHeader(container: HTMLElement): Promise<void> {
+    const inboxCount = await this.inboxRepo.count();
     renderTabNav(container, {
       eventBus: this.eventBus,
       activeTab: "list",
+      inboxCount,
     });
 
     const actionRow = container.createDiv({ cls: "zen-scrap-action-row" });
