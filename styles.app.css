@@ -4,7 +4,7 @@
 
 .zen-scrap-list-container,
 .zen-scrap-detail-container,
-.zen-scrap-marked-list-container,
+.zen-scrap-inbox-list-container,
 .zen-scrap-collection-list-container,
 .zen-scrap-collection-detail-container {
 
@@ -1690,11 +1690,8 @@ pre:hover .zen-scrap-code-copy-btn {
   z-index: 30;
 }
 
-/* ==========================================================================
-   Mark Button
-   ========================================================================== */
-
-.zen-scrap-mark-btn {
+/* Inbox ボタン */
+.zen-scrap-inbox-btn {
   background: none;
   border: none;
   cursor: pointer;
@@ -1708,20 +1705,20 @@ pre:hover .zen-scrap-code-copy-btn {
   margin-left: auto;
 }
 
-.zen-scrap-mark-btn:hover {
+.zen-scrap-inbox-btn:hover {
   opacity: 1;
 }
 
-.zen-scrap-mark-btn.is-marked {
+.zen-scrap-inbox-btn.is-active {
   color: var(--interactive-accent);
   opacity: 1;
 }
 
-.zen-scrap-entry:hover .zen-scrap-mark-btn {
+.zen-scrap-entry:hover .zen-scrap-inbox-btn {
   opacity: 0.7;
 }
 
-.zen-scrap-entry:hover .zen-scrap-mark-btn.is-marked {
+.zen-scrap-entry:hover .zen-scrap-inbox-btn.is-active {
   opacity: 1;
 }
 
@@ -1756,35 +1753,8 @@ pre:hover .zen-scrap-code-copy-btn {
   animation: zen-scrap-highlight-fade 2s ease-out forwards;
 }
 
-/* ==========================================================================
-   Filter Mark Button
-   ========================================================================== */
-
-.zen-scrap-filter-mark-btn {
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: var(--text-muted);
-  padding: 4px;
-  border-radius: var(--radius-sm);
-  display: flex;
-  align-items: center;
-}
-
-.zen-scrap-filter-mark-btn:hover {
-  background: var(--background-modifier-hover);
-}
-
-.zen-scrap-filter-mark-btn.is-active {
-  color: var(--interactive-accent);
-  background: var(--background-modifier-hover);
-}
-
-/* ==========================================================================
-   Marked List Page
-   ========================================================================== */
-
-.zen-scrap-marked-list-container {
+/* Inbox 一覧 */
+.zen-scrap-inbox-list-container {
   max-width: var(--content-width);
   margin: 0 auto;
   padding: 16px;
@@ -1792,32 +1762,13 @@ pre:hover .zen-scrap-code-copy-btn {
   height: 100%;
 }
 
-.zen-scrap-marked-toolbar {
-  margin-bottom: 12px;
-}
-
-.zen-scrap-bulk-copy-btn {
-  font-size: var(--font-md);
-  padding: 4px 12px;
-  border-radius: var(--radius-sm);
-  background: var(--interactive-accent);
-  color: var(--text-on-accent);
-  border: none;
-  cursor: pointer;
-}
-
-.zen-scrap-bulk-copy-btn:hover {
-  opacity: 0.9;
-}
-
-.zen-scrap-marked-list {
+.zen-scrap-inbox-list {
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
 
-.zen-scrap-marked-item {
-  position: relative;
+.zen-scrap-inbox-item {
   display: flex;
   align-items: flex-start;
   gap: 10px;
@@ -1825,102 +1776,57 @@ pre:hover .zen-scrap-code-copy-btn {
   border: 1px solid var(--background-modifier-border);
   border-radius: var(--radius-md);
   background: var(--background-primary);
-  transition: background-color var(--transition-base), border-color var(--transition-base);
+  transition: background-color var(--transition-base);
 }
 
-.zen-scrap-marked-item:hover {
+.zen-scrap-inbox-item:hover {
   background: var(--background-secondary);
 }
 
-.zen-scrap-marked-item.is-selected {
-  background: var(--background-secondary);
-  border-color: var(--interactive-accent);
+.zen-scrap-inbox-checkbox {
+  margin-top: 4px;
+  cursor: pointer;
+  flex-shrink: 0;
 }
 
-.zen-scrap-marked-content {
+.zen-scrap-inbox-content {
   flex: 1;
   min-width: 0;
   cursor: pointer;
 }
 
-.zen-scrap-marked-meta {
-  display: flex;
-  gap: 8px;
-  font-size: var(--font-sm);
-  color: var(--text-muted);
+.zen-scrap-inbox-preview {
+  font-size: var(--font-base);
+  color: var(--text-normal);
+  line-height: 1.4;
   margin-bottom: 4px;
 }
 
-.zen-scrap-marked-source {
-  font-weight: var(--weight-semibold);
-  color: var(--text-normal);
-}
-
-.zen-scrap-marked-preview {
-  font-size: var(--font-base);
-  color: var(--text-muted);
-  line-height: 1.4;
-}
-
-.zen-scrap-marked-actions {
+.zen-scrap-inbox-meta {
   display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.zen-scrap-marked-copy-btn {
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: var(--text-muted);
-  padding: 4px;
-  border-radius: var(--radius-sm);
-}
-
-.zen-scrap-marked-copy-btn:hover {
-  background: var(--background-modifier-hover);
-  color: var(--text-normal);
-}
-
-.zen-scrap-marked-unmark-btn {
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: var(--text-muted);
-  padding: 4px;
-  border-radius: var(--radius-sm);
-  display: flex;
-  align-items: center;
-  transition: color var(--transition-base), background-color var(--transition-base);
-}
-
-.zen-scrap-marked-unmark-btn:hover {
-  background: var(--background-modifier-hover);
-  color: var(--text-error);
-}
-
-.zen-scrap-marked-tooltip {
-  display: none;
-  position: absolute;
-  left: 40px;
-  top: 100%;
-  z-index: 20;
-  max-width: 400px;
-  padding: 10px 12px;
-  background: var(--background-primary);
-  border: 1px solid var(--background-modifier-border);
-  border-radius: 8px;
-  box-shadow: var(--shadow-dropdown);
+  gap: 6px;
   font-size: var(--font-sm);
-  line-height: 1.5;
-  color: var(--text-normal);
-  white-space: pre-wrap;
-  word-break: break-word;
+  color: var(--text-muted);
 }
 
-.zen-scrap-marked-bulk-bar {
-  padding: 8px 12px;
-  margin-bottom: 8px;
+.zen-scrap-inbox-source {
+  font-weight: var(--weight-semibold);
+}
+
+/* Inbox バッジ */
+.zen-scrap-inbox-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 9px;
+  background: var(--interactive-accent);
+  color: var(--text-on-accent);
+  font-size: 11px;
+  font-weight: var(--weight-semibold);
+  margin-left: 4px;
 }
 
 /* ==========================================================================
