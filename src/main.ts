@@ -3,7 +3,8 @@ import { ScrapRepository } from "./data/scrap-repository";
 import { CollectionRepository } from "./data/collection-repository";
 import { ScrapListView, VIEW_TYPE_SCRAP_LIST } from "./views/scrap-list-view";
 import { ScrapDetailView, VIEW_TYPE_SCRAP_DETAIL } from "./views/scrap-detail-view";
-import { MarkedListView, VIEW_TYPE_MARKED_LIST } from "./views/marked-list-view";
+import { InboxListView, VIEW_TYPE_INBOX_LIST } from "./views/inbox-list-view";
+import { InboxRepository } from "./data/inbox-repository";
 import { CollectionListView, VIEW_TYPE_COLLECTION_LIST } from "./views/collection-list-view";
 import { CollectionDetailView, VIEW_TYPE_COLLECTION_DETAIL } from "./views/collection-detail-view";
 import { Scrap } from "./data/types";
@@ -16,6 +17,7 @@ import { ZenScrapSettings, DEFAULT_SETTINGS, ZenScrapSettingTab } from "./settin
 export default class ZenScrapPlugin extends Plugin {
   private repo!: ScrapRepository;
   private collectionRepo!: CollectionRepository;
+  private inboxRepo!: InboxRepository;
   private eventBus!: EventBus;
   settings!: ZenScrapSettings;
 
@@ -24,6 +26,7 @@ export default class ZenScrapPlugin extends Plugin {
 
     this.repo = new ScrapRepository(this.app, this.settings);
     this.collectionRepo = new CollectionRepository(this.app, this.settings);
+    this.inboxRepo = new InboxRepository(this.app, this.settings);
     this.eventBus = new EventBus();
 
     this.registerView(VIEW_TYPE_SCRAP_LIST, (leaf) =>
@@ -31,11 +34,11 @@ export default class ZenScrapPlugin extends Plugin {
     );
 
     this.registerView(VIEW_TYPE_SCRAP_DETAIL, (leaf) =>
-      new ScrapDetailView(leaf, this.repo, this.collectionRepo, this.eventBus, this.settings)
+      new ScrapDetailView(leaf, this.repo, this.collectionRepo, this.inboxRepo, this.eventBus, this.settings)
     );
 
-    this.registerView(VIEW_TYPE_MARKED_LIST, (leaf) =>
-      new MarkedListView(leaf, this.repo, this.eventBus)
+    this.registerView(VIEW_TYPE_INBOX_LIST, (leaf) =>
+      new InboxListView(leaf, this.repo, this.inboxRepo, this.eventBus)
     );
 
     this.registerView(VIEW_TYPE_COLLECTION_LIST, (leaf) =>
@@ -50,7 +53,7 @@ export default class ZenScrapPlugin extends Plugin {
     registerNavHandlers(
       this.eventBus,
       () => this.activateListView(),
-      () => this.openMarkedList(),
+      () => this.openInboxList(),
       () => this.openCollectionList(),
       (id: string) => this.openCollectionDetail(id)
     );
@@ -120,14 +123,14 @@ export default class ZenScrapPlugin extends Plugin {
     workspace.revealLeaf(leaf);
   }
 
-  async openMarkedList() {
+  async openInboxList() {
     const { workspace } = this.app;
-    let leaf = workspace.getLeavesOfType(VIEW_TYPE_MARKED_LIST)[0];
+    let leaf = workspace.getLeavesOfType(VIEW_TYPE_INBOX_LIST)[0];
     if (!leaf) {
       leaf = workspace.getLeaf(true)!;
     }
     await leaf.setViewState({
-      type: VIEW_TYPE_MARKED_LIST,
+      type: VIEW_TYPE_INBOX_LIST,
       active: true,
     });
     workspace.revealLeaf(leaf);
