@@ -10,6 +10,7 @@ import { renderTimeline, renderClosedBanner, TimelineDeps } from "./detail/timel
 import { renderInputArea, InputAreaDeps } from "./detail/input-area-renderer";
 import type { ZenScrapSettings } from "../settings";
 import { CleanupManager } from "../ui/cleanup-manager";
+import { InboxRepository } from "../data/inbox-repository";
 
 
 export const VIEW_TYPE_SCRAP_DETAIL = "zen-scrap-detail";
@@ -17,21 +18,22 @@ export const VIEW_TYPE_SCRAP_DETAIL = "zen-scrap-detail";
 export class ScrapDetailView extends ItemView {
   private repo: ScrapRepository;
   private collectionRepo: CollectionRepository;
+  private inboxRepo: InboxRepository;
   private eventBus: EventBus;
   private settings: ZenScrapSettings;
   private scrap: Scrap | undefined;
   private isFullWidth = false;
-  private filterMarkedMap = new Map<string, boolean>();
   private ignoreChangeCount = 0;
   private settingState = false;
   private cleanupManager = new CleanupManager();
   private markdownRenderer: MarkdownRenderer;
   private onScrapChangedHandler: () => void;
 
-  constructor(leaf: WorkspaceLeaf, repo: ScrapRepository, collectionRepo: CollectionRepository, eventBus: EventBus, settings: ZenScrapSettings) {
+  constructor(leaf: WorkspaceLeaf, repo: ScrapRepository, collectionRepo: CollectionRepository, inboxRepo: InboxRepository, eventBus: EventBus, settings: ZenScrapSettings) {
     super(leaf);
     this.repo = repo;
     this.collectionRepo = collectionRepo;
+    this.inboxRepo = inboxRepo;
     this.eventBus = eventBus;
     this.settings = settings;
     this.markdownRenderer = new MarkdownRenderer(this.app);
@@ -143,8 +145,7 @@ export class ScrapDetailView extends ItemView {
       render,
       openFile: (path) => this.app.workspace.openLinkText(path, "", true),
       addDocumentClickHandler: (h) => this.cleanupManager.registerDocumentClick(h),
-      filterMarked: this.filterMarkedMap.get(scrap.filePath) ?? false,
-      setFilterMarked: (v: boolean) => { this.filterMarkedMap.set(scrap.filePath, v); },
+      inboxRepo: this.inboxRepo,
       scrollToEntry: (index) => {
         const entries = container.querySelectorAll<HTMLElement>(".zen-scrap-entry");
         if (entries[index]) {
@@ -175,8 +176,7 @@ export class ScrapDetailView extends ItemView {
       markdownRenderer: this.markdownRenderer,
       addDocumentClickHandler: (h) => this.cleanupManager.registerDocumentClick(h),
       entryEditorDeps: inputAreaDeps,
-      filterMarked: this.filterMarkedMap.get(scrap.filePath) ?? false,
-      setFilterMarked: (v: boolean) => { this.filterMarkedMap.set(scrap.filePath, v); },
+      inboxRepo: this.inboxRepo,
     };
     await renderTimeline(container, timelineDeps);
 

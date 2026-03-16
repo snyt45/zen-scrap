@@ -3,10 +3,11 @@ import { Scrap } from "../../data/types";
 import { ScrapRepository } from "../../data/scrap-repository";
 import { CollectionRepository } from "../../data/collection-repository";
 import { formatDate } from "../../utils";
-import { chevronDownIcon, GRIP_ICON, BOOKMARK_ICON, BOOKMARK_FILLED_ICON } from "../../icons";
+import { chevronDownIcon, GRIP_ICON, INBOX_ICON, INBOX_FILLED_ICON } from "../../icons";
 import { MarkdownRenderer } from "./markdown-renderer";
 import { renderEntryEditor, EntryEditorDeps } from "./input-area-renderer";
 import { CollectionPickerModal } from "../../ui/collection-picker-modal";
+import { InboxRepository } from "../../data/inbox-repository";
 
 export interface TimelineDeps {
   scrap: Scrap;
@@ -17,8 +18,7 @@ export interface TimelineDeps {
   markdownRenderer: MarkdownRenderer;
   addDocumentClickHandler: (handler: () => void) => void;
   entryEditorDeps: Omit<EntryEditorDeps, "entryEl" | "entryBody" | "index">;
-  filterMarked?: boolean;
-  setFilterMarked?: (v: boolean) => void;
+  inboxRepo: InboxRepository;
 }
 
 export function renderClosedBanner(container: HTMLElement, scrap: Scrap): void {
@@ -67,32 +67,7 @@ export async function renderTimeline(container: HTMLElement, deps: TimelineDeps)
 
   const stopAutoScroll = () => cancelAnimationFrame(autoScrollRaf);
 
-  const entriesToRender = deps.filterMarked
-    ? scrap.entries.map((e, i) => ({ entry: e, originalIndex: i })).filter(({ entry }) => entry.marked)
-    : scrap.entries.map((e, i) => ({ entry: e, originalIndex: i }));
-
-  if (deps.filterMarked && entriesToRender.length === 0) {
-    // マーク済みが0件になったら自動的に絞り込み解除
-    if (deps.setFilterMarked) {
-      deps.setFilterMarked(false);
-      await render();
-      return;
-    }
-  }
-
-  // マーク絞り込み時のまとめてコピーボタン
-  if (deps.filterMarked && entriesToRender.length > 0) {
-    const bulkBar = timeline.createDiv({ cls: "zen-scrap-marked-bulk-bar" });
-    const bulkCopyBtn = bulkBar.createEl("button", {
-      text: `マーク済み${entriesToRender.length}件をまとめてコピー`,
-      cls: "zen-scrap-bulk-copy-btn",
-    });
-    bulkCopyBtn.addEventListener("click", async () => {
-      const bodies = entriesToRender.map(({ entry }) => entry.body).join("\n\n---\n\n");
-      await navigator.clipboard.writeText(bodies);
-      new Notice(`${entriesToRender.length}件のセクションをコピーしました`);
-    });
-  }
+  const entriesToRender = scrap.entries.map((e, i) => ({ entry: e, originalIndex: i }));
 
   // Phase 1: 全エントリのDOM骨格を同期的に作成（スクロール遷移が即座に動くようにする）
   const renderTasks: (() => Promise<void>)[] = [];
@@ -171,17 +146,20 @@ export async function renderTimeline(container: HTMLElement, deps: TimelineDeps)
 
     entryHeader.createSpan({ text: entry.timestamp, cls: "zen-scrap-entry-time" });
 
-    // マークボタン
-    const markBtn = entryHeader.createEl("button", {
-      cls: `zen-scrap-mark-btn${entry.marked ? " is-marked" : ""}`,
+    // Inboxボタン
+    const inboxBtn = entryHeader.createEl("button", {
+      cls: "zen-scrap-inbox-btn",
     });
-    markBtn.innerHTML = entry.marked ? BOOKMARK_FILLED_ICON : BOOKMARK_ICON;
-    markBtn.setAttribute("aria-label", entry.marked ? "マーク解除" : "マーク");
-    markBtn.addEventListener("click", async (e) => {
+    inboxBtn.innerHTML = INBOX_ICON;
+    inboxBtn.setAttribute("aria-label", "Inboxに追加");
+    inboxBtn.addEventListener("click", async (e) => {
       e.stopPropagation();
-      entry.marked = !entry.marked;
-      scrap.updated = new Date().toISOString();
-      await repo.save(scrap);
+      const currentlyInInbox = await deps.inboxRepo.has(scrap.filePath, entry.timestamp);
+      if (currentlyInInbox) {
+        await deps.inboxRepo.remove(scrap.filePath, entry.timestamp);
+      } else {
+        await deps.inboxRepo.add(scrap.filePath, entry.timestamp);
+      }
       await render();
     });
 
@@ -230,11 +208,19 @@ export async function renderTimeline(container: HTMLElement, deps: TimelineDeps)
       document.addEventListener("click", onClickOutside);
     });
 
-    // Phase 2用: 本文レンダリングタスクを蓄積
+    // Phase 2用: 本文レンダリング + Inboxボタン状態更新
     renderTasks.push(async () => {
       entryBody.innerHTML = await markdownRenderer.renderBody(entry.body);
       markdownRenderer.addCopyButtons(entryBody);
       markdownRenderer.addLinkHandler(entryBody);
+
+      // Update inbox button state
+      const inInbox = await deps.inboxRepo.has(scrap.filePath, entry.timestamp);
+      if (inInbox) {
+        inboxBtn.addClass("is-active");
+        inboxBtn.innerHTML = INBOX_FILLED_ICON;
+        inboxBtn.setAttribute("aria-label", "Inboxから削除");
+      }
     });
   }
 
