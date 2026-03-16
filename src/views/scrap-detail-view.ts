@@ -179,6 +179,7 @@ export class ScrapDetailView extends ItemView {
       addDocumentClickHandler: (h) => this.cleanupManager.registerDocumentClick(h),
       entryEditorDeps: inputAreaDeps,
       inboxRepo: this.inboxRepo,
+      eventBus: this.eventBus,
     };
     await renderTimeline(container, timelineDeps);
 

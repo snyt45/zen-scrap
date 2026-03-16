@@ -8,6 +8,8 @@ import { MarkdownRenderer } from "./markdown-renderer";
 import { renderEntryEditor, EntryEditorDeps } from "./input-area-renderer";
 import { CollectionPickerModal } from "../../ui/collection-picker-modal";
 import { InboxRepository } from "../../data/inbox-repository";
+import { EventBus } from "../../events/event-bus";
+import { EVENTS } from "../../events/constants";
 
 export interface TimelineDeps {
   scrap: Scrap;
@@ -19,6 +21,7 @@ export interface TimelineDeps {
   addDocumentClickHandler: (handler: () => void) => void;
   entryEditorDeps: Omit<EntryEditorDeps, "entryEl" | "entryBody" | "index">;
   inboxRepo: InboxRepository;
+  eventBus: EventBus;
 }
 
 export function renderClosedBanner(container: HTMLElement, scrap: Scrap): void {
@@ -157,10 +160,16 @@ export async function renderTimeline(container: HTMLElement, deps: TimelineDeps)
       const currentlyInInbox = await deps.inboxRepo.has(scrap.filePath, entry.timestamp);
       if (currentlyInInbox) {
         await deps.inboxRepo.remove(scrap.filePath, entry.timestamp);
+        inboxBtn.removeClass("is-active");
+        inboxBtn.innerHTML = INBOX_ICON;
+        inboxBtn.setAttribute("aria-label", "Inboxに追加");
       } else {
         await deps.inboxRepo.add(scrap.filePath, entry.timestamp);
+        inboxBtn.addClass("is-active");
+        inboxBtn.innerHTML = INBOX_FILLED_ICON;
+        inboxBtn.setAttribute("aria-label", "Inboxから削除");
       }
-      await render();
+      deps.eventBus.emit(EVENTS.INBOX_CHANGED);
     });
 
     const menuWrapper = entryHeader.createDiv({ cls: "zen-scrap-entry-menu" });

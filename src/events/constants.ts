@@ -7,4 +7,5 @@ export const EVENTS = {
   NAV_TO_COLLECTION_LIST: "nav:to-collection-list",
   NAV_TO_COLLECTION_DETAIL: "nav:to-collection-detail",
   COLLECTION_CHANGED: "collection:changed",
+  INBOX_CHANGED: "inbox:changed",
 } as const;

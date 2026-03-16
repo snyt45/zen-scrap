@@ -53,11 +53,13 @@ export class InboxListView extends ItemView {
 
   async onOpen(): Promise<void> {
     this.eventBus.on(EVENTS.SCRAP_CHANGED, this.onChangedHandler);
+    this.eventBus.on(EVENTS.INBOX_CHANGED, this.onChangedHandler);
     await this.render();
   }
 
   async onClose(): Promise<void> {
     this.eventBus.off(EVENTS.SCRAP_CHANGED, this.onChangedHandler);
+    this.eventBus.off(EVENTS.INBOX_CHANGED, this.onChangedHandler);
     this.cleanupManager.cleanup();
   }
 
@@ -173,7 +175,7 @@ export class InboxListView extends ItemView {
           section.item.scrapPath,
           section.item.entryTimestamp
         );
-        this.eventBus.emit(EVENTS.SCRAP_CHANGED);
+        this.eventBus.emit(EVENTS.INBOX_CHANGED);
       });
 
       const content = item.createDiv({ cls: "zen-scrap-inbox-content" });
