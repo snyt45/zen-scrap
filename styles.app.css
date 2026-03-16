@@ -2134,6 +2134,11 @@ pre:hover .zen-scrap-code-copy-btn {
   background: var(--background-secondary);
 }
 
+.zen-scrap-collection-add-item.is-added {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
 .zen-scrap-collection-add-item-title {
   font-weight: var(--weight-semibold);
   font-size: var(--font-base);

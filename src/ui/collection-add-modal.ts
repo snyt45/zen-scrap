@@ -1,4 +1,4 @@
-import { App, Modal } from "obsidian";
+import { App, Modal, Notice } from "obsidian";
 import { ScrapRepository } from "../data/scrap-repository";
 import { Scrap } from "../data/types";
 import { stripMarkdown } from "../utils";
@@ -120,7 +120,8 @@ export class CollectionAddModal extends Modal {
       row.addEventListener("click", () => {
         if (this.mode === "scrap") {
           this.onAdd({ type: "scrap", scrapPath: scrap.filePath });
-          this.close();
+          row.addClass("is-added");
+          new Notice("追加しました");
         } else {
           this.selectedScrap = scrap;
           this.renderList();
@@ -190,7 +191,8 @@ export class CollectionAddModal extends Modal {
 
       row.addEventListener("click", () => {
         this.onAdd({ type: "entry", scrapPath: scrap.filePath, entryTimestamp: entry.timestamp });
-        this.close();
+        row.addClass("is-added");
+        new Notice("追加しました");
       });
     }
   }
