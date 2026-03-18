@@ -749,6 +749,11 @@
   cursor: text;
 }
 
+.zen-scrap-entry-body .task-list-item-checkbox {
+  pointer-events: auto;
+  cursor: pointer;
+}
+
 .zen-scrap-closed-banner {
   display: flex;
   flex-direction: column;

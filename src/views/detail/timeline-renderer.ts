@@ -22,6 +22,7 @@ export interface TimelineDeps {
   entryEditorDeps: Omit<EntryEditorDeps, "entryEl" | "entryBody" | "index">;
   inboxRepo: InboxRepository;
   eventBus: EventBus;
+  ignoreNextChange: () => void;
 }
 
 export function renderClosedBanner(container: HTMLElement, scrap: Scrap): void {
@@ -222,6 +223,24 @@ export async function renderTimeline(container: HTMLElement, deps: TimelineDeps)
       entryBody.innerHTML = await markdownRenderer.renderBody(entry.body);
       markdownRenderer.addCopyButtons(entryBody);
       markdownRenderer.addLinkHandler(entryBody);
+
+      // チェックボックスのクリックでTODO状態をトグル
+      const checkboxes = entryBody.querySelectorAll<HTMLInputElement>("input[type=\"checkbox\"]");
+      checkboxes.forEach((cb, cbIndex) => {
+        cb.disabled = false;
+        cb.style.cursor = "pointer";
+        cb.addEventListener("click", async (e) => {
+          e.stopPropagation();
+          const checked = cb.checked;
+          let count = 0;
+          entry.body = entry.body.replace(/- \[([ xX])\]/g, (match, state) => {
+            if (count++ !== cbIndex) return match;
+            return checked ? "- [x]" : "- [ ]";
+          });
+          deps.ignoreNextChange();
+          await repo.save(scrap);
+        });
+      });
 
       // Update inbox button state
       const inInbox = await deps.inboxRepo.has(scrap.filePath, entry.timestamp);

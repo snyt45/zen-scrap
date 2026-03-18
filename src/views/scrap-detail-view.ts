@@ -175,6 +175,7 @@ export class ScrapDetailView extends ItemView {
       entryEditorDeps: inputAreaDeps,
       inboxRepo: this.inboxRepo,
       eventBus: this.eventBus,
+      ignoreNextChange: () => { this.ignoreChangeCount++; },
     };
     await renderTimeline(container, timelineDeps);
 
