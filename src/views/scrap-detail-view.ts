@@ -11,6 +11,7 @@ import { renderInputArea, InputAreaDeps } from "./detail/input-area-renderer";
 import type { ZenScrapSettings } from "../settings";
 import { CleanupManager } from "../ui/cleanup-manager";
 import { InboxRepository } from "../data/inbox-repository";
+import { SearchBar } from "./detail/search-bar-renderer";
 
 
 export const VIEW_TYPE_SCRAP_DETAIL = "zen-scrap-detail";
@@ -27,6 +28,7 @@ export class ScrapDetailView extends ItemView {
   private cleanupManager = new CleanupManager();
   private markdownRenderer: MarkdownRenderer;
   private onScrapChangedHandler: () => void;
+  private searchBar: SearchBar | null = null;
 
   constructor(leaf: WorkspaceLeaf, repo: ScrapRepository, collectionRepo: CollectionRepository, inboxRepo: InboxRepository, eventBus: EventBus, settings: ZenScrapSettings) {
     super(leaf);
@@ -106,6 +108,10 @@ export class ScrapDetailView extends ItemView {
     return "message-square";
   }
 
+  toggleSearch(): void {
+    this.searchBar?.toggle();
+  }
+
   async onOpen(): Promise<void> {
     this.eventBus.on(EVENTS.SCRAP_CHANGED, this.onScrapChangedHandler);
     await this.render();
@@ -113,6 +119,7 @@ export class ScrapDetailView extends ItemView {
 
   async onClose(): Promise<void> {
     this.eventBus.off(EVENTS.SCRAP_CHANGED, this.onScrapChangedHandler);
+    this.searchBar?.close();
     this.cleanupManager.cleanup();
   }
 
@@ -122,6 +129,7 @@ export class ScrapDetailView extends ItemView {
     container.empty();
     if (!this.scrap) return;
     container.addClass("zen-scrap-detail-container");
+    this.searchBar = new SearchBar({ container, scrollContainer: container });
     const render = () => {
       this.ignoreChangeCount = 2;
       return this.render();

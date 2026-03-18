@@ -68,6 +68,28 @@ export default class ZenScrapPlugin extends Plugin {
       callback: () => this.activateListView(),
     });
 
+    this.addCommand({
+      id: "search-in-scrap",
+      name: "Search in scrap",
+      checkCallback: (checking) => {
+        const view = this.app.workspace.getActiveViewOfType(ScrapDetailView);
+        if (!view) return false;
+        if (!checking) view.toggleSearch();
+        return true;
+      },
+    });
+
+    // Cmd+F / Ctrl+F をスクラップ詳細ビューで捕まえる
+    this.registerDomEvent(window as any, "keydown", (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === "f") {
+        const view = this.app.workspace.getActiveViewOfType(ScrapDetailView);
+        if (!view) return;
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        view.toggleSearch();
+      }
+    }, true);
+
     this.addSettingTab(new ZenScrapSettingTab(this.app, this));
 
     let vaultChangeTimer: ReturnType<typeof setTimeout> | null = null;

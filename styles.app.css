@@ -754,6 +754,70 @@
   cursor: pointer;
 }
 
+/* 検索バー */
+.zen-scrap-search-bar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  background: var(--background-secondary);
+  border-bottom: 1px solid var(--background-modifier-border);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.zen-scrap-search-input {
+  flex: 1;
+  min-width: 0;
+  padding: 4px 8px;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 4px;
+  background: var(--background-primary);
+  color: var(--text-normal);
+  font-size: var(--font-ui-small);
+}
+
+.zen-scrap-search-input:focus {
+  outline: none;
+  border-color: var(--interactive-accent);
+}
+
+.zen-scrap-search-count {
+  font-size: var(--font-ui-smaller);
+  color: var(--text-muted);
+  white-space: nowrap;
+  min-width: 3em;
+  text-align: center;
+}
+
+.zen-scrap-search-nav-btn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: var(--font-ui-small);
+  line-height: 1;
+}
+
+.zen-scrap-search-nav-btn:hover {
+  background: var(--background-modifier-hover);
+  color: var(--text-normal);
+}
+
+.zen-scrap-search-highlight {
+  background: var(--text-highlight-bg, rgba(255, 208, 0, 0.4));
+  border-radius: 2px;
+}
+
+.zen-scrap-search-highlight.is-current {
+  background: var(--interactive-accent);
+  color: var(--text-on-accent);
+  border-radius: 2px;
+}
+
 .zen-scrap-closed-banner {
   display: flex;
   flex-direction: column;
