@@ -20,12 +20,14 @@ export interface InputAreaDeps {
   render: () => Promise<void>;
   addDocumentClickHandler: (handler: () => void) => void;
   setScrap: (scrap: Scrap) => void;
+  appendEntry?: (updatedScrap: Scrap) => Promise<void>;
 }
 
 export interface EntryEditorDeps extends InputAreaDeps {
   entryEl: HTMLElement;
   entryBody: HTMLElement;
   index: number;
+  ignoreNextChange?: () => void;
 }
 
 export function renderInputArea(container: HTMLElement, deps: InputAreaDeps): void {
@@ -85,7 +87,14 @@ export function renderInputArea(container: HTMLElement, deps: InputAreaDeps): vo
     if (!body || !scrap) return;
     const updated = await repo.addEntry(scrap, body);
     deps.setScrap(updated);
-    await render();
+    if (deps.appendEntry) {
+      textarea.value = "";
+      textarea.style.height = "auto";
+      textarea.dispatchEvent(new Event("input", { bubbles: true }));
+      await deps.appendEntry(updated);
+    } else {
+      await render();
+    }
   });
 
   const submitScope = new Scope(deps.scope ?? undefined);
@@ -181,8 +190,13 @@ export function renderEntryEditor(deps: EntryEditorDeps): void {
     if (!body || !scrap) return;
     scrap.entries[index].body = body;
     scrap.updated = new Date().toISOString();
+    if (deps.ignoreNextChange) deps.ignoreNextChange();
     await repo.save(scrap);
-    await render();
+    editArea.remove();
+    entryBody.innerHTML = await markdownRenderer.renderBody(body);
+    markdownRenderer.addCopyButtons(entryBody);
+    markdownRenderer.addLinkHandler(entryBody);
+    entryBody.style.display = "";
   });
 
   const updateScope = new Scope(deps.scope ?? undefined);

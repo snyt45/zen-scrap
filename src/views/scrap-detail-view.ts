@@ -6,7 +6,7 @@ import { EventBus } from "../events/event-bus";
 import { EVENTS } from "../events/constants";
 import { MarkdownRenderer } from "./detail/markdown-renderer";
 import { renderHeader, HeaderDeps } from "./detail/header-renderer";
-import { renderTimeline, renderClosedBanner, TimelineDeps } from "./detail/timeline-renderer";
+import { renderTimeline, renderClosedBanner, appendEntryToTimeline, TimelineDeps } from "./detail/timeline-renderer";
 import { renderInputArea, InputAreaDeps } from "./detail/input-area-renderer";
 import type { ZenScrapSettings } from "../settings";
 import { CleanupManager } from "../ui/cleanup-manager";
@@ -190,6 +190,15 @@ export class ScrapDetailView extends ItemView {
     if (scrap.status === "closed" || scrap.archived) {
       renderClosedBanner(container, scrap);
     }
-    renderInputArea(container, inputAreaDeps);
+    renderInputArea(container, {
+      ...inputAreaDeps,
+      appendEntry: async (updatedScrap: Scrap) => {
+        this.ignoreChangeCount++;
+        const newEntry = updatedScrap.entries[updatedScrap.entries.length - 1];
+        const newIndex = updatedScrap.entries.length - 1;
+        const entryEl = await appendEntryToTimeline(container, newEntry, newIndex, timelineDeps);
+        entryEl.scrollIntoView({ behavior: "smooth", block: "end" });
+      },
+    });
   }
 }
