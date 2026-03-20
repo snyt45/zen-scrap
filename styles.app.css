@@ -1288,7 +1288,8 @@ pre:hover .zen-scrap-code-copy-btn {
 
 .zen-scrap-entry-body.znc,
 .zen-scrap-preview.znc,
-.zen-scrap-guide-content.znc {
+.zen-scrap-guide-content.znc,
+.zen-scrap-description-body.znc {
   --c-bg-base: var(--background-primary);
   --c-bg-dim: var(--background-secondary);
   --c-bg-code: var(--background-secondary);
@@ -1307,7 +1308,8 @@ pre:hover .zen-scrap-code-copy-btn {
 
 .theme-dark .zen-scrap-entry-body.znc,
 .theme-dark .zen-scrap-preview.znc,
-.theme-dark .zen-scrap-guide-content.znc {
+.theme-dark .zen-scrap-guide-content.znc,
+.theme-dark .zen-scrap-description-body.znc {
   --c-bg-code: var(--background-secondary);
   --c-bg-warning: #39352c;
   --c-bg-warning-icon: #e5a21a;
