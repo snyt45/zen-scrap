@@ -8,6 +8,7 @@ export interface CollectionItem {
 export interface Collection {
   id: string;
   title: string;
+  description: string;
   items: CollectionItem[];
   created: string;
   updated: string;

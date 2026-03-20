@@ -44,6 +44,7 @@ export class CollectionRepository {
     const collection: Collection = {
       id: Date.now().toString(36),
       title,
+      description: "",
       items: [],
       created: now,
       updated: now,

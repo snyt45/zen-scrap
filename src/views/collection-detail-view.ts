@@ -1,4 +1,4 @@
-import { ItemView, Notice, WorkspaceLeaf } from "obsidian";
+import { ItemView, Notice, Scope, WorkspaceLeaf } from "obsidian";
 import { Collection } from "../data/collection-types";
 import { CollectionRepository } from "../data/collection-repository";
 import { ScrapRepository } from "../data/scrap-repository";
@@ -7,9 +7,10 @@ import { EventBus } from "../events/event-bus";
 import { EVENTS } from "../events/constants";
 import { renderTabNav } from "./shared/tab-nav-renderer";
 import { CleanupManager } from "../ui/cleanup-manager";
-import { chevronLeftIcon, GRIP_ICON } from "../icons";
+import { chevronLeftIcon, EDIT_ICON, GRIP_ICON } from "../icons";
 import { stripMarkdown } from "../utils";
 import { CollectionAddModal } from "../ui/collection-add-modal";
+import { MarkdownRenderer } from "./detail/markdown-renderer";
 
 export const VIEW_TYPE_COLLECTION_DETAIL = "zen-scrap-collection-detail";
 
@@ -20,6 +21,7 @@ export class CollectionDetailView extends ItemView {
   private eventBus: EventBus;
   private collection: Collection | null = null;
   private cleanupManager = new CleanupManager();
+  private markdownRenderer: MarkdownRenderer;
   private onCollectionChangedHandler: () => void;
 
   constructor(
@@ -34,6 +36,7 @@ export class CollectionDetailView extends ItemView {
     this.repo = repo;
     this.inboxRepo = inboxRepo;
     this.eventBus = eventBus;
+    this.markdownRenderer = new MarkdownRenderer(this.app);
     this.onCollectionChangedHandler = async () => {
       if (!this.collection) return;
       const updated = await this.collectionRepo.get(this.collection.id);
@@ -149,6 +152,113 @@ export class CollectionDetailView extends ItemView {
       input.focus();
       input.select();
     });
+
+    // 説明
+    const descSection = container.createDiv({ cls: "zen-scrap-description-section" });
+
+    const renderDescDisplay = async () => {
+      descSection.empty();
+      if (collection.description) {
+        const descBody = descSection.createDiv({ cls: "zen-scrap-description-body znc" });
+        descBody.innerHTML = await this.markdownRenderer.renderBody(collection.description);
+        this.markdownRenderer.addCopyButtons(descBody);
+        this.markdownRenderer.addLinkHandler(descBody);
+        const editBtn = descSection.createEl("button", { cls: "zen-scrap-description-edit-btn" });
+        editBtn.innerHTML = EDIT_ICON;
+        editBtn.addEventListener("click", () => renderDescEdit());
+      } else {
+        const addLink = descSection.createSpan({ text: "+ 説明を追加", cls: "zen-scrap-description-add-link" });
+        addLink.addEventListener("click", () => renderDescEdit());
+      }
+    };
+
+    const EMPTY_PREVIEW_HTML = '<p style="color: var(--text-muted)">プレビューする内容がありません</p>';
+
+    const renderDescEdit = () => {
+      descSection.empty();
+      const editArea = descSection.createDiv({ cls: "zen-scrap-description-edit" });
+
+      const tabHeader = editArea.createDiv({ cls: "zen-scrap-pill-tabs" });
+      const mdTab = tabHeader.createEl("button", { text: "Markdown", cls: "zen-scrap-pill-tab zen-scrap-pill-tab-active" });
+      const pvTab = tabHeader.createEl("button", { text: "Preview", cls: "zen-scrap-pill-tab" });
+
+      const textarea = editArea.createEl("textarea", { cls: "zen-scrap-textarea" });
+      textarea.value = collection.description || "";
+      textarea.placeholder = "説明を追加";
+
+      const adjustHeight = () => {
+        textarea.style.height = "auto";
+        textarea.style.height = textarea.scrollHeight + "px";
+      };
+      textarea.addEventListener("input", adjustHeight);
+      requestAnimationFrame(adjustHeight);
+
+      const preview = editArea.createDiv({ cls: "zen-scrap-preview znc" });
+      preview.style.display = "none";
+      preview.tabIndex = -1;
+
+      mdTab.addEventListener("click", () => {
+        mdTab.addClass("zen-scrap-pill-tab-active");
+        pvTab.removeClass("zen-scrap-pill-tab-active");
+        textarea.style.display = "";
+        preview.style.display = "none";
+        textarea.focus();
+      });
+
+      pvTab.addEventListener("click", async () => {
+        pvTab.addClass("zen-scrap-pill-tab-active");
+        mdTab.removeClass("zen-scrap-pill-tab-active");
+        textarea.style.display = "none";
+        preview.style.display = "";
+        preview.focus();
+        if (textarea.value.trim()) {
+          preview.innerHTML = await this.markdownRenderer.renderBody(textarea.value);
+          this.markdownRenderer.addCopyButtons(preview);
+          this.markdownRenderer.addLinkHandler(preview);
+        } else {
+          preview.innerHTML = EMPTY_PREVIEW_HTML;
+        }
+      });
+
+      const actionBar = editArea.createDiv({ cls: "zen-scrap-action-bar" });
+      const cancelBtn = actionBar.createEl("button", { text: "キャンセル", cls: "zen-scrap-btn-secondary zen-scrap-edit-cancel-btn" });
+      const saveBtn = actionBar.createEl("button", { text: "保存する", cls: "zen-scrap-btn-primary zen-scrap-submit-btn-new" });
+
+      const doSave = async () => {
+        collection.description = textarea.value.trim();
+        collection.updated = new Date().toISOString();
+        await this.collectionRepo.save(collection);
+        await renderDescDisplay();
+        this.eventBus.emit(EVENTS.COLLECTION_CHANGED);
+      };
+
+      cancelBtn.addEventListener("click", () => renderDescDisplay());
+      saveBtn.addEventListener("click", doSave);
+
+      const descScope = new Scope(this.scope ?? undefined);
+      descScope.register(["Mod"], "Enter", (e: KeyboardEvent) => {
+        e.preventDefault();
+        saveBtn.click();
+        return false;
+      });
+      descScope.register(["Mod"], "E", (e: KeyboardEvent) => {
+        e.preventDefault();
+        if (preview.style.display === "none") {
+          pvTab.click();
+        } else {
+          mdTab.click();
+        }
+        return false;
+      });
+      textarea.addEventListener("focus", () => this.app.keymap.pushScope(descScope));
+      textarea.addEventListener("blur", () => this.app.keymap.popScope(descScope));
+      preview.addEventListener("focus", () => this.app.keymap.pushScope(descScope));
+      preview.addEventListener("blur", () => this.app.keymap.popScope(descScope));
+
+      textarea.focus();
+    };
+
+    renderDescDisplay();
 
     // アクションバー
     const actionBar = container.createDiv({ cls: "zen-scrap-collection-actions" });

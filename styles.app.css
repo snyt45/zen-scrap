@@ -1478,6 +1478,7 @@ pre:hover .zen-scrap-code-copy-btn {
 .zen-scrap-description-section {
   position: relative;
   margin-top: 12px;
+  margin-bottom: 12px;
   padding: 12px 16px;
   border: 1px solid var(--background-modifier-border);
   border-radius: var(--radius-lg);
