@@ -80,7 +80,7 @@ export default class ZenScrapPlugin extends Plugin {
     });
 
     // Cmd+F / Ctrl+F をスクラップ詳細ビューで捕まえる
-    this.registerDomEvent(window as any, "keydown", (e: KeyboardEvent) => {
+    const searchHandler = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === "f") {
         const view = this.app.workspace.getActiveViewOfType(ScrapDetailView);
         if (!view) return;
@@ -88,7 +88,9 @@ export default class ZenScrapPlugin extends Plugin {
         e.stopImmediatePropagation();
         view.toggleSearch();
       }
-    }, true);
+    };
+    window.addEventListener("keydown", searchHandler, true);
+    this.register(() => window.removeEventListener("keydown", searchHandler, true));
 
     this.addSettingTab(new ZenScrapSettingTab(this.app, this));
 
