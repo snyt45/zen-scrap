@@ -1490,6 +1490,8 @@ pre:hover .zen-scrap-code-copy-btn {
 .zen-scrap-description-body {
   font-size: var(--font-base);
   line-height: 1.7;
+  user-select: text;
+  cursor: text;
 }
 
 .zen-scrap-description-body > *:first-child {
